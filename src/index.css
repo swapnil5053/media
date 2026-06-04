@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Syne", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, monospace;
+  --animate-ping-slow: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+:root {
+  --bg-base: #0a0a0a;
+  --bg-surface: #141414;
+  --bg-elevated: #1c1c1c;
+  --border: #252525;
+  --border-hover: #333333;
+  --text-primary: #f0ede8;
+  --text-secondary: #888580;
+  --text-tertiary: #3e3c3a;
+  --accent: #f59e0b;
+  --accent-dim: #92400e;
+  --status-ready: #10b981;
+  --status-processing: #f59e0b;
+  --status-failed: #ef4444;
+  --status-pending: #6b7280;
+}
+
+body {
+  font-family: 'Syne', sans-serif;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Base styles to handle common elements in dark mode */
+input, textarea, select {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* Custom Video.js Skin */
+.vjs-adaptflow .vjs-control-bar {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+}
+.vjs-adaptflow .vjs-play-progress {
+  background: var(--accent);
+}
+.vjs-adaptflow .vjs-volume-level {
+  background: var(--accent);
+}
+.vjs-adaptflow .vjs-big-play-button {
+  background-color: var(--accent);
+  border: none;
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  line-height: 64px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+}
+.vjs-adaptflow:hover .vjs-big-play-button {
+  background-color: var(--accent-dim);
+}
