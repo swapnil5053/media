@@ -21,16 +21,42 @@
   --status-processing: #f59e0b;
   --status-failed: #ef4444;
   --status-pending: #6b7280;
+
+  /* Chart colors — data visualization only */
+  --chart-1: #4a5568;
+  --chart-2: #4a6fa5;
+  --chart-3: #3d7a6b;
+  --chart-4: #6b5b8a;
+  --chart-amber: rgba(245, 158, 11, 0.7);
 }
 
+/* ─── Body Background Layers ─── */
 body {
   font-family: 'Syne', sans-serif;
-  background: var(--bg-base);
+  background-color: var(--bg-base);
+  background-image:
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
+    linear-gradient(rgba(37,37,37,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37,37,37,0.025) 1px, transparent 1px);
+  background-size: 200px 200px, 32px 32px, 32px 32px;
+  background-position: 0 0, center center, center center;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Base styles to handle common elements in dark mode */
+/* ─── Hero Lighting Utility ─── */
+.hero-lighting {
+  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,158,11,0.05) 0%, transparent 70%);
+}
+
+/* ─── Focus Ring System ─── */
+:focus-visible {
+  outline: 2px solid rgba(245, 158, 11, 0.45);
+  outline-offset: 2px;
+}
+
+/* ─── Form Element Base ─── */
 input, textarea, select {
   background: var(--bg-surface);
   color: var(--text-primary);
@@ -41,7 +67,40 @@ input:focus, textarea:focus, select:focus {
   border-color: var(--accent);
 }
 
-/* Custom Video.js Skin */
+/* ─── Custom Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover) var(--bg-surface);
+}
+
+/* ─── Pipeline Connector Animation ─── */
+@keyframes flow-down {
+  from { stroke-dashoffset: 24; }
+  to   { stroke-dashoffset: 0; }
+}
+.pipeline-connector-active {
+  stroke-dasharray: 4 4;
+  animation: flow-down 600ms linear infinite;
+}
+
+/* ─── Shimmer Animation ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, transparent 25%, rgba(245,158,11,0.08) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* ─── Custom Video.js Skin ─── */
 .vjs-adaptflow .vjs-control-bar {
   background: rgba(0, 0, 0, 0.85);
   backdrop-filter: blur(12px);

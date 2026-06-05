@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { useUpload } from '@/hooks/useUpload';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { ProgressBar } from '@/components/ui/ProgressBar';
 
 export function UploadZone() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -27,7 +28,7 @@ export function UploadZone() {
       toast.error('Only video files are supported (MP4, MOV, MKV, etc.)');
       return;
     }
-    if (file.size > 2 * 1024 * 1024 * 1024) { // 2GB
+    if (file.size > 2 * 1024 * 1024 * 1024) {
       toast.error('File size exceeds 2GB maximum limit');
       return;
     }
@@ -35,13 +36,12 @@ export function UploadZone() {
     try {
       const newMediaId = await startUpload(file);
       window.dispatchEvent(new CustomEvent('app-notification', {
-          detail: { type: 'success', message: `New asset successfully uploaded: ${file.name}` }
+        detail: { type: 'success', message: `New asset successfully uploaded: ${file.name}` }
       }));
-      // Let the success state render briefly
       setTimeout(() => {
         navigate(`/media/${newMediaId}`);
       }, 800);
-    } catch (err) {
+    } catch {
       toast.error('Upload failed. Please try again.');
     }
   };
@@ -67,66 +67,79 @@ export function UploadZone() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={cn(
-        "relative w-full overflow-hidden bg-[var(--bg-elevated)] rounded-2xl border-2 border-dashed transition-colors duration-300 flex flex-col items-center justify-center min-h-[360px]",
-        isDragging ? "border-[var(--accent)] bg-[#92400e]/10" : "border-[var(--border)] hover:border-[var(--border-hover)]",
-        status !== 'uploading' ? "cursor-pointer" : ""
+        'relative w-full bg-[var(--bg-surface)] rounded-xl border border-dashed transition-colors duration-200 flex flex-col items-center justify-center p-8',
+        isDragging
+          ? 'border-[var(--accent)] bg-[rgba(245,158,11,0.03)]'
+          : 'border-[var(--border)] hover:border-[var(--border-hover)]',
+        status !== 'uploading' ? 'cursor-pointer' : '',
+        status === 'idle' || status === 'error' ? 'min-h-[200px]' : 'min-h-[140px]'
       )}
     >
-      <input 
-        type="file" 
-        className="hidden" 
-        ref={fileInputRef} 
+      <input
+        type="file"
+        className="hidden"
+        ref={fileInputRef}
         onChange={handleFileChange}
         accept="video/*"
       />
 
       <AnimatePresence mode="wait">
         {status === 'idle' || status === 'error' ? (
-          <motion.div 
+          <motion.div
             key="idle"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            exit={{ opacity: 0, scale: 0.97 }}
+            transition={{ duration: 0.2 }}
             className="flex flex-col items-center pointer-events-none"
           >
-            <div id="upload-animation-container" className="w-[120px] h-[120px] mb-6 flex items-center justify-center rounded-full bg-[var(--bg-surface)] border border-[var(--border)] relative">
-                <UploadCloud className="w-12 h-12 text-[var(--accent)] relative z-10" />
-                {isDragging && (
-                   <motion.div 
-                     className="absolute inset-0 rounded-full border-2 border-[var(--accent)]"
-                     animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0, 0.5] }}
-                     transition={{ duration: 1.5, repeat: Infinity }}
-                   />
-                )}
+            <div className="relative mb-4">
+              <UploadCloud className="w-6 h-6 text-[var(--accent)]" />
+              {isDragging && (
+                <motion.div
+                  className="absolute -inset-3 rounded-full border border-[var(--accent)]/40"
+                  animate={{ scale: [1, 1.4, 1], opacity: [0.4, 0, 0.4] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+              )}
             </div>
-            <h3 className="font-sans text-xl font-medium text-[var(--text-primary)] mb-2">
-              Drop any video
+            <h3 className="font-sans text-[15px] font-medium text-[var(--text-primary)] mb-1">
+              Drop video files here
             </h3>
-            <p className="text-sm font-mono text-[var(--text-tertiary)] uppercase tracking-wider">
-              MP4, MOV, MKV, HEVC, ProRes, AV1 — UP TO 2GB
+            <p className="font-mono text-[12px] text-[var(--text-tertiary)] tracking-[0.02em]">
+              MP4 · MOV · MKV · AVI — max 2 GB
             </p>
           </motion.div>
         ) : (
-          <motion.div 
+          <motion.div
             key="uploading"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg px-8 flex flex-col items-center"
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-md flex flex-col items-center"
           >
-            <div className="w-full flex justify-between items-end mb-3 font-mono text-xs">
-                <div className="truncate pr-4 text-[var(--status-ready)]">{currentFile?.name}</div>
-                <div className="whitespace-nowrap text-[var(--text-secondary)]">{speedMBps.toFixed(1)} MB/s</div>
+            <div className="w-full flex justify-between items-end mb-2">
+              <span className="font-mono text-[12px] text-[var(--status-ready)] truncate pr-4">
+                {currentFile?.name}
+              </span>
+              <span className="font-mono text-[12px] text-[var(--text-secondary)] whitespace-nowrap">
+                {speedMBps.toFixed(1)} MB/s
+              </span>
             </div>
-            <div className="w-full h-1.5 bg-[var(--bg-surface)] rounded-full overflow-hidden">
-                <motion.div 
-                    className="h-full bg-[var(--accent)]"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${progress}%` }}
-                />
-            </div>
-            <div className="w-full flex justify-between items-start mt-3 font-mono text-[10px] text-[var(--text-tertiary)] uppercase tracking-widest">
-                <div>{Math.round(progress)}% COMPLETED</div>
-                {status === 'success' && <div className="text-[var(--status-ready)]">PROCESSING</div>}
+
+            <ProgressBar
+              value={progress}
+              height={3}
+              color="amber"
+              animated={status === 'uploading'}
+              className="mb-2"
+            />
+
+            <div className="w-full flex justify-between items-start font-mono text-[10px] text-[var(--text-tertiary)] uppercase tracking-[0.08em]">
+              <span>{Math.round(progress)}% completed</span>
+              {status === 'success' && (
+                <span className="text-[var(--status-ready)]">Processing</span>
+              )}
             </div>
           </motion.div>
         )}

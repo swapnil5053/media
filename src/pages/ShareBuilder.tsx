@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, Copy, ExternalLink, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, ShieldCheck, Copy, ExternalLink, Globe, Lock, Eye } from 'lucide-react';
 import { createShareLink } from '@/api/share';
 import { toast } from 'sonner';
 import { PageTransition, AnimatedPill } from '@/components/common';
+import { SettingRow } from '@/components/ui/SettingRow';
+import { Toggle } from '@/components/ui/Toggle';
+import { AnimatePresence } from 'framer-motion';
+
+type AccessType = 'public' | 'restricted' | 'password';
 
 export default function ShareBuilder() {
   const { mediaId } = useParams();
   const navigate = useNavigate();
-  
+
+  const [accessType, setAccessType] = useState<AccessType>('restricted');
   const [config, setConfig] = useState({
-    require_password: true,
     password: '',
     view_limit: false,
     limit_count: 50,
     expires: '24h',
     download: false,
-    mobile_only: false,
   });
 
   const [generating, setGenerating] = useState(false);
@@ -29,23 +33,22 @@ export default function ShareBuilder() {
     setGenerating(true);
     try {
       const payload = {
-        require_password: config.require_password,
-        password: config.password || undefined,
+        require_password: accessType === 'password',
+        password: accessType === 'password' ? config.password || undefined : undefined,
         view_limit: config.view_limit ? config.limit_count : undefined,
         allow_download: config.download,
-        mobile_only: config.mobile_only,
-        // map expires string to hours
-        expires_in_hours: config.expires === '24h' ? 24 : config.expires === '7d' ? 168 : undefined
+        expires_in_hours: config.expires === '24h' ? 24 : config.expires === '7d' ? 168 : config.expires === '1h' ? 1 : config.expires === '6h' ? 6 : config.expires === '30d' ? 720 : undefined,
       };
       const res = await createShareLink(mediaId, payload);
       setResultUrl(res.url);
       setResultSlug(res.slug);
       toast.success('Secure link generated');
       window.dispatchEvent(new CustomEvent('app-notification', {
-          detail: { type: 'success', message: `Secure link generated for slug /view/${res.slug}` }
+        detail: { type: 'success', message: `Secure link generated for slug /view/${res.slug}` }
       }));
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to generate link');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to generate link';
+      toast.error(message);
     } finally {
       setGenerating(false);
     }
@@ -58,162 +61,207 @@ export default function ShareBuilder() {
     }
   };
 
+  const accessOptions: { value: AccessType; label: string; desc: string; icon: React.ReactNode }[] = [
+    { value: 'public', label: 'PUBLIC', desc: 'Anyone with the link can view', icon: <Globe className="w-4 h-4" /> },
+    { value: 'restricted', label: 'RESTRICTED', desc: 'Apply view limits & expiration', icon: <Eye className="w-4 h-4" /> },
+    { value: 'password', label: 'PASSWORD PROTECTED', desc: 'Require password to view', icon: <Lock className="w-4 h-4" /> },
+  ];
+
   return (
     <PageTransition>
       <div className="h-full flex flex-col">
-      <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate(`/media/${mediaId}`)} className="w-8 h-8 rounded border border-[var(--border)] flex items-center justify-center hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]">
-          <ArrowLeft className="w-4 h-4" />
-        </button>
-        <h1 className="font-sans text-2xl font-bold tracking-tight">Create Secure Link</h1>
-      </div>
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <button
+            onClick={() => navigate(`/media/${mediaId}`)}
+            className="w-8 h-8 rounded-lg border border-[var(--border)] flex items-center justify-center hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] transition-colors cursor-pointer"
+            aria-label="Back to media"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
+          <h1 className="font-sans text-[22px] font-semibold tracking-[-0.02em]">Generate Share Link</h1>
+        </div>
 
-      <div className="grid lg:grid-cols-[1fr_400px] gap-8 flex-1">
-         
-         {/* Config Form */}
-         <div>
-            <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-6 text-[var(--text-secondary)] border-b border-[var(--border)] pb-4">
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="font-mono text-xs uppercase tracking-widest">Link Settings</span>
-                </div>
-
-                <div className="space-y-6">
-                    <SettingRow 
-                        title="Password Protection" 
-                        desc="Require a secure key for access" 
-                        checked={config.require_password}
-                        onChange={(c) => setConfig({...config, require_password: c})}
-                    >
-                        {config.require_password && (
-                            <input 
-                                type="text" placeholder="Set password..."
-                                className="mt-3 w-full bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-2 text-sm font-mono"
-                                value={config.password} onChange={e => setConfig({...config, password: e.target.value})}
-                            />
-                        )}
-                    </SettingRow>
-
-                    <SettingRow 
-                        title="View Limit" 
-                        desc="Restrict total number of playback sessions" 
-                        checked={config.view_limit}
-                        onChange={(c) => setConfig({...config, view_limit: c})}
-                    >
-                        {config.view_limit && (
-                            <input 
-                                type="number" 
-                                className="mt-3 w-32 bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-2 text-sm font-mono"
-                                value={config.limit_count} onChange={e => setConfig({...config, limit_count: parseInt(e.target.value)})}
-                            />
-                        )}
-                    </SettingRow>
-
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <div className="font-sans text-sm font-medium mb-1">Link Expiration</div>
-                            <div className="text-xs text-[var(--text-secondary)]">Auto-delete link after duration</div>
-                        </div>
-                        <select 
-                            className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-sm font-mono text-[var(--text-primary)]"
-                            value={config.expires} onChange={e => setConfig({...config, expires: e.target.value})}
-                        >
-                            <option value="never">Never</option>
-                            <option value="24h">24 Hours</option>
-                            <option value="7d">7 Days</option>
-                        </select>
-                    </div>
-
-                    <SettingRow 
-                        title="Download Enabled" 
-                        desc="Allow recipients to save source file" 
-                        checked={config.download}
-                        onChange={(c) => setConfig({...config, download: c})}
-                    />
-
-                    <div className="pt-6">
-                        <button 
-                            disabled={generating}
-                            onClick={handleGenerate}
-                            className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black font-semibold py-3 rounded uppercase tracking-wide text-sm transition-colors disabled:opacity-50"
-                        >
-                            {generating ? 'Generating...' : 'Generate Secure Link'}
-                        </button>
-                    </div>
-                </div>
-            </div>
-         </div>
-
-         {/* Preview Column */}
-         <div className="flex flex-col gap-4">
-             <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-6 flex flex-col min-h-[300px]">
-                 <div className="font-mono text-xs uppercase tracking-widest text-[var(--text-secondary)] mb-auto text-center pt-4">
-                     Live Preview
-                 </div>
-                 
-                 <div className="my-8 flex flex-col items-center justify-center text-center">
-                    {resultUrl ? (
-                         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full">
-                            <div className="font-mono text-[10px] text-[var(--text-tertiary)] uppercase mb-2">Target Edge URL</div>
-                            <div className="font-mono text-lg text-[var(--accent)] break-all mb-6">
-                                {resultUrl.replace('http://', '').replace('https://', '')}
-                            </div>
-                            <div className="flex gap-3 justify-center">
-                                <button onClick={copyToClipboard} className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-sm hover:!border-[var(--accent)] transition-colors">
-                                    <Copy className="w-4 h-4" /> Copy URL
-                                </button>
-                                <button onClick={() => window.open(resultUrl, '_blank')} className="flex items-center gap-2 px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border)] rounded text-sm hover:!border-[var(--accent)] transition-colors">
-                                    <ExternalLink className="w-4 h-4" /> Test Link
-                                </button>
-                            </div>
-                         </motion.div>
-                    ) : (
-                        <div className="text-[var(--text-tertiary)] border border-dashed border-[var(--border)] rounded flex items-center justify-center p-8 w-max mx-auto mb-2">
-                           <ExternalLink className="w-6 h-6" />
-                        </div>
-                    )}
-                 </div>
-
-                 <div className="mt-auto">
-                    <div className="font-mono text-[10px] uppercase tracking-widest text-[var(--text-tertiary)] mb-3">Active Restrictions</div>
-                    <div className="flex flex-wrap gap-2">
-                        <AnimatePresence>
-                            {config.require_password && <AnimatedPill key="pwd" text="Password Protected" color="blue" />}
-                            {config.view_limit && <AnimatedPill key="limit" text={`Limit: ${config.limit_count}`} color="amber" />}
-                            {config.expires !== 'never' && <AnimatedPill key="exp" text={`Expires: ${config.expires}`} color="blue" />}
-                        </AnimatePresence>
-                        {(!config.require_password && !config.view_limit && config.expires === 'never') && (
-                            <span className="text-xs text-[var(--text-tertiary)]">Public Link</span>
-                        )}
-                    </div>
-                 </div>
+        <div className="grid lg:grid-cols-[1fr_380px] gap-8 flex-1">
+          {/* Left — Configuration */}
+          <div>
+            {/* Access Type */}
+            <div className="mb-6">
+              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-3">
+                Access Type
               </div>
-           </div>
+              <div className="space-y-2">
+                {accessOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setAccessType(opt.value)}
+                    className={`w-full text-left p-3 rounded-lg border transition-colors cursor-pointer flex items-start gap-3 ${
+                      accessType === opt.value
+                        ? 'border-[var(--accent)]/30 bg-[rgba(245,158,11,0.04)]'
+                        : 'border-[var(--border)] bg-[var(--bg-surface)] hover:border-[var(--border-hover)]'
+                    }`}
+                  >
+                    <div className={`mt-0.5 ${accessType === opt.value ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}>
+                      {opt.icon}
+                    </div>
+                    <div>
+                      <div className={`font-mono text-[11px] uppercase tracking-[0.06em] ${
+                        accessType === opt.value ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'
+                      }`}>
+                        {opt.label}
+                      </div>
+                      <div className="font-sans text-[12px] text-[var(--text-tertiary)] mt-0.5">{opt.desc}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Security Rules */}
+            {accessType !== 'public' && (
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 mb-6">
+                <div className="flex items-center gap-2 mb-2 text-[var(--text-secondary)] border-b border-[var(--border)] pb-3">
+                  <ShieldCheck className="w-4 h-4" />
+                  <span className="font-mono text-[10px] uppercase tracking-[0.08em]">Security Rules</span>
+                </div>
+
+                {accessType === 'password' && (
+                  <SettingRow label="Password" description="Required to view the content">
+                    <input
+                      type="text"
+                      placeholder="Set password..."
+                      className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-40 focus:border-[var(--accent)] outline-none"
+                      value={config.password}
+                      onChange={e => setConfig({ ...config, password: e.target.value })}
+                    />
+                  </SettingRow>
+                )}
+
+                <SettingRow label="View Limit" description="Restrict total playback sessions">
+                  <div className="flex items-center gap-2">
+                    {config.view_limit && (
+                      <input
+                        type="number"
+                        className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-2 py-1 text-[13px] font-mono w-20 text-right focus:border-[var(--accent)] outline-none"
+                        value={config.limit_count}
+                        onChange={e => setConfig({ ...config, limit_count: parseInt(e.target.value) || 0 })}
+                      />
+                    )}
+                    <Toggle checked={config.view_limit} onChange={c => setConfig({ ...config, view_limit: c })} />
+                  </div>
+                </SettingRow>
+
+                <SettingRow label="Link Expiration" description="Auto-expire after duration">
+                  <select
+                    className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono text-[var(--text-primary)] focus:border-[var(--accent)] outline-none"
+                    value={config.expires}
+                    onChange={e => setConfig({ ...config, expires: e.target.value })}
+                  >
+                    <option value="never">Never</option>
+                    <option value="1h">1 Hour</option>
+                    <option value="6h">6 Hours</option>
+                    <option value="24h">24 Hours</option>
+                    <option value="7d">7 Days</option>
+                    <option value="30d">30 Days</option>
+                  </select>
+                </SettingRow>
+
+                <SettingRow label="Allow Download" description="Let recipients save the source file">
+                  <Toggle checked={config.download} onChange={c => setConfig({ ...config, download: c })} />
+                </SettingRow>
+              </div>
+            )}
+          </div>
+
+          {/* Right — Live Preview */}
+          <div>
+            <div className="sticky top-6">
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-5 flex flex-col min-h-[320px]">
+                {resultUrl ? (
+                  <motion.div initial={{ scale: 0.97, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col h-full">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-ready)]" />
+                      <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--status-ready)]">
+                        Link Generated
+                      </span>
+                    </div>
+
+                    <div className="mb-6">
+                      <div className="font-mono text-[10px] text-[var(--text-tertiary)] uppercase mb-1">URL</div>
+                      <div className="font-mono text-[13px] text-[var(--accent)] break-all">
+                        {resultUrl.replace('http://', '').replace('https://', '')}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mb-6">
+                      <button
+                        onClick={copyToClipboard}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-[13px] hover:border-[var(--accent)]/30 transition-colors cursor-pointer"
+                      >
+                        <Copy className="w-3.5 h-3.5" /> Copy URL
+                      </button>
+                      <button
+                        onClick={() => window.open(resultUrl, '_blank')}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-[13px] hover:border-[var(--accent)]/30 transition-colors cursor-pointer"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> Test Link
+                      </button>
+                    </div>
+
+                    <div className="mt-auto">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-2">Active Restrictions</div>
+                      <div className="flex flex-wrap gap-2">
+                        <AnimatePresence>
+                          {accessType === 'password' && <AnimatedPill key="pwd" text="🔒 Password" color="blue" />}
+                          {config.view_limit && <AnimatedPill key="limit" text={`👁 ${config.limit_count}`} color="amber" />}
+                          {config.expires !== 'never' && <AnimatedPill key="exp" text={`⏱ ${config.expires}`} color="blue" />}
+                        </AnimatePresence>
+                        {accessType === 'public' && !config.view_limit && config.expires === 'never' && (
+                          <span className="font-mono text-[11px] text-[var(--text-tertiary)]">Public Link — no restrictions</span>
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <div className="flex flex-col h-full">
+                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-auto text-center pt-4">
+                      Link Preview
+                    </div>
+
+                    <div className="flex-1 flex items-center justify-center">
+                      <div className="text-[var(--text-tertiary)] border border-dashed border-[var(--border)] rounded-lg p-6">
+                        <ExternalLink className="w-6 h-6 mx-auto" />
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-4">
+                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-2">Active Restrictions</div>
+                      <div className="flex flex-wrap gap-2">
+                        <AnimatePresence>
+                          {accessType === 'password' && <AnimatedPill key="pwd" text="🔒 Password" color="blue" />}
+                          {config.view_limit && <AnimatedPill key="limit" text={`👁 ${config.limit_count}`} color="amber" />}
+                          {config.expires !== 'never' && <AnimatedPill key="exp" text={`⏱ ${config.expires}`} color="blue" />}
+                        </AnimatePresence>
+                        {accessType === 'public' && !config.view_limit && config.expires === 'never' && (
+                          <span className="font-mono text-[11px] text-[var(--text-tertiary)]">Public Link — no restrictions</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <button
+                      disabled={generating}
+                      onClick={handleGenerate}
+                      className="w-full mt-4 bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black font-semibold py-3 rounded-lg uppercase tracking-[0.06em] text-[13px] transition-colors disabled:opacity-50 cursor-pointer"
+                    >
+                      {generating ? 'Generating...' : 'Generate Secure Link'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </PageTransition>
   );
-}
-
-function SettingRow({ title, desc, checked, onChange, children }: any) {
-    return (
-        <div>
-            <div className="flex items-center justify-between">
-                <div>
-                    <div className="font-sans text-sm font-medium mb-1">{title}</div>
-                    <div className="text-xs text-[var(--text-secondary)]">{desc}</div>
-                </div>
-                <button 
-                  onClick={() => onChange(!checked)}
-                  className={`w-10 h-6 rounded-full relative transition-colors ${checked ? 'bg-[var(--accent)]' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}
-                >
-                    <motion.div 
-                      className={`w-4 h-4 bg-white rounded-full absolute top-[3px] ${checked ? 'left-[22px]' : 'left-[3px]'} shadow`}
-                      layout
-                    />
-                </button>
-            </div>
-            {children}
-        </div>
-    )
 }

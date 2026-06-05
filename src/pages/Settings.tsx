@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Save, Shield, HardDrive, RefreshCw } from 'lucide-react';
+import { Settings as SettingsIcon, Save } from 'lucide-react';
 import { PageTransition } from '@/components/common';
+import { SettingRow } from '@/components/ui/SettingRow';
+import { Toggle } from '@/components/ui/Toggle';
 import { toast } from 'sonner';
 
 export default function SettingsPage() {
@@ -10,6 +12,9 @@ export default function SettingsPage() {
     bucketOriginals: 'media-originals',
     bucketVariants: 'media-variants',
     defaultViewLimit: 50,
+    defaultExpiry: '24h',
+    forceHttps: true,
+    logEvents: true,
   });
 
   const [saving, setSaving] = useState(false);
@@ -18,8 +23,8 @@ export default function SettingsPage() {
     const saved = localStorage.getItem('adaptflow_config');
     if (saved) {
       try {
-        setConfig(JSON.parse(saved));
-      } catch {}
+        setConfig(prev => ({ ...prev, ...JSON.parse(saved) }));
+      } catch { /* ignore corrupt data */ }
     }
   }, []);
 
@@ -34,113 +39,107 @@ export default function SettingsPage() {
 
   return (
     <PageTransition>
-      <div className="pb-12 max-w-3xl">
+      <div className="pb-12 max-w-2xl">
+        {/* Header */}
         <div className="flex items-end justify-between mb-8 pb-4 border-b border-[var(--border)]">
-          <h1 className="text-3xl font-bold tracking-tight uppercase flex items-center gap-3">
-            <SettingsIcon className="w-8 h-8 text-[var(--accent)]" /> Configuration Center
+          <h1 className="font-sans text-[22px] font-semibold tracking-[-0.02em] flex items-center gap-3">
+            <SettingsIcon className="w-6 h-6 text-[var(--accent)]" /> Configuration
           </h1>
         </div>
 
-        <div className="space-y-6">
-          {/* Section: Transcoding Profile */}
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4 text-[var(--text-secondary)] border-b border-[var(--border)] pb-3">
-              <RefreshCw className="w-4 h-4" />
-              <span className="font-mono text-xs uppercase tracking-widest">Processing Rules</span>
+        <div className="space-y-4">
+          {/* Processing Configuration */}
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
+              Processing Configuration
             </div>
-            
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-sans text-sm font-medium mb-1">Default Transcoder Target</div>
-                  <div className="text-xs text-[var(--text-secondary)]">Primary codec profile for multi-device delivery</div>
-                </div>
-                <select 
-                  className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-sm font-mono text-[var(--text-primary)]"
-                  value={config.defaultProfile} 
-                  onChange={e => setConfig({...config, defaultProfile: e.target.value})}
-                >
-                  <option value="H264">H.264 (Universal compatibility)</option>
-                  <option value="HEVC">HEVC/H.265 (High quality/low size)</option>
-                  <option value="AV1">AV1 (Next-gen compression)</option>
-                </select>
-              </div>
-            </div>
+            <SettingRow label="Default Codec Target" description="Applied to new uploads unless overridden">
+              <select
+                className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono text-[var(--text-primary)] focus:border-[var(--accent)] outline-none"
+                value={config.defaultProfile}
+                onChange={e => setConfig({ ...config, defaultProfile: e.target.value })}
+              >
+                <option value="H264">H.264 Standard</option>
+                <option value="HEVC">H.265 High</option>
+                <option value="AV1">AV1 Ultra</option>
+              </select>
+            </SettingRow>
           </div>
 
-          {/* Section: Storage & S3 Config */}
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4 text-[var(--text-secondary)] border-b border-[var(--border)] pb-3">
-              <HardDrive className="w-4 h-4" />
-              <span className="font-mono text-xs uppercase tracking-widest">S3 Cluster Bindings</span>
+          {/* Storage Bindings */}
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
+              Storage Bindings
             </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2">Original Storage Bucket</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-2 text-sm font-mono focus:border-[var(--accent)] outline-none"
-                  value={config.bucketOriginals}
-                  onChange={e => setConfig({...config, bucketOriginals: e.target.value})}
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-2">Variants Storage Bucket</label>
-                <input 
-                  type="text" 
-                  className="w-full bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-2 text-sm font-mono focus:border-[var(--accent)] outline-none"
-                  value={config.bucketVariants}
-                  onChange={e => setConfig({...config, bucketVariants: e.target.value})}
-                />
-              </div>
-            </div>
+            <SettingRow label="Origin Bucket" description="S3 bucket for original uploads">
+              <input
+                type="text"
+                className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-48 focus:border-[var(--accent)] outline-none"
+                value={config.bucketOriginals}
+                onChange={e => setConfig({ ...config, bucketOriginals: e.target.value })}
+              />
+            </SettingRow>
+            <SettingRow label="Variants Bucket" description="S3 bucket for transcoded variants">
+              <input
+                type="text"
+                className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-48 focus:border-[var(--accent)] outline-none"
+                value={config.bucketVariants}
+                onChange={e => setConfig({ ...config, bucketVariants: e.target.value })}
+              />
+            </SettingRow>
           </div>
 
-          {/* Section: Security defaults */}
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-6">
-            <div className="flex items-center gap-2 mb-4 text-[var(--text-secondary)] border-b border-[var(--border)] pb-3">
-              <Shield className="w-4 h-4" />
-              <span className="font-mono text-xs uppercase tracking-widest">Transmission Security</span>
+          {/* CDN & Delivery */}
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
+              CDN & Delivery
             </div>
+            <SettingRow label="Enable CDN" description="Route playback through edge nodes">
+              <Toggle checked={config.enableCDN} onChange={c => setConfig({ ...config, enableCDN: c })} />
+            </SettingRow>
+            <SettingRow label="Default View Limit" description="Applied to new share links">
+              <input
+                type="number"
+                className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-24 text-right focus:border-[var(--accent)] outline-none"
+                value={config.defaultViewLimit}
+                onChange={e => setConfig({ ...config, defaultViewLimit: parseInt(e.target.value) || 0 })}
+              />
+            </SettingRow>
+          </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-sans text-sm font-medium mb-1">CDN Edge Distribution</div>
-                  <div className="text-xs text-[var(--text-secondary)]">Route media streaming content through CDN gateways</div>
-                </div>
-                <button 
-                  onClick={() => setConfig({...config, enableCDN: !config.enableCDN})}
-                  className={`w-10 h-6 rounded-full relative transition-colors ${config.enableCDN ? 'bg-[var(--accent)]' : 'bg-[var(--bg-surface)] border border-[var(--border)]'}`}
-                >
-                  <div className={`w-4 h-4 bg-white rounded-full absolute top-[3px] transition-all ${config.enableCDN ? 'left-[22px]' : 'left-[3px]'} shadow`} />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between pt-2">
-                <div>
-                  <div className="font-sans text-sm font-medium mb-1">Default View Constraint Limit</div>
-                  <div className="text-xs text-[var(--text-secondary)]">Initial view capacity for newly generated share slugs</div>
-                </div>
-                <input 
-                  type="number" 
-                  className="w-24 bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-sm font-mono text-right"
-                  value={config.defaultViewLimit}
-                  onChange={e => setConfig({...config, defaultViewLimit: parseInt(e.target.value) || 0})}
-                />
-              </div>
+          {/* Security */}
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
+            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
+              Security
             </div>
+            <SettingRow label="Default Link Expiry" description="Applied when no expiry is specified">
+              <select
+                className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono text-[var(--text-primary)] focus:border-[var(--accent)] outline-none"
+                value={config.defaultExpiry}
+                onChange={e => setConfig({ ...config, defaultExpiry: e.target.value })}
+              >
+                <option value="never">Never</option>
+                <option value="24h">24 Hours</option>
+                <option value="7d">7 Days</option>
+                <option value="30d">30 Days</option>
+              </select>
+            </SettingRow>
+            <SettingRow label="Force HTTPS" description="Reject non-secure playback requests">
+              <Toggle checked={config.forceHttps} onChange={c => setConfig({ ...config, forceHttps: c })} />
+            </SettingRow>
+            <SettingRow label="Log Viewer Events" description="Record playback telemetry for analytics">
+              <Toggle checked={config.logEvents} onChange={c => setConfig({ ...config, logEvents: c })} />
+            </SettingRow>
           </div>
 
           {/* Save Button */}
-          <div className="pt-4 flex justify-end">
-            <button 
+          <div className="pt-2 flex justify-end">
+            <button
               disabled={saving}
               onClick={handleSave}
-              className="bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black px-6 py-2.5 rounded font-sans text-sm font-semibold transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black px-6 py-2.5 rounded-lg font-sans text-[13px] font-semibold transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              <Save className="w-4 h-4" /> {saving ? 'Writing Parameters...' : 'Save Configuration'}
+              <Save className="w-4 h-4" /> {saving ? 'Saving...' : 'Save Configuration'}
             </button>
           </div>
         </div>

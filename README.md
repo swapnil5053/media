@@ -3,7 +3,6 @@
 <div align="center">
   <p><strong>High-Performance Video Ingestion & Secure Edge Delivery Console</strong></p>
   
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat&logo=vite)](https://vite.dev)
   [![React](https://img.shields.io/badge/React-19.x-61DAFB.svg?style=flat&logo=react)](https://react.dev)
   [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC.svg?style=flat&logo=tailwind-css)](https://tailwindcss.com)
@@ -92,7 +91,3 @@ VITE_API_BASE="http://localhost:8000/api/v1"
 ```
 
 ---
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

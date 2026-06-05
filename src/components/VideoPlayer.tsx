@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
 import { Loader2, RefreshCcw } from 'lucide-react';
@@ -10,14 +10,14 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ mediaId }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const playerRef = useRef<any>(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(false);
-  const [streamUrl, setStreamUrl] = React.useState('');
+  const playerRef = useRef<ReturnType<typeof videojs> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [streamUrl, setStreamUrl] = useState('');
 
   useEffect(() => {
     let mounted = true;
-    
+
     getMediaStream(mediaId)
       .then((res) => {
         if (mounted) {
@@ -26,13 +26,13 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
         }
       })
       .catch((err) => {
-         console.error(err);
-         if (mounted) {
-           setError(true);
-           setLoading(false);
-         }
+        console.error(err);
+        if (mounted) {
+          setError(true);
+          setLoading(false);
+        }
       });
-      
+
     return () => { mounted = false; };
   }, [mediaId]);
 
@@ -47,8 +47,6 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
         src: streamUrl,
         type: streamUrl.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'
       }]
-    }, () => {
-      // Player is ready
     });
 
     return () => {
@@ -60,17 +58,22 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
 
   if (loading) {
     return (
-      <div className="w-full aspect-video bg-[#0a0a0a] flex items-center justify-center border border-[var(--border)] rounded-lg overflow-hidden">
-        <Loader2 className="w-8 h-8 text-[var(--accent)] animate-spin" />
+      <div className="w-full aspect-video bg-[var(--bg-base)] flex items-center justify-center rounded-lg overflow-hidden border border-[var(--border)]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-6 h-6 text-[var(--accent)] animate-spin" />
+          <span className="font-mono text-[11px] text-[var(--text-tertiary)] uppercase tracking-[0.08em]">
+            Loading stream...
+          </span>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full aspect-video bg-[#0a0a0a] flex flex-col items-center justify-center border border-[var(--border)] text-red-400 gap-3 rounded-lg overflow-hidden">
-        <RefreshCcw className="w-8 h-8 opacity-50" />
-        <span className="font-sans text-sm">Playback unavailable</span>
+      <div className="w-full aspect-video bg-[var(--bg-base)] flex flex-col items-center justify-center border border-[var(--border)] text-[var(--status-failed)] gap-3 rounded-lg overflow-hidden">
+        <RefreshCcw className="w-6 h-6 opacity-50" />
+        <span className="font-sans text-[13px]">Playback unavailable</span>
       </div>
     );
   }
