@@ -56,7 +56,18 @@ async function startServer() {
     fs.mkdirSync(uploadDir);
   }
 
-  const upload = multer({ dest: uploadDir });
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, uploadDir);
+    },
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      const ext = path.extname(file.originalname);
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    }
+  });
+
+  const upload = multer({ storage });
 
   // -----------------------------------------------------
   // MOCK FASTAPI ROUTES
@@ -71,6 +82,7 @@ async function startServer() {
     mediaDb.set(id, {
       id,
       filename: req.file.originalname,
+      localPath: req.file.filename,
       status: 'analyzing', // simulate state machine later
       created_at: new Date().toISOString(),
       size_bytes: req.file.size,
@@ -122,7 +134,12 @@ async function startServer() {
   });
 
   app.get('/api/v1/media/:id/stream', (req, res) => {
-    res.json({ stream_url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }); // Sample valid HLS stream
+    const item = mediaDb.get(req.params.id);
+    if (item && item.localPath) {
+      res.json({ stream_url: `/uploads/${item.localPath}` });
+    } else {
+      res.json({ stream_url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }); // Sample valid HLS stream
+    }
   });
 
   app.post('/api/v1/media/:id/share', (req, res) => {
@@ -217,6 +234,8 @@ async function startServer() {
     item.codec = 'HEVC';
     res.json(item);
   });
+
+  app.use('/uploads', express.static(uploadDir));
 
   // -----------------------------------------------------
   // VITE MIDDLEWARE
