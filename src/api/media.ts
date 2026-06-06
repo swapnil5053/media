@@ -18,7 +18,7 @@ export interface MediaItem {
 export function mapMediaItem(item: any): MediaItem {
   if (!item) return item;
   return {
-    id: item.id,
+    id: item.id || item.media_id,
     filename: item.filename || item.original_filename || '',
     status: item.status,
     created_at: item.created_at,
