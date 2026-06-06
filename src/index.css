@@ -126,3 +126,8 @@ input:focus, textarea:focus, select:focus {
 .vjs-adaptflow:hover .vjs-big-play-button {
   background-color: var(--accent-dim);
 }
+
+.vjs-adaptflow.video-js {
+  width: 100% !important;
+  height: 100% !important;
+}
