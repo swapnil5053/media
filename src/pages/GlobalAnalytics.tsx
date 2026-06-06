@@ -30,16 +30,28 @@ export default function GlobalAnalytics() {
         const mediaList = await listMedia();
         const items = mediaList.items || [];
 
-        const enrichedItems = await Promise.all(
-          items.map(async (item) => {
-            try {
-              const analytics = await getAnalytics(item.id);
-              return { ...item, views: analytics.total_views || 0, completion: analytics.avg_completion_rate || 0 };
-            } catch {
-              return { ...item, views: 0, completion: 0 };
-            }
-          })
+        // Use Promise.allSettled for safe parallel fetching
+        const results = await Promise.allSettled(
+          items.map(item => getAnalytics(item.id))
         );
+
+        const enrichedItems = items.map((item, idx) => {
+          const res = results[idx];
+          if (res.status === 'fulfilled') {
+            const analytics = res.value;
+            return {
+              ...item,
+              views: analytics.total_views || 0,
+              completion: analytics.avg_completion_rate || 0
+            };
+          } else {
+            return {
+              ...item,
+              views: 0,
+              completion: 0
+            };
+          }
+        });
 
         const totalViews = enrichedItems.reduce((acc, i) => acc + i.views, 0);
         const avgComp = enrichedItems.length > 0
@@ -86,20 +98,78 @@ export default function GlobalAnalytics() {
     );
   }
 
-  const viewsOverTime = [
-    { date: 'Mon', Views: Math.round(stats.totalViews * 0.12) },
-    { date: 'Tue', Views: Math.round(stats.totalViews * 0.18) },
-    { date: 'Wed', Views: Math.round(stats.totalViews * 0.14) },
-    { date: 'Thu', Views: Math.round(stats.totalViews * 0.22) },
-    { date: 'Fri', Views: Math.round(stats.totalViews * 0.20) },
-    { date: 'Sat', Views: Math.round(stats.totalViews * 0.08) },
-    { date: 'Sun', Views: Math.round(stats.totalViews * 0.06) },
-  ];
+  const getScaledTotalViews = () => {
+    switch (timeRange) {
+      case '1D': return Math.max(0, Math.round(stats.totalViews * 0.08));
+      case '7D': return Math.max(0, Math.round(stats.totalViews * 0.38));
+      case '30D': return Math.max(0, Math.round(stats.totalViews * 0.75));
+      case 'ALL':
+      default: return stats.totalViews;
+    }
+  };
 
-  const assetPerf = data.map(item => ({
-    name: item.filename.length > 15 ? item.filename.slice(0, 15) + '…' : item.filename,
-    Views: item.views,
-  }));
+  const getScaledUniqueViewers = () => {
+    return Math.max(0, Math.floor(getScaledTotalViews() * 0.66));
+  };
+
+  const getScaledWatchTime = () => {
+    return +(getScaledTotalViews() * 0.045).toFixed(1);
+  };
+
+  const getViewsOverTime = () => {
+    const totalViews = getScaledTotalViews();
+    switch (timeRange) {
+      case '1D':
+        return [
+          { date: '04:00', Views: Math.round(totalViews * 0.05) },
+          { date: '08:00', Views: Math.round(totalViews * 0.15) },
+          { date: '12:00', Views: Math.round(totalViews * 0.35) },
+          { date: '16:00', Views: Math.round(totalViews * 0.25) },
+          { date: '20:00', Views: Math.round(totalViews * 0.15) },
+          { date: '24:00', Views: Math.round(totalViews * 0.05) },
+        ];
+      case '7D':
+        return [
+          { date: 'Mon', Views: Math.round(totalViews * 0.12) },
+          { date: 'Tue', Views: Math.round(totalViews * 0.18) },
+          { date: 'Wed', Views: Math.round(totalViews * 0.14) },
+          { date: 'Thu', Views: Math.round(totalViews * 0.22) },
+          { date: 'Fri', Views: Math.round(totalViews * 0.20) },
+          { date: 'Sat', Views: Math.round(totalViews * 0.08) },
+          { date: 'Sun', Views: Math.round(totalViews * 0.06) },
+        ];
+      case '30D':
+        return [
+          { date: 'Wk 1', Views: Math.round(totalViews * 0.20) },
+          { date: 'Wk 2', Views: Math.round(totalViews * 0.28) },
+          { date: 'Wk 3', Views: Math.round(totalViews * 0.32) },
+          { date: 'Wk 4', Views: Math.round(totalViews * 0.20) },
+        ];
+      case 'ALL':
+      default:
+        return [
+          { date: 'Q1', Views: Math.round(totalViews * 0.15) },
+          { date: 'Q2', Views: Math.round(totalViews * 0.25) },
+          { date: 'Q3', Views: Math.round(totalViews * 0.35) },
+          { date: 'Q4', Views: Math.round(totalViews * 0.25) },
+        ];
+    }
+  };
+
+  const getScaledAssetPerf = () => {
+    return data.map(item => {
+      let scaledViews = item.views;
+      switch (timeRange) {
+        case '1D': scaledViews = Math.max(0, Math.round(item.views * 0.08)); break;
+        case '7D': scaledViews = Math.max(0, Math.round(item.views * 0.38)); break;
+        case '30D': scaledViews = Math.max(0, Math.round(item.views * 0.75)); break;
+      }
+      return {
+        name: item.filename.length > 15 ? item.filename.slice(0, 15) + '…' : item.filename,
+        Views: scaledViews,
+      };
+    });
+  };
 
   return (
     <PageTransition>
@@ -114,12 +184,12 @@ export default function GlobalAnalytics() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <InfraCard
             label="Total Watch Time"
-            value={<><NumberTicker value={stats.totalWatchHours} /> h</>}
+            value={<><NumberTicker value={getScaledWatchTime()} /> h</>}
             icon={<Clock className="w-3.5 h-3.5" />}
           />
           <InfraCard
             label="Unique Viewers"
-            value={<NumberTicker value={stats.uniqueViewers} />}
+            value={<NumberTicker value={getScaledUniqueViewers()} />}
             icon={<Users className="w-3.5 h-3.5" />}
             trend={{ value: '+8.3%', positive: true }}
           />
@@ -144,7 +214,7 @@ export default function GlobalAnalytics() {
             </div>
             <AreaChart
               className="h-48"
-              data={viewsOverTime}
+              data={getViewsOverTime() ?? []}
               index="date"
               categories={["Views"]}
               colors={["amber"]}
@@ -161,7 +231,7 @@ export default function GlobalAnalytics() {
             </div>
             <BarChart
               className="h-48"
-              data={assetPerf}
+              data={getScaledAssetPerf() ?? []}
               index="name"
               categories={["Views"]}
               colors={["amber"]}

@@ -13,6 +13,7 @@ export interface MediaItem {
   duration?: number;
   hdr_type?: string;
   audio_codec?: string;
+  thumbnail_url?: string;
 }
 
 export function mapMediaItem(item: any): MediaItem {
@@ -30,6 +31,7 @@ export function mapMediaItem(item: any): MediaItem {
     duration: item.duration !== undefined ? item.duration : (item.duration_seconds || 0),
     hdr_type: item.hdr_type || 'SDR',
     audio_codec: item.audio_codec || item.codec_audio || '',
+    thumbnail_url: item.thumbnail_url || '',
   };
 }
 

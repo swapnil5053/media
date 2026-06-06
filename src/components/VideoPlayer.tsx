@@ -6,9 +6,10 @@ import { getMediaStream } from '@/api/media';
 
 interface VideoPlayerProps {
   mediaId: string;
+  posterUrl?: string;
 }
 
-export function VideoPlayer({ mediaId }: VideoPlayerProps) {
+export function VideoPlayer({ mediaId, posterUrl }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<ReturnType<typeof videojs> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -42,7 +43,9 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
     playerRef.current = videojs(videoRef.current, {
       controls: true,
       fill: true,
+      fluid: false,
       responsive: true,
+      poster: posterUrl || undefined,
       sources: [{
         src: streamUrl,
         type: streamUrl.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'
@@ -58,7 +61,7 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
 
   if (loading) {
     return (
-      <div className="w-full aspect-video bg-[var(--bg-base)] flex items-center justify-center rounded-lg overflow-hidden border border-[var(--border)]">
+      <div className="absolute inset-0 w-full h-full bg-[var(--bg-base)] flex items-center justify-center rounded-lg overflow-hidden border border-[var(--border)]">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="w-6 h-6 text-[var(--accent)] animate-spin" />
           <span className="font-mono text-[11px] text-[var(--text-tertiary)] uppercase tracking-[0.08em]">
@@ -71,7 +74,7 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
 
   if (error) {
     return (
-      <div className="w-full aspect-video bg-[var(--bg-base)] flex flex-col items-center justify-center border border-[var(--border)] text-[var(--status-failed)] gap-3 rounded-lg overflow-hidden">
+      <div className="absolute inset-0 w-full h-full bg-[var(--bg-base)] flex flex-col items-center justify-center border border-[var(--border)] text-[var(--status-failed)] gap-3 rounded-lg overflow-hidden">
         <RefreshCcw className="w-6 h-6 opacity-50" />
         <span className="font-sans text-[13px]">Playback unavailable</span>
       </div>
@@ -79,7 +82,7 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
   }
 
   return (
-    <div className="w-full relative rounded-lg overflow-hidden border border-[var(--border)] aspect-video max-h-[60vh] bg-black">
+    <div className="absolute inset-0 w-full h-full bg-black">
       <video ref={videoRef} className="video-js vjs-adaptflow w-full h-full" />
     </div>
   );

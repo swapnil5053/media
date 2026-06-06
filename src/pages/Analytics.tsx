@@ -42,14 +42,69 @@ export default function Analytics() {
     );
   }
 
-  const areaData = [
-    { date: '00:00', Views: Math.round(data.total_views * 0.1) },
-    { date: '04:00', Views: Math.round(data.total_views * 0.12) },
-    { date: '08:00', Views: Math.round(data.total_views * 0.18) },
-    { date: '12:00', Views: Math.round(data.total_views * 0.35) },
-    { date: '16:00', Views: Math.round(data.total_views * 0.2) },
-    { date: '20:00', Views: Math.round(data.total_views * 0.05) },
-  ];
+  const getScaledViews = () => {
+    switch (timeRange) {
+      case '1D': return Math.max(0, Math.round(data.total_views * 0.08));
+      case '7D': return Math.max(0, Math.round(data.total_views * 0.38));
+      case '30D': return Math.max(0, Math.round(data.total_views * 0.75));
+      case 'ALL':
+      default: return data.total_views;
+    }
+  };
+
+  const getScaledUniqueViewers = () => {
+    const scaledViews = getScaledViews();
+    return Math.max(0, Math.floor(scaledViews * 0.82));
+  };
+
+  const getScaledBandwidthSaved = () => {
+    const scaledViews = getScaledViews();
+    const mb = scaledViews * 10;
+    if (mb >= 1000) {
+      return `${(mb / 1024).toFixed(1)} GB`;
+    }
+    return `${mb} MB`;
+  };
+
+  const getAreaData = () => {
+    const totalViews = getScaledViews();
+    switch (timeRange) {
+      case '1D':
+        return [
+          { date: '00:00', Views: Math.round(totalViews * 0.05) },
+          { date: '04:00', Views: Math.round(totalViews * 0.10) },
+          { date: '08:00', Views: Math.round(totalViews * 0.20) },
+          { date: '12:00', Views: Math.round(totalViews * 0.35) },
+          { date: '16:00', Views: Math.round(totalViews * 0.20) },
+          { date: '20:00', Views: Math.round(totalViews * 0.10) },
+        ];
+      case '7D':
+        return [
+          { date: 'Mon', Views: Math.round(totalViews * 0.12) },
+          { date: 'Tue', Views: Math.round(totalViews * 0.18) },
+          { date: 'Wed', Views: Math.round(totalViews * 0.14) },
+          { date: 'Thu', Views: Math.round(totalViews * 0.22) },
+          { date: 'Fri', Views: Math.round(totalViews * 0.20) },
+          { date: 'Sat', Views: Math.round(totalViews * 0.08) },
+          { date: 'Sun', Views: Math.round(totalViews * 0.06) },
+        ];
+      case '30D':
+        return [
+          { date: 'Wk 1', Views: Math.round(totalViews * 0.22) },
+          { date: 'Wk 2', Views: Math.round(totalViews * 0.28) },
+          { date: 'Wk 3', Views: Math.round(totalViews * 0.30) },
+          { date: 'Wk 4', Views: Math.round(totalViews * 0.20) },
+        ];
+      case 'ALL':
+      default:
+        return [
+          { date: 'Jan-Mar', Views: Math.round(totalViews * 0.20) },
+          { date: 'Apr-Jun', Views: Math.round(totalViews * 0.30) },
+          { date: 'Jul-Sep', Views: Math.round(totalViews * 0.35) },
+          { date: 'Oct-Dec', Views: Math.round(totalViews * 0.15) },
+        ];
+    }
+  };
 
   const deviceData = [
     { name: 'Desktop', value: 72 },
@@ -88,13 +143,13 @@ export default function Analytics() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <InfraCard
             label="Total Views"
-            value={<NumberTicker value={data.total_views} />}
+            value={<NumberTicker value={getScaledViews()} />}
             icon={<Eye className="w-3.5 h-3.5" />}
             trend={{ value: '+14.2%', positive: true }}
           />
           <InfraCard
             label="Unique Viewers"
-            value={<NumberTicker value={Math.floor(data.total_views * 0.82)} />}
+            value={<NumberTicker value={getScaledUniqueViewers()} />}
             icon={<Users className="w-3.5 h-3.5" />}
             trend={{ value: '+5.7%', positive: true }}
           />
@@ -105,7 +160,7 @@ export default function Analytics() {
           />
           <InfraCard
             label="Bandwidth Saved"
-            value="120 MB"
+            value={getScaledBandwidthSaved()}
             icon={<Cloud className="w-3.5 h-3.5" />}
             variant="active"
             subtext="Performance optimized"
@@ -120,7 +175,7 @@ export default function Analytics() {
             </div>
             <AreaChart
               className="h-48"
-              data={areaData}
+              data={getAreaData() ?? []}
               index="date"
               categories={["Views"]}
               colors={["amber"]}
@@ -138,7 +193,7 @@ export default function Analytics() {
             <div className="flex-1 flex items-center justify-center -my-4">
               <DonutChart
                 className="max-h-40"
-                data={deviceData}
+                data={deviceData ?? []}
                 category="value"
                 index="name"
                 colors={["amber", "slate", "zinc"]}

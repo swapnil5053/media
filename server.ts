@@ -5,6 +5,109 @@ import fs from "fs";
 import multer from "multer";
 import { v4 as uuidv4 } from "uuid";
 import { createServer as createViteServer } from "vite";
+import { exec } from "child_process";
+import { promisify } from "util";
+
+const execAsync = promisify(exec);
+
+// Extract video metadata using ffprobe
+async function getVideoMetadata(filePath: string): Promise<{
+  codec: string;
+  resolution: string;
+  fps: number;
+  bitrate: number;
+  duration: number;
+  hdr_type: string;
+  audio_codec: string;
+}> {
+  try {
+    const { stdout } = await execAsync(
+      `ffprobe -v quiet -print_format json -show_format -show_streams "${filePath}"`
+    );
+    const data = JSON.parse(stdout);
+    
+    const videoStream = data.streams?.find((s: any) => s.codec_type === 'video');
+    const audioStream = data.streams?.find((s: any) => s.codec_type === 'audio');
+    const format = data.format || {};
+
+    let codec = 'H.264';
+    if (videoStream?.codec_name) {
+      const name = videoStream.codec_name.toUpperCase();
+      if (name === 'H264') codec = 'H.264';
+      else if (name === 'HEVC') codec = 'HEVC';
+      else if (name === 'VP9') codec = 'VP9';
+      else if (name === 'AV1') codec = 'AV1';
+      else codec = name;
+    }
+
+    const width = videoStream?.width;
+    const height = videoStream?.height;
+    const resolution = width && height ? `${width}x${height}` : '1920x1080';
+
+    let fps = 30;
+    if (videoStream?.r_frame_rate) {
+      const parts = videoStream.r_frame_rate.split('/');
+      if (parts.length === 2) {
+        const num = parseFloat(parts[0]);
+        const den = parseFloat(parts[1]);
+        if (den !== 0) fps = Math.round(num / den);
+      } else {
+        const num = parseFloat(videoStream.r_frame_rate);
+        if (!isNaN(num)) fps = Math.round(num);
+      }
+    }
+
+    const bitrate = format.bit_rate ? parseInt(format.bit_rate) : (videoStream?.bit_rate ? parseInt(videoStream.bit_rate) : 5000000);
+    const duration = format.duration ? parseFloat(format.duration) : (videoStream?.duration ? parseFloat(videoStream.duration) : 120);
+
+    // HDR check
+    const colorSpace = videoStream?.color_space || '';
+    const colorTransfer = videoStream?.color_transfer || '';
+    const hdr_type = (colorTransfer.includes('smpte2084') || colorTransfer.includes('arib-std-b67') || colorSpace.includes('bt2020')) ? 'HDR10' : 'SDR';
+
+    const audio_codec = audioStream?.codec_name ? audioStream.codec_name.toUpperCase() : 'AAC';
+
+    return {
+      codec,
+      resolution,
+      fps,
+      bitrate,
+      duration,
+      hdr_type,
+      audio_codec
+    };
+  } catch (err) {
+    console.error('Error during ffprobe:', err);
+    return {
+      codec: 'H.264',
+      resolution: '1920x1080',
+      fps: 30,
+      bitrate: 8000000,
+      duration: 120,
+      hdr_type: 'SDR',
+      audio_codec: 'AAC'
+    };
+  }
+}
+
+// Generate thumbnail image from video using ffmpeg
+async function generateVideoThumbnail(filePath: string, outputThumbnailPath: string): Promise<void> {
+  try {
+    try {
+      await execAsync(
+        `ffmpeg -y -ss 00:00:00.500 -i "${filePath}" -update 1 -vframes 1 -q:v 2 "${outputThumbnailPath}"`
+      );
+    } catch (e) {
+      console.warn('Failed capturing thumbnail at 0.5s, retrying at 0.0s:', e);
+      await execAsync(
+        `ffmpeg -y -i "${filePath}" -update 1 -vframes 1 -q:v 2 "${outputThumbnailPath}"`
+      );
+    }
+  } catch (err) {
+    console.error('Error during ffmpeg thumbnail generation:', err);
+    throw err;
+  }
+}
 
 async function startServer() {
   const app = express();
@@ -16,6 +119,13 @@ async function startServer() {
   // In-memory data store for the mock backend
   const mediaDb = new Map<string, any>();
   const shareLinksDb = new Map<string, any>();
+
+  // Track dynamic media analytics
+  const mediaAnalyticsDb = new Map<string, {
+    total_views: number;
+    unique_viewers: number;
+    completion_rates: number[];
+  }>();
 
   // Pre-seed mock data for demonstration and testing
   const demoId = "12c57519-7f2e-406f-a303-1b4fce160c85";
@@ -32,6 +142,7 @@ async function startServer() {
     duration: 180,
     hdr_type: 'SDR',
     audio_codec: 'AAC',
+    thumbnail_url: '/uploads/demo_poster.png',
   });
 
   const processingId = "24c57519-7f2e-406f-a303-1b4fce160c86";
@@ -48,6 +159,14 @@ async function startServer() {
     duration: 60,
     hdr_type: 'HDR10',
     audio_codec: 'PCM',
+    thumbnail_url: '/uploads/demo_poster.png',
+  });
+
+  // Pre-seed demoId analytics
+  mediaAnalyticsDb.set(demoId, {
+    total_views: 12400,
+    unique_viewers: 8200,
+    completion_rates: Array(100).fill(0.78),
   });
 
   // Use a temporary folder for uploads
@@ -69,6 +188,77 @@ async function startServer() {
 
   const upload = multer({ storage });
 
+  // Scan uploads folder for historical uploads and populate metadata/thumbnails
+  async function scanUploadsFolder() {
+    try {
+      if (!fs.existsSync(uploadDir)) return;
+      const files = fs.readdirSync(uploadDir);
+      for (const file of files) {
+        if (file.startsWith('file-') && (file.endsWith('.mp4') || file.endsWith('.mov') || file.endsWith('.mkv') || file.endsWith('.avi'))) {
+          let found = false;
+          for (const item of mediaDb.values()) {
+            if (item.localPath === file) {
+              found = true;
+              break;
+            }
+          }
+          
+          if (!found) {
+            const id = uuidv4();
+            const filePath = path.join(uploadDir, file);
+            const stats = fs.statSync(filePath);
+            const thumbnailFilename = `thumbnail-${id}.jpg`;
+            const thumbnailPath = path.join(uploadDir, thumbnailFilename);
+            
+            console.log(`Discovered historical upload: ${file}, registering id ${id}...`);
+            
+            mediaDb.set(id, {
+              id,
+              filename: file,
+              localPath: file,
+              status: 'ready',
+              created_at: stats.mtime.toISOString(),
+              size_bytes: stats.size,
+              codec: 'H.264',
+              resolution: '1920x1080',
+              fps: 30,
+              bitrate: 5000000,
+              duration: 120,
+              hdr_type: 'SDR',
+              audio_codec: 'AAC',
+            });
+            
+            (async () => {
+              try {
+                const metadata = await getVideoMetadata(filePath);
+                const item = mediaDb.get(id);
+                if (item) {
+                  Object.assign(item, metadata);
+                }
+                
+                if (!fs.existsSync(thumbnailPath)) {
+                  await generateVideoThumbnail(filePath, thumbnailPath);
+                }
+                
+                const finalItem = mediaDb.get(id);
+                if (finalItem) {
+                  finalItem.thumbnail_url = `/uploads/${thumbnailFilename}`;
+                }
+              } catch (e) {
+                console.error(`Failed extracting specs for historical file ${file}:`, e);
+              }
+            })();
+          }
+        }
+      }
+    } catch (err) {
+      console.error('Error scanning uploads folder:', err);
+    }
+  }
+
+  // Run the uploads scan
+  scanUploadsFolder();
+
   // -----------------------------------------------------
   // MOCK FASTAPI ROUTES
   // -----------------------------------------------------
@@ -79,11 +269,15 @@ async function startServer() {
     }
     
     const id = uuidv4();
+    const filePath = path.join(uploadDir, req.file.filename);
+    const thumbnailFilename = `thumbnail-${id}.jpg`;
+    const thumbnailPath = path.join(uploadDir, thumbnailFilename);
+
     mediaDb.set(id, {
       id,
       filename: req.file.originalname,
       localPath: req.file.filename,
-      status: 'analyzing', // simulate state machine later
+      status: 'analyzing',
       created_at: new Date().toISOString(),
       size_bytes: req.file.size,
       codec: 'HEVC',
@@ -95,18 +289,46 @@ async function startServer() {
       audio_codec: 'AAC',
     });
 
-    // Simulate progress: move from analyzing -> transcoding -> ready
-    setTimeout(() => {
-      const item = mediaDb.get(id);
-      if (item) {
-        item.status = 'transcoding';
-        setTimeout(() => {
-            if (mediaDb.has(id)) {
-                mediaDb.get(id).status = 'ready';
-            }
-        }, 3000);
+    // Background processing matching pipeline visual stages:
+    (async () => {
+      try {
+        // Step 1: Wait 2 seconds in 'analyzing' state (keeps UI pipeline visualization consistent)
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        // Get metadata using ffprobe
+        const metadata = await getVideoMetadata(filePath);
+        const item = mediaDb.get(id);
+        if (item) {
+          Object.assign(item, metadata);
+          item.status = 'transcoding';
+        }
+
+        // Step 2: Wait 3 seconds in 'transcoding' state
+        await new Promise(resolve => setTimeout(resolve, 3000));
+
+        // Generate thumbnail using ffmpeg
+        try {
+          await generateVideoThumbnail(filePath, thumbnailPath);
+          const finalItem = mediaDb.get(id);
+          if (finalItem) {
+            finalItem.thumbnail_url = `/uploads/${thumbnailFilename}`;
+          }
+        } catch (thumbErr) {
+          console.error(`Failed to generate thumbnail for ${id}, using default fallback:`, thumbErr);
+        }
+
+        const finalItem = mediaDb.get(id);
+        if (finalItem) {
+          finalItem.status = 'ready';
+        }
+      } catch (err) {
+        console.error(`Background processing failed for ${id}:`, err);
+        const finalItem = mediaDb.get(id);
+        if (finalItem) {
+          finalItem.status = 'ready';
+        }
       }
-    }, 2000);
+    })();
 
     res.json({ id });
   });
@@ -177,9 +399,30 @@ async function startServer() {
 
     share.views++;
 
+    const mediaItem = mediaDb.get(share.media_id);
+    const stream_url = mediaItem && mediaItem.localPath
+      ? `/uploads/${mediaItem.localPath}`
+      : "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
+
+    // Dynamic analytics view increment
+    if (mediaItem) {
+      let stats = mediaAnalyticsDb.get(mediaItem.id);
+      if (!stats) {
+        stats = {
+          total_views: 0,
+          unique_viewers: 0,
+          completion_rates: []
+        };
+        mediaAnalyticsDb.set(mediaItem.id, stats);
+      }
+      stats.total_views++;
+      stats.unique_viewers = Math.max(1, Math.round(stats.total_views * 0.82));
+    }
+
     res.json({ 
-        stream_url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
-        media_id: share.media_id 
+        stream_url,
+        media_id: share.media_id,
+        thumbnail_url: mediaItem ? mediaItem.thumbnail_url : undefined
     });
   });
 
@@ -214,16 +457,52 @@ async function startServer() {
   });
 
   app.get('/api/v1/media/:id/analytics', (req, res) => {
+    const mediaId = req.params.id;
+    let stats = mediaAnalyticsDb.get(mediaId);
+    if (!stats) {
+      stats = {
+        total_views: 0,
+        unique_viewers: 0,
+        completion_rates: []
+      };
+      mediaAnalyticsDb.set(mediaId, stats);
+    }
+
+    const sum = stats.completion_rates.reduce((a, b) => a + b, 0);
+    const avg = stats.completion_rates.length > 0 ? (sum / stats.completion_rates.length) : 0.0;
+
     res.json({
-        total_views: 12400,
-        unique_viewers: 8200,
-        average_completion: 0.78,
-        avg_completion_rate: 0.78
+        total_views: stats.total_views,
+        unique_viewers: stats.unique_viewers,
+        average_completion: avg,
+        avg_completion_rate: avg
     });
   });
 
   app.post('/api/v1/media/:id/playback-event', (req, res) => {
-    // Record playback metrics
+    const mediaId = req.params.id;
+    const { completion } = req.body;
+
+    let stats = mediaAnalyticsDb.get(mediaId);
+    if (!stats) {
+      stats = {
+        total_views: 0,
+        unique_viewers: 0,
+        completion_rates: []
+      };
+      mediaAnalyticsDb.set(mediaId, stats);
+    }
+
+    if (completion !== undefined) {
+      stats.completion_rates.push(Number(completion));
+      if (stats.completion_rates.length > 500) {
+        stats.completion_rates.shift();
+      }
+    }
+
+    stats.total_views++;
+    stats.unique_viewers = Math.max(1, Math.round(stats.total_views * 0.82));
+
     res.status(204).send();
   });
 

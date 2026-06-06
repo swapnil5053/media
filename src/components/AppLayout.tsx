@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
@@ -14,12 +14,18 @@ interface AppNotification {
 }
 
 export function AppLayout() {
+  const location = useLocation();
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifications, setNotifications] = useState<AppNotification[]>([
     { id: 1, type: 'success', message: 'Asset demo_video.mp4 has completed transcoding', time: '2 mins ago', unread: true },
     { id: 2, type: 'warning', message: 'Disk space on node us-east-4 at 78% capacity', time: '1 hour ago', unread: true },
     { id: 3, type: 'info', message: 'System security policy verified successfully', time: '5 hours ago', unread: true },
   ]);
+
+  // Bypass layout completely for the Viewer page route
+  if (location.pathname.startsWith('/view/')) {
+    return <Outlet />;
+  }
 
   // Preserve the custom event listener exactly
   useEffect(() => {

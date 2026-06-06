@@ -12,7 +12,7 @@ export default function Viewer() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ status: number; message: string } | null>(null);
   const [password, setPassword] = useState('');
-  const [data, setData] = useState<{ stream_url: string; media_id: string } | null>(null);
+  const [data, setData] = useState<{ stream_url: string; media_id: string; thumbnail_url?: string } | null>(null);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<ReturnType<typeof videojs> | null>(null);
@@ -69,6 +69,9 @@ export default function Viewer() {
     playerRef.current = videojs(videoRef.current, {
       controls: true,
       fill: true,
+      fluid: false,
+      responsive: true,
+      poster: data.thumbnail_url || undefined,
       sources: [{
         src: data.stream_url,
         type: data.stream_url.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'
@@ -122,7 +125,7 @@ export default function Viewer() {
             />
             <button
               type="submit"
-              className="w-full bg-[var(--accent)] hover:bg-[var(--accent)]/90 text-black font-semibold rounded py-2.5 transition-colors cursor-pointer font-mono text-[12px] uppercase tracking-[0.06em]"
+              className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black font-semibold rounded py-2.5 transition-colors cursor-pointer font-mono text-[12px] uppercase tracking-[0.06em]"
             >
               Access Content
             </button>
@@ -149,20 +152,17 @@ export default function Viewer() {
   // ─── Success: Video Player ───
   return (
     <div className="min-h-screen bg-black flex flex-col justify-center items-center py-12 px-4">
-      {/* Tiny amber dot in top-left corner */}
-      <div className="fixed top-4 left-4">
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] inline-block" />
-      </div>
-
       <div className="w-full max-w-5xl">
-        <div className="rounded-xl overflow-hidden border border-[#222] shadow-2xl relative aspect-video max-h-[70vh] bg-black">
-          <video ref={videoRef} className="video-js vjs-adaptflow w-full h-full" />
+        <div className="relative w-full aspect-video bg-black rounded-xl overflow-hidden border border-[#222] shadow-2xl">
+          <div className="absolute inset-0 w-full h-full">
+            <video ref={videoRef} className="video-js vjs-adaptflow w-full h-full" />
+          </div>
         </div>
 
         {/* Below video */}
         <div className="mt-3 flex items-center gap-3">
           <span className="font-sans text-[15px] font-medium text-[var(--text-primary)]">{slug}</span>
-          <span className="inline-flex items-center gap-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-full px-2 py-0.5">
+          <span className="inline-flex items-center gap-1.5 bg-[var(--bg-elevated)] border border-[#222] rounded-full px-2 py-0.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-ready)]" />
             <span className="font-mono text-[10px] text-[var(--text-secondary)]">Ready</span>
           </span>

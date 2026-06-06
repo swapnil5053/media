@@ -5,6 +5,8 @@ export * from './VideoPlayer';
 export * from './CompatibilityGauges';
 export * from './AppLayout';
 export * from './UploadZone';
+export * from './ErrorBoundary';
+
 
 // UI primitives
 export * from './ui/InfraCard';

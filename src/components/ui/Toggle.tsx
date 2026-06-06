@@ -17,8 +17,8 @@ export function Toggle({ checked, onChange, disabled = false }: ToggleProps) {
       disabled={disabled}
       onClick={() => !disabled && onChange(!checked)}
       className={cn(
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors duration-150',
-        checked ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)] border border-[var(--border)]',
+        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full items-center transition-colors duration-150',
+        checked ? 'bg-[var(--accent)] border border-transparent' : 'bg-[var(--bg-elevated)] border border-[var(--border)]',
         disabled && 'opacity-50 cursor-not-allowed'
       )}
     >
@@ -26,9 +26,8 @@ export function Toggle({ checked, onChange, disabled = false }: ToggleProps) {
         layout
         transition={{ type: 'spring', stiffness: 700, damping: 30 }}
         className={cn(
-          'pointer-events-none block h-3.5 w-3.5 rounded-full bg-white shadow-[0_1px_3px_rgba(0,0,0,0.5)]',
-          'absolute top-[3px]',
-          checked ? 'left-[18px]' : 'left-[3px]'
+          'pointer-events-none block h-3 w-3 rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] transition-colors',
+          checked ? 'bg-black ml-5' : 'bg-[var(--text-tertiary)] ml-1'
         )}
       />
     </button>

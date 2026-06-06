@@ -67,12 +67,12 @@ export function UploadZone() {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={cn(
-        'relative w-full bg-[var(--bg-surface)] rounded-xl border border-dashed transition-colors duration-200 flex flex-col items-center justify-center p-8',
+        'relative w-full bg-[var(--bg-surface)] rounded-xl border border-dashed transition-colors duration-200 flex flex-col items-center justify-center py-10 px-8',
         isDragging
           ? 'border-[var(--accent)] bg-[rgba(245,158,11,0.03)]'
           : 'border-[var(--border)] hover:border-[var(--border-hover)]',
         status !== 'uploading' ? 'cursor-pointer' : '',
-        status === 'idle' || status === 'error' ? 'min-h-[200px]' : 'min-h-[140px]'
+        status === 'idle' || status === 'error' ? 'min-h-[200px]' : 'min-h-[148px]'
       )}
     >
       <input
@@ -81,6 +81,7 @@ export function UploadZone() {
         ref={fileInputRef}
         onChange={handleFileChange}
         accept="video/*"
+        data-upload-trigger="true"
       />
 
       <AnimatePresence mode="wait">

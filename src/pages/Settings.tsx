@@ -57,7 +57,7 @@ export default function SettingsPage() {
               <select
                 className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono text-[var(--text-primary)] focus:border-[var(--accent)] outline-none"
                 value={config.defaultProfile}
-                onChange={e => setConfig({ ...config, defaultProfile: e.target.value })}
+                onChange={e => setConfig(prev => ({ ...prev, defaultProfile: e.target.value }))}
               >
                 <option value="H264">H.264 Standard</option>
                 <option value="HEVC">H.265 High</option>
@@ -76,7 +76,7 @@ export default function SettingsPage() {
                 type="text"
                 className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-48 focus:border-[var(--accent)] outline-none"
                 value={config.bucketOriginals}
-                onChange={e => setConfig({ ...config, bucketOriginals: e.target.value })}
+                onChange={e => setConfig(prev => ({ ...prev, bucketOriginals: e.target.value }))}
               />
             </SettingRow>
             <SettingRow label="Variants Bucket" description="S3 bucket for transcoded variants">
@@ -84,7 +84,7 @@ export default function SettingsPage() {
                 type="text"
                 className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-48 focus:border-[var(--accent)] outline-none"
                 value={config.bucketVariants}
-                onChange={e => setConfig({ ...config, bucketVariants: e.target.value })}
+                onChange={e => setConfig(prev => ({ ...prev, bucketVariants: e.target.value }))}
               />
             </SettingRow>
           </div>
@@ -95,14 +95,14 @@ export default function SettingsPage() {
               CDN & Delivery
             </div>
             <SettingRow label="Enable CDN" description="Route playback through edge nodes">
-              <Toggle checked={config.enableCDN} onChange={c => setConfig({ ...config, enableCDN: c })} />
+              <Toggle checked={config.enableCDN ?? false} onChange={c => setConfig(prev => ({ ...prev, enableCDN: c }))} />
             </SettingRow>
             <SettingRow label="Default View Limit" description="Applied to new share links">
               <input
                 type="number"
                 className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-24 text-right focus:border-[var(--accent)] outline-none"
                 value={config.defaultViewLimit}
-                onChange={e => setConfig({ ...config, defaultViewLimit: parseInt(e.target.value) || 0 })}
+                onChange={e => setConfig(prev => ({ ...prev, defaultViewLimit: parseInt(e.target.value) || 0 }))}
               />
             </SettingRow>
           </div>
@@ -116,7 +116,7 @@ export default function SettingsPage() {
               <select
                 className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono text-[var(--text-primary)] focus:border-[var(--accent)] outline-none"
                 value={config.defaultExpiry}
-                onChange={e => setConfig({ ...config, defaultExpiry: e.target.value })}
+                onChange={e => setConfig(prev => ({ ...prev, defaultExpiry: e.target.value }))}
               >
                 <option value="never">Never</option>
                 <option value="24h">24 Hours</option>
@@ -125,10 +125,10 @@ export default function SettingsPage() {
               </select>
             </SettingRow>
             <SettingRow label="Force HTTPS" description="Reject non-secure playback requests">
-              <Toggle checked={config.forceHttps} onChange={c => setConfig({ ...config, forceHttps: c })} />
+              <Toggle checked={config.forceHttps ?? false} onChange={c => setConfig(prev => ({ ...prev, forceHttps: c }))} />
             </SettingRow>
             <SettingRow label="Log Viewer Events" description="Record playback telemetry for analytics">
-              <Toggle checked={config.logEvents} onChange={c => setConfig({ ...config, logEvents: c })} />
+              <Toggle checked={config.logEvents ?? false} onChange={c => setConfig(prev => ({ ...prev, logEvents: c }))} />
             </SettingRow>
           </div>
 

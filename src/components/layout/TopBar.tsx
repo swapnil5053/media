@@ -39,10 +39,14 @@ export function TopBar({ unreadCount, onBellClick }: TopBarProps) {
 
   return (
     <header className="h-12 flex-shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-sm border-b border-[var(--border)] flex items-center justify-between px-4">
-      {/* Left: page title */}
-      <span className="font-sans text-[13px] font-medium text-[var(--text-secondary)] tracking-[-0.005em]">
-        {title}
-      </span>
+      {/* Left: page title with divider */}
+      <div className="flex items-center h-full">
+        <div className="border-l border-[var(--border)] pl-4 ml-1">
+          <span className="text-[13px] font-medium text-[var(--text-secondary)] tracking-[-0.01em]">
+            {title}
+          </span>
+        </div>
+      </div>
 
       {/* Right: status + clock + bell */}
       <div className="flex items-center gap-3">

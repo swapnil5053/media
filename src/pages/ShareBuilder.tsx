@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ShieldCheck, Copy, ExternalLink, Globe, Lock, Eye } from 'lucide-react';
 import { createShareLink } from '@/api/share';
 import { toast } from 'sonner';
 import { PageTransition, AnimatedPill } from '@/components/common';
 import { SettingRow } from '@/components/ui/SettingRow';
 import { Toggle } from '@/components/ui/Toggle';
-import { AnimatePresence } from 'framer-motion';
 
 type AccessType = 'public' | 'restricted' | 'password';
 
@@ -94,7 +93,10 @@ export default function ShareBuilder() {
                 {accessOptions.map((opt) => (
                   <button
                     key={opt.value}
-                    onClick={() => setAccessType(opt.value)}
+                    onClick={() => {
+                      setAccessType(opt.value);
+                      setResultUrl(null); // Reset generated link if they change configuration
+                    }}
                     className={`w-full text-left p-3 rounded-lg border transition-colors cursor-pointer flex items-start gap-3 ${
                       accessType === opt.value
                         ? 'border-[var(--accent)]/30 bg-[rgba(245,158,11,0.04)]'
@@ -132,7 +134,10 @@ export default function ShareBuilder() {
                       placeholder="Set password..."
                       className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono w-40 focus:border-[var(--accent)] outline-none"
                       value={config.password}
-                      onChange={e => setConfig({ ...config, password: e.target.value })}
+                      onChange={e => {
+                        setConfig({ ...config, password: e.target.value });
+                        setResultUrl(null);
+                      }}
                     />
                   </SettingRow>
                 )}
@@ -144,10 +149,16 @@ export default function ShareBuilder() {
                         type="number"
                         className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-2 py-1 text-[13px] font-mono w-20 text-right focus:border-[var(--accent)] outline-none"
                         value={config.limit_count}
-                        onChange={e => setConfig({ ...config, limit_count: parseInt(e.target.value) || 0 })}
+                        onChange={e => {
+                          setConfig({ ...config, limit_count: parseInt(e.target.value) || 0 });
+                          setResultUrl(null);
+                        }}
                       />
                     )}
-                    <Toggle checked={config.view_limit} onChange={c => setConfig({ ...config, view_limit: c })} />
+                    <Toggle checked={config.view_limit} onChange={c => {
+                      setConfig({ ...config, view_limit: c });
+                      setResultUrl(null);
+                    }} />
                   </div>
                 </SettingRow>
 
@@ -155,7 +166,10 @@ export default function ShareBuilder() {
                   <select
                     className="bg-[var(--bg-base)] border border-[var(--border)] rounded px-3 py-1.5 text-[13px] font-mono text-[var(--text-primary)] focus:border-[var(--accent)] outline-none"
                     value={config.expires}
-                    onChange={e => setConfig({ ...config, expires: e.target.value })}
+                    onChange={e => {
+                      setConfig({ ...config, expires: e.target.value });
+                      setResultUrl(null);
+                    }}
                   >
                     <option value="never">Never</option>
                     <option value="1h">1 Hour</option>
@@ -167,7 +181,10 @@ export default function ShareBuilder() {
                 </SettingRow>
 
                 <SettingRow label="Allow Download" description="Let recipients save the source file">
-                  <Toggle checked={config.download} onChange={c => setConfig({ ...config, download: c })} />
+                  <Toggle checked={config.download} onChange={c => {
+                    setConfig({ ...config, download: c });
+                    setResultUrl(null);
+                  }} />
                 </SettingRow>
               </div>
             )}
@@ -223,38 +240,32 @@ export default function ShareBuilder() {
                     </div>
                   </motion.div>
                 ) : (
-                  <div className="flex flex-col h-full">
-                    <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-auto text-center pt-4">
-                      Link Preview
+                  <div className="p-2 space-y-1 flex flex-col h-full justify-between">
+                    <div>
+                      <p className="text-[10px] font-mono uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-3">
+                        LINK PREVIEW
+                      </p>
+                      {[
+                        { label: 'Access',    value: accessType === 'public' ? 'Public' : accessType === 'restricted' ? 'Restricted' : 'Password Protected' },
+                        { label: 'Expires',   value: config.expires === 'never' ? 'Never' : config.expires },
+                        { label: 'Limit',     value: config.view_limit ? `${config.limit_count} views` : 'Unlimited' },
+                        { label: 'Download',  value: config.download ? 'Allowed' : 'Disabled' },
+                      ].map(row => (
+                        <div key={row.label} className="flex justify-between items-baseline py-2 border-b border-[var(--border)] last:border-0">
+                          <span className="text-[11px] font-mono text-[var(--text-tertiary)]">{row.label}</span>
+                          <span className="text-[12px] font-mono text-[var(--text-primary)]">{row.value}</span>
+                        </div>
+                      ))}
                     </div>
-
-                    <div className="flex-1 flex items-center justify-center">
-                      <div className="text-[var(--text-tertiary)] border border-dashed border-[var(--border)] rounded-lg p-6">
-                        <ExternalLink className="w-6 h-6 mx-auto" />
-                      </div>
+                    <div className="pt-3">
+                      <button
+                        onClick={handleGenerate}
+                        disabled={generating}
+                        className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black text-[12px] font-semibold py-2.5 rounded-md transition-colors cursor-pointer"
+                      >
+                        {generating ? 'GENERATING...' : 'GENERATE SECURE LINK'}
+                      </button>
                     </div>
-
-                    <div className="mt-auto pt-4">
-                      <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-2">Active Restrictions</div>
-                      <div className="flex flex-wrap gap-2">
-                        <AnimatePresence>
-                          {accessType === 'password' && <AnimatedPill key="pwd" text="🔒 Password" color="blue" />}
-                          {config.view_limit && <AnimatedPill key="limit" text={`👁 ${config.limit_count}`} color="amber" />}
-                          {config.expires !== 'never' && <AnimatedPill key="exp" text={`⏱ ${config.expires}`} color="blue" />}
-                        </AnimatePresence>
-                        {accessType === 'public' && !config.view_limit && config.expires === 'never' && (
-                          <span className="font-mono text-[11px] text-[var(--text-tertiary)]">Public Link — no restrictions</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <button
-                      disabled={generating}
-                      onClick={handleGenerate}
-                      className="w-full mt-4 bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black font-semibold py-3 rounded-lg uppercase tracking-[0.06em] text-[13px] transition-colors disabled:opacity-50 cursor-pointer"
-                    >
-                      {generating ? 'Generating...' : 'Generate Secure Link'}
-                    </button>
                   </div>
                 )}
               </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, Download, ExternalLink, Copy, Trash2, Eye, Lock, Clock, HardDrive, Zap, BarChart2 } from 'lucide-react';
+import { ArrowLeft, Share2, Download, ExternalLink, Copy, Trash2, Eye, Lock, Clock, HardDrive, Zap, BarChart2, Link } from 'lucide-react';
 import { getMedia, MediaItem, getMediaStream, deleteMedia, optimizeMedia } from '@/api/media';
 import { ShareLink, getShareLinks, deactivateLink } from '@/api/share';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -150,9 +150,13 @@ export default function MediaDetail() {
     { name: 'Mobile Native', codec: 'AV1', bitrate: '3.2 Mbps', res: '720×480', status: 'pending' as const },
   ];
 
+  const optimizedSize = media.codec === 'HEVC' 
+    ? Math.round(media.size_bytes * 0.25) 
+    : null;
+
   return (
     <PageTransition>
-      <div className="pb-20">
+      <div className="pb-20 overflow-y-auto">
         {/* Navigation header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -176,21 +180,22 @@ export default function MediaDetail() {
         </div>
 
         {/* Video Section */}
-        <div className="relative rounded-xl overflow-hidden bg-[var(--bg-elevated)] border border-[var(--border)] mb-6">
-          <div className="aspect-video">
-            {media.status === 'ready' ? (
-              <VideoPlayer mediaId={media.id} />
-            ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center text-[var(--text-tertiary)]">
-                <HardDrive className="w-8 h-8 mb-3 opacity-40" />
-                <span className="font-mono text-[12px] uppercase tracking-[0.08em]">
-                  {media.status === 'failed' ? 'Processing Failed' : 'Media Processing...'}
-                </span>
-              </div>
-            )}
-          </div>
+        <div className="relative w-full aspect-video bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden mb-6">
+          {media.status === 'ready' ? (
+            <VideoPlayer mediaId={media.id} posterUrl={media.thumbnail_url} />
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-tertiary)] bg-black/40">
+              <HardDrive className="w-8 h-8 mb-3 opacity-40 animate-pulse" />
+              <span className="font-mono text-[12px] uppercase tracking-[0.08em] font-semibold">
+                {media.status === 'failed' ? 'Processing Failed' : 'MEDIA PROCESSING...'}
+              </span>
+            </div>
+          )}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_30%_at_50%_100%,rgba(245,158,11,0.06),transparent)] pointer-events-none" />
         </div>
+
+        {/* Visual spacer and fade below the video */}
+        <div className="w-12 h-px bg-gradient-to-r from-transparent via-[var(--border)] to-transparent mx-auto my-6" />
 
         {/* Two-column grid */}
         <div className="grid lg:grid-cols-[1fr_320px] gap-6">
@@ -221,7 +226,7 @@ export default function MediaDetail() {
                         <button
                           onClick={() => handleDownloadVariant(v.name)}
                           disabled={v.status !== 'ready'}
-                          className="p-1.5 rounded hover:bg-[var(--bg-elevated)] text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="p-1.5 rounded-md text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] transition-all duration-150 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
                           aria-label={`Download ${v.name}`}
                         >
                           <Download className="w-3.5 h-3.5" />
@@ -299,70 +304,76 @@ export default function MediaDetail() {
             </AnimatePresence>
           </div>
 
-          {/* Right — Technical Panel */}
-          <div className="flex flex-col gap-4">
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-              <SpecTable
-                title="Technical Specification"
-                rows={[
-                  { label: 'Video Codec', value: media.codec || '—' },
-                  { label: 'Resolution', value: media.resolution || '—' },
-                  { label: 'Frame Rate', value: media.fps ? `${media.fps} fps` : '—' },
-                  { label: 'Bitrate', value: media.bitrate ? formatBitrate(media.bitrate) : '—' },
-                  { label: 'HDR', value: media.hdr_type || 'SDR' },
-                  { label: 'Duration', value: media.duration ? formatDuration(media.duration) : '—' },
-                  { label: 'Audio', value: media.audio_codec || '—' },
-                ]}
-              />
-            </div>
-
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-              <SpecTable
-                title="Storage"
-                rows={[
-                  { label: 'File Size', value: formatBytes(media.size_bytes) },
-                  { label: 'Optimized', value: media.codec === 'HEVC' ? formatBytes(media.size_bytes) : formatBytes(media.size_bytes * 0.25) },
-                  { label: 'Savings', value: '74.9%' },
-                ]}
-              />
-            </div>
-
-            {/* Compatibility */}
-            <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-              <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-2">
-                Compatibility
+          {/* Right — Technical Panel (sticky + independently scrollable) */}
+          <div>
+            <div className="sticky top-6 overflow-y-auto max-h-[calc(100vh-6rem)] space-y-4 pr-1 pb-8" style={{ scrollbarWidth: 'none' }}>
+              {/* Technical Specifications */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
+                <SpecTable
+                  title="Technical Specification"
+                  rows={[
+                    { label: 'Video Codec', value: media.codec || '—' },
+                    { label: 'Resolution', value: media.resolution || '—' },
+                    { label: 'Frame Rate', value: media.fps ? `${media.fps} fps` : '—' },
+                    { label: 'Bitrate', value: media.bitrate ? formatBitrate(media.bitrate) : '—' },
+                    { label: 'HDR', value: media.hdr_type || 'SDR' },
+                    { label: 'Duration', value: media.duration ? formatDuration(media.duration) : '—' },
+                    { label: 'Audio', value: media.audio_codec || '—' },
+                  ]}
+                />
               </div>
-              <CompatibilityGauges scores={{ "IOS": 90, "ANDROID": 80, "DESKTOP": 100, "TV": 85, "WEB": 95, "CONSOLE": 70 }} />
-            </div>
 
-            {/* Actions */}
-            <div className="flex flex-col gap-2">
-              <button
-                onClick={handleOptimize}
-                disabled={optimizing || media.codec === 'HEVC'}
-                className="w-full bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black font-sans text-[13px] font-semibold py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Zap className="w-4 h-4" />
-                {optimizing ? 'Optimizing...' : media.codec === 'HEVC' ? 'Already Optimized' : 'Apply Optimization'}
-              </button>
-              <button
-                onClick={() => navigate(`/media/${mediaId}/share`)}
-                className="w-full bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--border-hover)] text-[var(--text-primary)] font-sans text-[13px] py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Share2 className="w-4 h-4" /> Create Share Link
-              </button>
-              <button
-                onClick={() => navigate(`/media/${mediaId}/analytics`)}
-                className="w-full bg-[var(--bg-surface)] border border-[var(--border)] hover:border-[var(--border-hover)] text-[var(--text-primary)] font-sans text-[13px] py-2.5 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2"
-              >
-                <BarChart2 className="w-4 h-4" /> View Analytics
-              </button>
-              <button
-                onClick={handleDelete}
-                className="w-full text-red-400/70 hover:text-red-400 font-sans text-[13px] py-2 rounded-lg transition-colors cursor-pointer hover:bg-red-500/5"
-              >
-                Delete Asset
-              </button>
+              {/* Storage */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
+                <SpecTable
+                  title="Storage"
+                  rows={[
+                    { label: 'File Size',  value: formatBytes(media.size_bytes) },
+                    { label: 'Optimized',  value: optimizedSize ? formatBytes(optimizedSize) : '—' },
+                    { label: 'Savings',    value: optimizedSize ? '74.9%' : '—' },
+                  ]}
+                />
+              </div>
+
+              {/* Action buttons */}
+              <div className="flex flex-col gap-2 pt-1">
+                {media.status === 'ready' && media.codec !== 'HEVC' && (
+                  <button
+                    onClick={handleOptimize}
+                    disabled={optimizing}
+                    className="w-full flex items-center justify-center gap-2 bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black text-[12px] font-semibold py-2 rounded-md transition-colors disabled:opacity-50 cursor-pointer"
+                  >
+                    {optimizing ? <span className="animate-spin">⟳</span> : <Zap size={12} />}
+                    {optimizing ? 'Optimizing…' : 'Optimize with HEVC'}
+                  </button>
+                )}
+                <button
+                  onClick={() => navigate(`/media/${mediaId}/share`)}
+                  className="w-full flex items-center justify-center gap-2 bg-[var(--bg-elevated)] hover:bg-[var(--border)] border border-[var(--border)] hover:border-[var(--border-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[12px] font-medium py-2 rounded-md transition-colors cursor-pointer"
+                >
+                  <Link size={12} /> Generate Share Link
+                </button>
+                <button
+                  onClick={() => navigate(`/media/${mediaId}/analytics`)}
+                  className="w-full flex items-center justify-center gap-2 bg-[var(--bg-elevated)] hover:bg-[var(--border)] border border-[var(--border)] hover:border-[var(--border-hover)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-[12px] font-medium py-2 rounded-md transition-colors cursor-pointer"
+                >
+                  <BarChart2 size={12} /> View Analytics
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="w-full flex items-center justify-center gap-2 text-red-400/70 hover:text-red-400 hover:bg-red-950/20 border border-transparent hover:border-red-900/30 text-[12px] font-medium py-2 rounded-md transition-colors cursor-pointer"
+                >
+                  <Trash2 size={12} /> Delete Asset
+                </button>
+              </div>
+
+              {/* Compatibility */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
+                <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-2">
+                  Compatibility
+                </div>
+                <CompatibilityGauges scores={{ "IOS": 90, "ANDROID": 80, "DESKTOP": 100, "TV": 85, "WEB": 95, "CONSOLE": 70 }} />
+              </div>
             </div>
           </div>
         </div>
