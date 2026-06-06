@@ -54,7 +54,7 @@ export const listMedia = async (skip = 0, limit = 50) => {
 
 export const deleteMedia = (id: string) => apiFetch(`/media/${id}`, { method: 'DELETE' });
 
-export const uploadMedia = (file: File, onProgress: (progress: number, speed: number) => void): Promise<{ id: string }> => {
+export const uploadMedia = (file: File, onProgress: (progress: number, speed: number) => void): Promise<{ id?: string; media_id?: string }> => {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const startTime = Date.now();

@@ -22,9 +22,10 @@ export function useUpload() {
         setSpeedMBps(speed);
       });
 
-      setMediaId(response.id);
+      const uploadedId = response.id || response.media_id;
+      setMediaId(uploadedId);
       setStatus('success');
-      return response.id;
+      return uploadedId;
     } catch (err: any) {
       console.error(err);
       setStatus('error');
