@@ -129,17 +129,22 @@ export function PipelineVisualization({ items = [] }: PipelineVisualizationProps
     return false;
   };
 
+  const hasActiveProcessing = items.some(i => i.status === 'analyzing' || i.status === 'transcoding');
+
   return (
     <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-5 relative">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
-          Processing Pipeline
-        </span>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+          <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+            Processing Pipeline
+          </span>
+        </div>
         <div className="flex items-center gap-1.5">
-          <span className={`w-1.5 h-1.5 rounded-full bg-[var(--status-ready)] ${diagStep !== null ? 'animate-pulse' : ''}`} />
-          <span className="font-mono text-[10px] text-[var(--text-tertiary)]">
-            {diagStep !== null ? 'Diagnosing...' : 'Operational'}
+          <div className={`w-1.5 h-1.5 rounded-full ${hasActiveProcessing ? 'bg-[var(--accent)] animate-pulse' : 'bg-[var(--status-ready)]'}`} />
+          <span className="font-mono text-[10px] text-[var(--text-tertiary)] select-none">
+            {hasActiveProcessing ? 'Processing' : 'Operational'}
           </span>
         </div>
       </div>
@@ -167,16 +172,16 @@ export function PipelineVisualization({ items = [] }: PipelineVisualizationProps
                     <motion.div
                       className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150"
                       style={{
-                        border: `1.5px solid ${isActive ? 'var(--accent)' : isHovered ? 'rgba(245,158,11,0.5)' : 'var(--border)'}`,
+                        border: `1.5px solid ${isActive ? 'var(--accent)' : isHovered ? 'rgba(99,102,241,0.5)' : 'var(--border)'}`,
                         background: isActive
-                          ? 'rgba(245,158,11,0.06)'
+                          ? 'rgba(99,102,241,0.06)'
                           : isHovered
-                            ? 'rgba(245,158,11,0.04)'
+                            ? 'rgba(99,102,241,0.04)'
                             : 'var(--bg-surface)',
                         boxShadow: isActive
-                          ? '0 0 20px rgba(245,158,11,0.2)'
+                          ? '0 0 20px rgba(99,102,241,0.2)'
                           : isHovered
-                            ? '0 0 0 4px rgba(245,158,11,0.08), 0 0 16px rgba(245,158,11,0.12)'
+                            ? '0 0 0 4px rgba(99,102,241,0.08), 0 0 16px rgba(99,102,241,0.12)'
                             : 'none',
                       }}
                     >

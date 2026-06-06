@@ -172,8 +172,13 @@ export default function Dashboard() {
             {/* Processing Queue */}
             {activeJobs.length > 0 && (
               <div className="mb-8">
-                <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-3">
-                  In Pipeline
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                    <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)]">
+                      In Pipeline
+                    </span>
+                  </div>
                 </div>
                 <div className="flex gap-3 overflow-x-auto pb-2">
                   {activeJobs.map(job => (
@@ -187,12 +192,14 @@ export default function Dashboard() {
               </div>
             )}
 
-            {/* Asset Library */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
-                  Asset Library
-                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)]">
+                    Asset Library
+                  </span>
+                </div>
                 <span className="font-mono text-[11px] text-[var(--text-tertiary)]">
                   {items.length} {items.length === 1 ? 'item' : 'items'}
                 </span>
@@ -259,8 +266,13 @@ export default function Dashboard() {
 
               {/* System Overview */}
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-3">
-                  System Overview
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                    <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)]">
+                      System Overview
+                    </span>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <InfraCard
@@ -289,8 +301,13 @@ export default function Dashboard() {
 
               {/* Activity Feed */}
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-3">
-                  System Activity
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                    <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)]">
+                      System Activity
+                    </span>
+                  </div>
                 </div>
                 <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
                   <div className="max-h-52 overflow-y-auto" style={{ scrollbarWidth: 'none' }}>

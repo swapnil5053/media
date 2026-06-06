@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Share2, Download, ExternalLink, Copy, Trash2, Eye, Lock, Clock, HardDrive, Zap, BarChart2, Link } from 'lucide-react';
+import { ArrowLeft, Share2, Download, ExternalLink, Copy, Trash2, Eye, Lock, Clock, HardDrive, Zap, BarChart2, Link, AlertTriangle } from 'lucide-react';
 import { getMedia, MediaItem, getMediaStream, deleteMedia, optimizeMedia } from '@/api/media';
 import { ShareLink, getShareLinks, deactivateLink } from '@/api/share';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -13,6 +13,58 @@ import { CompatibilityGauges } from '@/components/CompatibilityGauges';
 import { formatBytes, formatDuration, formatBitrate } from '@/lib/utils';
 import { toast } from 'sonner';
 import { PageTransition } from '@/components/common';
+
+function ProcessingPlaceholder({ status }: { status: string }) {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black">
+      {/* Animated concentric rings */}
+      <div className="relative w-14 h-14">
+        {/* Outer ring */}
+        <motion.div
+          className="absolute inset-0 rounded-full"
+          style={{ border: '1.5px solid transparent', borderTopColor: 'var(--accent)' }}
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: 'linear' }}
+        />
+        {/* Middle ring — counter-rotating */}
+        <motion.div
+          className="absolute inset-[8px] rounded-full"
+          style={{ border: '1.5px solid transparent', borderTopColor: 'rgba(99,102,241,0.45)' }}
+          animate={{ rotate: -360 }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
+        />
+        {/* Inner static ring */}
+        <div className="absolute inset-[16px] rounded-full border border-[var(--border)]" />
+        {/* Center dot */}
+        <motion.div
+          className="absolute inset-[22px] rounded-full bg-[var(--accent)]"
+          animate={{ opacity: [0.3, 1, 0.3] }}
+          transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </div>
+
+      {/* Status text */}
+      <div className="text-center">
+        <p className="text-[11px] font-mono uppercase tracking-[0.1em] text-[var(--text-tertiary)] select-none">
+          {status === 'analyzing' ? 'Analyzing stream...' : 
+           status === 'transcoding' ? 'Encoding H.265...' : 
+           'Processing...'}
+        </p>
+        {/* Pulsing dots */}
+        <div className="flex justify-center gap-1.5 mt-3">
+          {[0, 1, 2].map(i => (
+            <motion.div
+              key={i}
+              className="w-1 h-1 rounded-full bg-[var(--accent)]"
+              animate={{ opacity: [0.15, 0.8, 0.15] }}
+              transition={{ duration: 1.4, repeat: Infinity, delay: i * 0.22, ease: 'easeInOut' }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function MediaDetail() {
   const { mediaId } = useParams();
@@ -180,16 +232,18 @@ export default function MediaDetail() {
         </div>
 
         {/* Video Section */}
-        <div className="relative w-full aspect-video bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl overflow-hidden mb-6">
+        <div className="relative w-full aspect-video bg-black border border-[var(--border)] rounded-xl overflow-hidden mb-6">
           {media.status === 'ready' ? (
             <VideoPlayer mediaId={media.id} posterUrl={media.thumbnail_url} />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--text-tertiary)] bg-black/40">
-              <HardDrive className="w-8 h-8 mb-3 opacity-40 animate-pulse" />
+          ) : media.status === 'failed' ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-[var(--status-failed)] bg-black">
+              <AlertTriangle className="w-8 h-8 mb-3 opacity-80" />
               <span className="font-mono text-[12px] uppercase tracking-[0.08em] font-semibold">
-                {media.status === 'failed' ? 'Processing Failed' : 'MEDIA PROCESSING...'}
+                Processing Failed
               </span>
             </div>
+          ) : (
+            <ProcessingPlaceholder status={media.status} />
           )}
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_30%_at_50%_100%,rgba(245,158,11,0.06),transparent)] pointer-events-none" />
         </div>
@@ -239,10 +293,13 @@ export default function MediaDetail() {
 
               {activeTab === 'share' && (
                 <motion.div key="share" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-mono text-[10px] text-[var(--text-tertiary)] uppercase tracking-[0.08em]">
-                      Active Links
-                    </span>
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                      <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                        Active Links
+                      </span>
+                    </div>
                     <button
                       onClick={() => navigate(`/media/${mediaId}/share`)}
                       className="bg-[var(--accent)] hover:bg-[var(--accent-dim)] text-black px-3 py-1 rounded font-mono text-[10px] uppercase tracking-[0.06em] font-semibold transition-colors flex items-center gap-1 cursor-pointer"
@@ -369,8 +426,13 @@ export default function MediaDetail() {
 
               {/* Compatibility */}
               <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-                <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-2">
-                  Compatibility
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                    <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                      Compatibility
+                    </span>
+                  </div>
                 </div>
                 <CompatibilityGauges scores={{ "IOS": 90, "ANDROID": 80, "DESKTOP": 100, "TV": 85, "WEB": 95, "CONSOLE": 70 }} />
               </div>
@@ -381,8 +443,13 @@ export default function MediaDetail() {
         {/* Compression Visualization (full-width, below grid) */}
         {media.codec === 'HEVC' && (
           <div className="mt-6 bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-5">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-4">
-              Compression Result
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  Compression Result
+                </span>
+              </div>
             </div>
             <div className="flex items-center gap-4 mb-3">
               <span className="font-mono text-[13px] text-[var(--text-secondary)]">{formatBytes(media.size_bytes * 4)}</span>

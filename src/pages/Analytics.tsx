@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { getAnalytics } from '@/api/analytics';
-import { AreaChart, DonutChart } from '@tremor/react';
 import { Eye, Users, Clock, Cloud } from 'lucide-react';
 import { PageTransition } from '@/components/common';
 import { NumberTicker } from '@/components/NumberTicker';
@@ -9,6 +8,78 @@ import { InfraCard } from '@/components/ui/InfraCard';
 import { PillTabs } from '@/components/ui/PillTabs';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { toast } from 'sonner';
+
+function SimpleAreaChart({ data }: { data: { date: string; Views: number }[] }) {
+  if (!data.length) return null;
+  const max = Math.max(...data.map(d => d.Views), 1);
+  const width = 800; const height = 160;
+  const points = data.map((d, i) => ({
+    x: (i / (data.length - 1)) * width,
+    y: height - (d.Views / max) * (height - 20),
+  }));
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+  const areaD = `${pathD} L${width},${height} L0,${height} Z`;
+  
+  return (
+    <div className="w-full select-none">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={areaD} fill="url(#areaGrad)" />
+        <path d={pathD} fill="none" stroke="var(--accent)" strokeWidth="2" />
+      </svg>
+      {/* x-axis labels */}
+      <div className="flex justify-between mt-2 px-1">
+        {data.map((d, i) => (
+          <span key={i} className="text-[10px] font-mono text-[var(--text-tertiary)] select-none">
+            {d.date}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SimpleDonut({ data }: { data: { name: string; value: number; color: string }[] }) {
+  const total = data.reduce((s, d) => s + d.value, 0);
+  const cx = 60; const cy = 60; const r = 48; const inner = 32;
+  let angle = -90;
+  const paths = data.map(d => {
+    const sweep = (d.value / total) * 360;
+    const start = angle; angle += sweep;
+    const s = { x: cx + r * Math.cos(start * Math.PI / 180), y: cy + r * Math.sin(start * Math.PI / 180) };
+    const e = { x: cx + r * Math.cos((start + sweep) * Math.PI / 180), y: cy + r * Math.sin((start + sweep) * Math.PI / 180) };
+    const si = { x: cx + inner * Math.cos(start * Math.PI / 180), y: cy + inner * Math.sin(start * Math.PI / 180) };
+    const ei = { x: cx + inner * Math.cos((start + sweep) * Math.PI / 180), y: cy + inner * Math.sin((start + sweep) * Math.PI / 180) };
+    const large = sweep > 180 ? 1 : 0;
+    return { d: `M${s.x},${s.y} A${r},${r} 0 ${large} 1 ${e.x},${e.y} L${ei.x},${ei.y} A${inner},${inner} 0 ${large} 0 ${si.x},${si.y} Z`, color: d.color, name: d.name, value: d.value };
+  });
+  
+  return (
+    <div className="flex flex-col sm:flex-row items-center gap-6 justify-center w-full py-2 select-none">
+      <svg viewBox="0 0 120 120" className="w-28 h-28 shrink-0">
+        {paths.map((p, i) => (
+          <path key={i} d={p.d} fill={p.color} className="transition-all duration-200 hover:brightness-110" />
+        ))}
+      </svg>
+      <div className="space-y-2 flex-1 w-full">
+        {data.map((d, i) => (
+          <div key={i} className="flex items-center justify-between text-[11px] font-mono text-[var(--text-secondary)]">
+            <div className="flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-sm" style={{ background: d.color }} />
+              <span className="select-none">{d.name}</span>
+            </div>
+            <span className="text-[var(--text-tertiary)] select-none">{d.value}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function Analytics() {
   const { mediaId } = useParams();
@@ -170,48 +241,45 @@ export default function Analytics() {
         {/* Charts Row */}
         <div className="grid md:grid-cols-[2fr_1fr] gap-4 mb-6">
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-4">
-              Viewership Trend
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  Viewership Trend
+                </span>
+              </div>
             </div>
-            <AreaChart
-              className="h-48"
-              data={getAreaData() ?? []}
-              index="date"
-              categories={["Views"]}
-              colors={["amber"]}
-              showYAxis={false}
-              showLegend={false}
-              showGridLines={false}
-              curveType="monotone"
-            />
+            <SimpleAreaChart data={getAreaData() ?? []} />
           </div>
 
-          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-4">
-              Device Breakdown
-            </div>
-            <div className="flex-1 flex items-center justify-center -my-4">
-              <DonutChart
-                className="max-h-40"
-                data={deviceData ?? []}
-                category="value"
-                index="name"
-                colors={["amber", "slate", "zinc"]}
-                showTooltip={false}
-              />
-            </div>
-            <div className="mt-4 space-y-2 font-mono text-[11px] text-[var(--text-secondary)]">
-              <div className="flex justify-between items-center"><span className="text-[var(--accent)]">● Desktop</span><span>72%</span></div>
-              <div className="flex justify-between items-center"><span className="text-slate-400">● Mobile</span><span>18%</span></div>
-              <div className="flex justify-between items-center"><span className="text-[var(--text-tertiary)]">● Other</span><span>10%</span></div>
+          <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                  <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                    Device Breakdown
+                  </span>
+                </div>
+              </div>
+              <SimpleDonut data={[
+                { name: 'Desktop', value: 72, color: 'var(--accent)' },
+                { name: 'Mobile', value: 18, color: 'rgba(99, 102, 241, 0.45)' },
+                { name: 'Other', value: 10, color: 'var(--border-hover)' },
+              ]} />
             </div>
           </div>
         </div>
 
         {/* Completion Distribution */}
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4 mb-6">
-          <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-4">
-            Completion Distribution
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                Completion Distribution
+              </span>
+            </div>
           </div>
           <div className="space-y-2.5">
             {completionSegments.map((seg) => (

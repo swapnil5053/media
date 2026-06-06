@@ -7,52 +7,54 @@
 }
 
 :root {
-  --bg-base: #0a0a0a;
-  --bg-surface: #141414;
-  --bg-elevated: #1c1c1c;
-  --border: #252525;
-  --border-hover: #333333;
+  --bg-base: #080808;          /* Page background */
+  --bg-surface: #111113;       /* Cards, sidebar — slightly warmer/lighter */
+  --bg-elevated: #18181b;      /* Elevated cards, hover states */
+  --bg-overlay: #1f1f23;       /* Tooltips, dropdowns, modals */
+  --border: #222225;
+  --border-hover: #333338;
   --text-primary: #f0ede8;
   --text-secondary: #888580;
-  --text-tertiary: #3e3c3a;
-  --accent: #f59e0b;
-  --accent-dim: #92400e;
+  --text-tertiary: #4e4c4a;
+  --accent: #6366f1;           /* Indigo accent color */
+  --accent-dim: #4338ca;       /* Darker indigo */
   --status-ready: #10b981;
-  --status-processing: #f59e0b;
+  --status-processing: #6366f1;
   --status-failed: #ef4444;
   --status-pending: #6b7280;
 
-  /* Chart colors — data visualization only */
-  --chart-1: #4a5568;
-  --chart-2: #4a6fa5;
-  --chart-3: #3d7a6b;
-  --chart-4: #6b5b8a;
-  --chart-amber: rgba(245, 158, 11, 0.7);
+  /* Card inner glow — applied to InfraCards and featured cards */
+  --card-glow-subtle: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
-/* ─── Body Background Layers ─── */
+/* ─── Body Background Grid & Noise Layers ─── */
 body {
   font-family: 'Syne', sans-serif;
   background-color: var(--bg-base);
   background-image:
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
-    linear-gradient(rgba(37,37,37,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37,37,37,0.025) 1px, transparent 1px);
-  background-size: 200px 200px, 32px 32px, 32px 32px;
+    /* Layer 2: Subtle noise texture — adds material depth */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"),
+    /* Horizontal grid lines */
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    /* Vertical grid lines */
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 300px 300px, 32px 32px, 32px 32px;
   background-position: 0 0, center center, center center;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Hero Lighting Utility ─── */
+/* ─── Page-level radial lighting on Dashboard hero area ─── */
 .hero-lighting {
-  background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245,158,11,0.05) 0%, transparent 70%);
+  background:
+    radial-gradient(ellipse 70% 40% at 30% 0%, rgba(99,102,241,0.06) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 60% at 85% 20%, rgba(99,102,241,0.03) 0%, transparent 70%);
 }
 
 /* ─── Focus Ring System ─── */
 :focus-visible {
-  outline: 2px solid rgba(245, 158, 11, 0.45);
+  outline: 2px solid rgba(99, 102, 241, 0.45);
   outline-offset: 2px;
 }
 
@@ -79,14 +81,10 @@ input:focus, textarea:focus, select:focus {
   scrollbar-color: var(--border-hover) var(--bg-surface);
 }
 
-/* ─── Pipeline Connector Animation ─── */
-@keyframes flow-down {
-  from { stroke-dashoffset: 24; }
-  to   { stroke-dashoffset: 0; }
-}
-.pipeline-connector-active {
-  stroke-dasharray: 4 4;
-  animation: flow-down 600ms linear infinite;
+/* ─── Pipeline Flow Laser Animation ─── */
+@keyframes flowDown {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(300%); }
 }
 
 /* ─── Shimmer Animation ─── */
@@ -95,7 +93,7 @@ input:focus, textarea:focus, select:focus {
   100% { background-position: 200% 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(245,158,11,0.08) 50%, transparent 75%);
+  background: linear-gradient(90deg, transparent 25%, rgba(99,102,241,0.08) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
 }
@@ -130,4 +128,59 @@ input:focus, textarea:focus, select:focus {
 .vjs-adaptflow.video-js {
   width: 100% !important;
   height: 100% !important;
+  background-color: #000000 !important;
+}
+
+.video-js .vjs-tech {
+  object-fit: contain !important;  /* Letterbox rather than stretch portrait video */
+  background: #000000 !important;
+}
+
+/* ============================================
+   CURSOR DISCIPLINE
+   Prevents text cursor on all non-input elements
+   ============================================ */
+
+/* Prevent text selection and cursor on all non-interactive content */
+p, span, h1, h2, h3, h4, h5, h6, div, label,
+[class*="text-"], td, th, li {
+  cursor: default;
+  user-select: none;
+}
+
+/* Inputs and textareas — restore text cursor ONLY here */
+input, textarea, [contenteditable="true"] {
+  cursor: text;
+  user-select: text;
+}
+
+/* Interactive elements — pointer cursor */
+button, a, [role="button"], [role="link"],
+[role="tab"], [role="menuitem"],
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+/* Explicitly non-interactive */
+.cursor-default {
+  cursor: default !important;
+}
+
+/* Drag zones */
+[data-drag-zone] {
+  cursor: copy;
+}
+[data-drag-zone].drag-over {
+  cursor: copy;
+}
+
+/* In index.css — override Tremor's chart colors for our dark theme */
+.tremor-AreaChart-curve {
+  stroke: #6366f1 !important;
+}
+.tremor-AreaChart-area {
+  fill: rgba(99,102,241,0.15) !important;
+}
+[data-tremor-color="amber"] {
+  background-color: #6366f1 !important;
 }

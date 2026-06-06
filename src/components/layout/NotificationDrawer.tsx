@@ -19,8 +19,8 @@ interface NotificationDrawerProps {
 
 const dotColor: Record<string, string> = {
   success: 'bg-[var(--status-ready)]',
-  warning: 'bg-amber-500',
-  info: 'bg-blue-500',
+  warning: 'bg-[var(--status-processing)]',
+  info: 'bg-[var(--accent)]',
 };
 
 export function NotificationDrawer({ notifications, onClose, onReadAll, onClear }: NotificationDrawerProps) {
@@ -46,25 +46,27 @@ export function NotificationDrawer({ notifications, onClose, onReadAll, onClear 
       >
         {/* Header */}
         <div className="h-12 flex items-center justify-between px-4 border-b border-[var(--border)] shrink-0">
-          <span className="font-sans text-[13px] font-semibold text-[var(--text-primary)]">
+          <span className="font-sans text-[13px] font-semibold text-[var(--text-primary)] select-none">
             Notifications
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {notifications.length > 0 && (
-              <>
+              <div className="flex items-center gap-2">
                 <button
                   onClick={onReadAll}
-                  className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
+                  className="font-mono text-[11px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer bg-transparent border-none p-0"
                 >
-                  Read All
+                  READ ALL
                 </button>
+                <span className="text-[var(--border)] select-none">·</span>
                 <button
                   onClick={onClear}
-                  className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--accent)] hover:underline cursor-pointer bg-transparent border-none p-0"
+                  className="font-mono text-[11px] text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] transition-colors cursor-pointer bg-transparent border-none p-0"
                 >
-                  Clear
+                  CLEAR
                 </button>
-              </>
+                <span className="text-[var(--border)] select-none">·</span>
+              </div>
             )}
             <button
               onClick={onClose}
@@ -79,7 +81,7 @@ export function NotificationDrawer({ notifications, onClose, onReadAll, onClear 
         {/* List */}
         <div className="flex-1 overflow-y-auto">
           {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)]">
+            <div className="flex flex-col items-center justify-center h-full text-[var(--text-tertiary)] select-none">
               <span className="font-mono text-[11px] uppercase tracking-[0.08em]">No notifications</span>
             </div>
           ) : (
@@ -87,16 +89,16 @@ export function NotificationDrawer({ notifications, onClose, onReadAll, onClear 
               {notifications.map((n) => (
                 <div
                   key={n.id}
-                  className={`px-4 py-3 flex gap-3 items-start transition-colors ${
-                    n.unread ? 'bg-[rgba(245,158,11,0.02)]' : ''
+                  className={`px-4 py-3 flex gap-3 items-start border-b border-[var(--border)] last:border-0 transition-colors ${
+                    n.unread ? 'bg-[var(--accent)]/5' : ''
                   }`}
                 >
-                  <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-1.5 ${dotColor[n.type] || 'bg-blue-500'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${dotColor[n.type] || 'bg-[var(--accent)]'}`} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-sans text-[13px] text-[var(--text-primary)] leading-snug">
+                    <p className="font-sans text-[13px] text-[var(--text-secondary)] leading-snug select-none">
                       {n.message}
                     </p>
-                    <span className="font-mono text-[11px] text-[var(--text-tertiary)] mt-0.5 block">
+                    <span className="font-mono text-[11px] text-[var(--text-tertiary)] mt-1 block select-none">
                       {n.time}
                     </span>
                   </div>

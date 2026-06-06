@@ -50,8 +50,13 @@ export default function SettingsPage() {
         <div className="space-y-4">
           {/* Processing Configuration */}
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
-              Processing Configuration
+            <div className="flex items-center justify-between mb-2 pb-3 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  Processing Configuration
+                </span>
+              </div>
             </div>
             <SettingRow label="Default Codec Target" description="Applied to new uploads unless overridden">
               <select
@@ -68,8 +73,13 @@ export default function SettingsPage() {
 
           {/* Storage Bindings */}
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
-              Storage Bindings
+            <div className="flex items-center justify-between mb-2 pb-3 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  Storage Bindings
+                </span>
+              </div>
             </div>
             <SettingRow label="Origin Bucket" description="S3 bucket for original uploads">
               <input
@@ -91,8 +101,13 @@ export default function SettingsPage() {
 
           {/* CDN & Delivery */}
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
-              CDN & Delivery
+            <div className="flex items-center justify-between mb-2 pb-3 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  CDN & Delivery
+                </span>
+              </div>
             </div>
             <SettingRow label="Enable CDN" description="Route playback through edge nodes">
               <Toggle checked={config.enableCDN ?? false} onChange={c => setConfig(prev => ({ ...prev, enableCDN: c }))} />
@@ -109,8 +124,13 @@ export default function SettingsPage() {
 
           {/* Security */}
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-1 pb-3 border-b border-[var(--border)]">
-              Security
+            <div className="flex items-center justify-between mb-2 pb-3 border-b border-[var(--border)]">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  Security
+                </span>
+              </div>
             </div>
             <SettingRow label="Default Link Expiry" description="Applied when no expiry is specified">
               <select

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { listMedia, MediaItem } from '@/api/media';
 import { getAnalytics } from '@/api/analytics';
-import { AreaChart, BarChart } from '@tremor/react';
 import { Eye, Users, Film, Clock, ChevronRight } from 'lucide-react';
 import { PageTransition } from '@/components/common';
 import { NumberTicker } from '@/components/NumberTicker';
@@ -14,6 +13,61 @@ import { toast } from 'sonner';
 interface MediaWithAnalytics extends MediaItem {
   views: number;
   completion: number;
+}
+
+function SimpleAreaChart({ data }: { data: { date: string; Views: number }[] }) {
+  if (!data.length) return null;
+  const max = Math.max(...data.map(d => d.Views), 1);
+  const width = 800; const height = 160;
+  const points = data.map((d, i) => ({
+    x: (i / (data.length - 1)) * width,
+    y: height - (d.Views / max) * (height - 20),
+  }));
+  const pathD = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x},${p.y}`).join(' ');
+  const areaD = `${pathD} L${width},${height} L0,${height} Z`;
+  
+  return (
+    <div className="w-full select-none">
+      <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
+            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.02" />
+          </linearGradient>
+        </defs>
+        <path d={areaD} fill="url(#areaGrad)" />
+        <path d={pathD} fill="none" stroke="var(--accent)" strokeWidth="2" />
+      </svg>
+      {/* x-axis labels */}
+      <div className="flex justify-between mt-2 px-1">
+        {data.map((d, i) => (
+          <span key={i} className="text-[10px] font-mono text-[var(--text-tertiary)] select-none">
+            {d.date}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AssetPerformanceChart({ items }: { items: { name: string; Views: number }[] }) {
+  const max = Math.max(...items.map(i => i.Views), 1);
+  return (
+    <div className="flex items-end gap-2 h-44 px-2 pb-4 select-none w-full">
+      {items.map((item, i) => (
+        <div key={i} className="flex-1 flex flex-col items-center gap-1 group min-w-0">
+          <div
+            className="w-full rounded-t-sm bg-[var(--accent)] opacity-60 group-hover:opacity-100
+                       transition-all duration-200 min-h-[2px]"
+            style={{ height: `${Math.max((item.Views / max) * 100, 3)}%` }}
+          />
+          <span className="text-[9px] font-mono text-[var(--text-tertiary)] truncate w-full text-center select-none mt-1">
+            {item.name.split('-')[0].slice(0, 8)}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function GlobalAnalytics() {
@@ -209,45 +263,39 @@ export default function GlobalAnalytics() {
         {/* Charts Row */}
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-4">
-              Views Over Time
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  Views Over Time
+                </span>
+              </div>
             </div>
-            <AreaChart
-              className="h-48"
-              data={getViewsOverTime() ?? []}
-              index="date"
-              categories={["Views"]}
-              colors={["amber"]}
-              showYAxis={false}
-              showLegend={false}
-              showGridLines={false}
-              curveType="monotone"
-            />
+            <SimpleAreaChart data={getViewsOverTime() ?? []} />
           </div>
 
           <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl p-4">
-            <div className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] mb-4">
-              Asset Performance
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+                <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                  Asset Performance
+                </span>
+              </div>
             </div>
-            <BarChart
-              className="h-48"
-              data={getScaledAssetPerf() ?? []}
-              index="name"
-              categories={["Views"]}
-              colors={["amber"]}
-              showYAxis={false}
-              showLegend={false}
-              showGridLines={false}
-            />
+            <AssetPerformanceChart items={getScaledAssetPerf() ?? []} />
           </div>
         </div>
 
         {/* Assets Table */}
         <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-xl overflow-hidden">
           <div className="px-4 py-3 border-b border-[var(--border)]">
-            <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)]">
-              Asset Analytics
-            </span>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
+                Asset Analytics
+              </span>
+            </div>
           </div>
 
           {data.length === 0 ? (
