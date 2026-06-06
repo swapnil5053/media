@@ -41,7 +41,7 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
 
     playerRef.current = videojs(videoRef.current, {
       controls: true,
-      fluid: true,
+      fill: true,
       responsive: true,
       sources: [{
         src: streamUrl,
@@ -79,8 +79,8 @@ export function VideoPlayer({ mediaId }: VideoPlayerProps) {
   }
 
   return (
-    <div className="w-full relative rounded-lg overflow-hidden border border-[var(--border)]">
-      <video ref={videoRef} className="video-js vjs-adaptflow" />
+    <div className="w-full relative rounded-lg overflow-hidden border border-[var(--border)] aspect-video max-h-[60vh] bg-black">
+      <video ref={videoRef} className="video-js vjs-adaptflow w-full h-full" />
     </div>
   );
 }

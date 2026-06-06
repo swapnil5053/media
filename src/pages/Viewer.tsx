@@ -68,8 +68,7 @@ export default function Viewer() {
 
     playerRef.current = videojs(videoRef.current, {
       controls: true,
-      fluid: true,
-      aspectRatio: '16:9',
+      fill: true,
       sources: [{
         src: data.stream_url,
         type: data.stream_url.endsWith('.m3u8') ? 'application/x-mpegURL' : 'video/mp4'
@@ -156,8 +155,8 @@ export default function Viewer() {
       </div>
 
       <div className="w-full max-w-5xl">
-        <div className="rounded-xl overflow-hidden border border-[#222] shadow-2xl relative">
-          <video ref={videoRef} className="video-js vjs-adaptflow" />
+        <div className="rounded-xl overflow-hidden border border-[#222] shadow-2xl relative aspect-video max-h-[70vh] bg-black">
+          <video ref={videoRef} className="video-js vjs-adaptflow w-full h-full" />
         </div>
 
         {/* Below video */}
