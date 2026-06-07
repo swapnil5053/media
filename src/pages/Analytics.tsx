@@ -264,7 +264,7 @@ export default function Analytics() {
               </div>
               <SimpleDonut data={[
                 { name: 'Desktop', value: 72, color: 'var(--accent)' },
-                { name: 'Mobile', value: 18, color: 'rgba(99, 102, 241, 0.45)' },
+                { name: 'Mobile', value: 18, color: 'var(--accent-secondary)' },
                 { name: 'Other', value: 10, color: 'var(--border-hover)' },
               ]} />
             </div>

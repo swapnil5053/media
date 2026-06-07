@@ -172,16 +172,16 @@ export function PipelineVisualization({ items = [] }: PipelineVisualizationProps
                     <motion.div
                       className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150"
                       style={{
-                        border: `1.5px solid ${isActive ? 'var(--accent)' : isHovered ? 'rgba(99,102,241,0.5)' : 'var(--border)'}`,
+                        border: `1.5px solid ${isActive ? 'var(--accent)' : isHovered ? 'rgba(245,158,11,0.5)' : 'var(--border)'}`,
                         background: isActive
-                          ? 'rgba(99,102,241,0.06)'
+                          ? 'rgba(245,158,11,0.06)'
                           : isHovered
-                            ? 'rgba(99,102,241,0.04)'
+                            ? 'rgba(245,158,11,0.04)'
                             : 'var(--bg-surface)',
                         boxShadow: isActive
-                          ? '0 0 20px rgba(99,102,241,0.2)'
+                          ? '0 0 20px rgba(245,158,11,0.2)'
                           : isHovered
-                            ? '0 0 0 4px rgba(99,102,241,0.08), 0 0 16px rgba(99,102,241,0.12)'
+                            ? '0 0 0 4px rgba(245,158,11,0.08), 0 0 16px rgba(245,158,11,0.12)'
                             : 'none',
                       }}
                     >

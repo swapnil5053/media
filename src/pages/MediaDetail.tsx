@@ -29,7 +29,7 @@ function ProcessingPlaceholder({ status }: { status: string }) {
         {/* Middle ring — counter-rotating */}
         <motion.div
           className="absolute inset-[8px] rounded-full"
-          style={{ border: '1.5px solid transparent', borderTopColor: 'rgba(99,102,241,0.45)' }}
+          style={{ border: '1.5px solid transparent', borderTopColor: 'rgba(245,158,11,0.45)' }}
           animate={{ rotate: -360 }}
           transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
         />

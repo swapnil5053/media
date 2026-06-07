@@ -20,7 +20,7 @@ interface NotificationDrawerProps {
 const dotColor: Record<string, string> = {
   success: 'bg-[var(--status-ready)]',
   warning: 'bg-[var(--status-processing)]',
-  info: 'bg-[var(--accent)]',
+  info: 'bg-[var(--accent-secondary)]',
 };
 
 export function NotificationDrawer({ notifications, onClose, onReadAll, onClear }: NotificationDrawerProps) {

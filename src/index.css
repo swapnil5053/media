@@ -1,43 +1,47 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Syne", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --animate-ping-slow: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 :root {
-  --bg-base: #080808;          /* Page background */
-  --bg-surface: #111113;       /* Cards, sidebar — slightly warmer/lighter */
-  --bg-elevated: #18181b;      /* Elevated cards, hover states */
-  --bg-overlay: #1f1f23;       /* Tooltips, dropdowns, modals */
-  --border: #222225;
-  --border-hover: #333338;
-  --text-primary: #f0ede8;
-  --text-secondary: #888580;
-  --text-tertiary: #4e4c4a;
-  --accent: #6366f1;           /* Indigo accent color */
-  --accent-dim: #4338ca;       /* Darker indigo */
-  --status-ready: #10b981;
-  --status-processing: #6366f1;
-  --status-failed: #ef4444;
-  --status-pending: #6b7280;
+  --bg-base: #050505;          /* Deep black foundation */
+  --bg-surface: #0F0F11;       /* Dark grey card surfaces */
+  --bg-elevated: #161619;      /* Inset areas, elevated blocks */
+  --bg-overlay: #1e1e24;       /* Modals, dropdowns */
+
+  --border: #232328;
+  --border-hover: #32323b;
+
+  --text-primary: #F5F5F5;
+  --text-secondary: #A1A1AA;
+  --text-tertiary: #71717A;
+
+  --accent: #F59E0B;           /* Amber primary accent */
+  --accent-secondary: #4F6B8A; /* Cool grey-blue secondary accent */
+  --accent-dim: #D97706;       /* Darker amber */
+
+  --status-ready: #10B981;
+  --status-processing: #F59E0B;
+  --status-failed: #EF4444;
+  --status-pending: #71717A;
 
   /* Card inner glow — applied to InfraCards and featured cards */
-  --card-glow-subtle: inset 0 1px 0 rgba(255,255,255,0.04);
+  --card-glow-subtle: inset 0 1px 0 rgba(255,255,255,0.03);
 }
 
 /* ─── Body Background Grid & Noise Layers ─── */
 body {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Geist', sans-serif;
   background-color: var(--bg-base);
   background-image:
-    /* Layer 2: Subtle noise texture — adds material depth */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E"),
-    /* Horizontal grid lines */
-    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-    /* Vertical grid lines */
-    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    /* Layer 2: Subtle noise texture */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E"),
+    /* Layer 3: Technical grid */
+    linear-gradient(rgba(255,255,255,0.007) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.007) 1px, transparent 1px);
   background-size: 300px 300px, 32px 32px, 32px 32px;
   background-position: 0 0, center center, center center;
   color: var(--text-primary);
@@ -48,13 +52,13 @@ body {
 /* ─── Page-level radial lighting on Dashboard hero area ─── */
 .hero-lighting {
   background:
-    radial-gradient(ellipse 70% 40% at 30% 0%, rgba(99,102,241,0.06) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 60% at 85% 20%, rgba(99,102,241,0.03) 0%, transparent 70%);
+    radial-gradient(ellipse 70% 40% at 30% 0%, rgba(245,158,11,0.03) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 60% at 85% 20%, rgba(79,107,138,0.02) 0%, transparent 70%);
 }
 
 /* ─── Focus Ring System ─── */
 :focus-visible {
-  outline: 2px solid rgba(99, 102, 241, 0.45);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -93,7 +97,7 @@ input:focus, textarea:focus, select:focus {
   100% { background-position: 200% 0; }
 }
 .shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(99,102,241,0.08) 50%, transparent 75%);
+  background: linear-gradient(90deg, transparent 25%, rgba(245,158,11,0.08) 50%, transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 2s ease-in-out infinite;
 }
@@ -176,11 +180,11 @@ button, a, [role="button"], [role="link"],
 
 /* In index.css — override Tremor's chart colors for our dark theme */
 .tremor-AreaChart-curve {
-  stroke: #6366f1 !important;
+  stroke: #F59E0B !important;
 }
 .tremor-AreaChart-area {
-  fill: rgba(99,102,241,0.15) !important;
+  fill: rgba(245,158,11,0.15) !important;
 }
 [data-tremor-color="amber"] {
-  background-color: #6366f1 !important;
+  background-color: #F59E0B !important;
 }
