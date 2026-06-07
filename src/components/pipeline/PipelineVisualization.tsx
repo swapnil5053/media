@@ -1,276 +1,223 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, ScanSearch, Cpu, Zap, Globe } from 'lucide-react';
 import type { MediaItem } from '@/api/media';
 
-interface PipelineStage {
-  id: string;
-  icon: React.FC<{ className?: string }>;
-  label: string;
-}
-
-const stages: PipelineStage[] = [
-  { id: 'ingest', icon: Upload, label: 'INGEST' },
-  { id: 'analyze', icon: ScanSearch, label: 'ANALYZE' },
-  { id: 'transcode', icon: Cpu, label: 'TRANSCODE' },
-  { id: 'optimize', icon: Zap, label: 'OPTIMIZE' },
-  { id: 'deliver', icon: Globe, label: 'DELIVER' },
+const STAGES = [
+  { id: 'ingest',    Icon: Upload,     label: 'Ingest',    info: { action: 'Container validation & stream detection', time: '< 1s' } },
+  { id: 'analyze',   Icon: ScanSearch, label: 'Analyze',   info: { action: 'Codec fingerprinting, FPS, HDR detection', time: '~2s' } },
+  { id: 'transcode', Icon: Cpu,        label: 'Transcode', info: { action: 'Multi-pass H.265 encode · CRF 23', time: '~45s/min', codec: 'HEVC' } },
+  { id: 'optimize',  Icon: Zap,        label: 'Optimize',  info: { action: 'SSIM quality pass · bitrate normalization', time: '~15s/min', codec: 'CRF 23' } },
+  { id: 'deliver',   Icon: Globe,      label: 'Deliver',   info: { action: 'HLS segmentation · MP4 fragmentation', time: '< 5s' } },
 ];
 
-const statusToStage: Record<string, string> = {
-  analyzing: 'analyze',
-  transcoding: 'transcode',
-};
+const STATUS_MAP: Record<string, string> = { analyzing: 'analyze', transcoding: 'transcode' };
 
-const stageInfo: Record<string, { action: string; detail: string; avgTime: string; codec?: string }> = {
-  ingest:    { action: 'File validation & format detection', detail: 'Checks container, streams, metadata', avgTime: '< 1s' },
-  analyze:   { action: 'Stream analysis & fingerprinting', detail: 'Codec detection, resolution, FPS, HDR', avgTime: '~2s' },
-  transcode: { action: 'Multi-pass H.265 encoding', detail: 'CRF 23 · 2-pass · HEVC Main Profile', avgTime: '~45s/min', codec: 'H.265 / HEVC' },
-  optimize:  { action: 'Compression quality pass', detail: 'SSIM analysis · bitrate optimization', avgTime: '~15s/min', codec: 'CRF 23' },
-  deliver:   { action: 'Edge CDN packaging', detail: 'HLS segmentation · MP4 fragmentation', avgTime: '< 5s' },
-};
-
-interface PipelineVisualizationProps {
-  items?: MediaItem[];
-}
-
-export function PipelineVisualization({ items = [] }: PipelineVisualizationProps) {
-  const [hoveredStage, setHoveredStage] = useState<string | null>(null);
+export function PipelineVisualization({ items = [] }: { items?: MediaItem[] }) {
+  const [hovered, setHovered] = useState<string | null>(null);
   const [diagStep, setDiagStep] = useState<number | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Filter out any mock items that have been transcoded long ago (e.g. older than 5 minutes)
-  // and specifically exclude the pre-seeded transcoding item so the diagram isn't permanently stuck
   const activeStages = new Set(
     items
-      .filter(i => {
-        // Exclude the pre-seeded mock transcoding item by its unique ID
-        if (i.id === '24c57519-7f2e-406f-a303-1b4fce160c86') return false;
-
-        const isProcessing = i.status === 'analyzing' || i.status === 'transcoding';
-        if (!isProcessing) return false;
-        
-        const ageMs = Date.now() - new Date(i.created_at).getTime();
-        return ageMs < 5 * 60 * 1000;
-      })
-      .map(i => statusToStage[i.status])
-      .filter(Boolean)
+      .filter(i => i.id !== '24c57519-7f2e-406f-a303-1b4fce160c86'
+        && (i.status === 'analyzing' || i.status === 'transcoding')
+        && Date.now() - new Date(i.created_at).getTime() < 5 * 60 * 1000)
+      .map(i => STATUS_MAP[i.status]).filter(Boolean)
   );
 
-  // Cool diagnostic pass sequence when idle
+  // Idle diagnostic sweep
   useEffect(() => {
-    if (activeStages.size > 0) {
-      setDiagStep(null);
-      return;
-    }
-
-    const runDiagnostic = () => {
-      let step = 0;
-      setDiagStep(0);
-      
-      const interval = setInterval(() => {
-        step++;
-        if (step > 12) {
-          clearInterval(interval);
-          setDiagStep(null);
-        } else {
-          setDiagStep(step);
-        }
-      }, 1200); // 1200ms per step
+    if (activeStages.size > 0) { setDiagStep(null); return; }
+    let timer: ReturnType<typeof setInterval>;
+    const run = () => {
+      let s = 0; setDiagStep(0);
+      const t = setInterval(() => {
+        s++;
+        if (s > 11) { clearInterval(t); setDiagStep(null); } else setDiagStep(s);
+      }, 1100);
+      return t;
     };
-
-    // Run first diagnostics scan on mount
-    runDiagnostic();
-
-    // Repeat every 16 seconds
-    const timer = setInterval(runDiagnostic, 16000);
-
-    return () => {
-      clearInterval(timer);
-    };
+    const t1 = run();
+    timer = setInterval(run, 16000);
+    return () => { clearInterval(t1); clearInterval(timer); };
   }, [activeStages.size]);
 
-  const isStageGlowing = (stageId: string) => {
-    if (activeStages.size > 0) {
-      return activeStages.has(stageId);
-    }
+  const stageActive = (id: string) => {
+    if (activeStages.size > 0) return activeStages.has(id);
     if (diagStep === null) return false;
-
-    const stageIndex = stages.findIndex(s => s.id === stageId);
-    
-    // Sequential pass (each gets on/off)
-    if (diagStep >= 0 && diagStep <= 4) {
-      return diagStep === stageIndex;
-    }
-
-    // Accumulative pass (sections get on and stay on)
-    if (diagStep >= 6 && diagStep <= 11) {
-      return stageIndex <= (diagStep - 6);
-    }
-
-    return false;
+    const idx = STAGES.findIndex(s => s.id === id);
+    return diagStep <= 4 ? diagStep === idx : diagStep >= 6 ? idx <= diagStep - 6 : false;
   };
 
-  const isConnectorGlowing = (index: number) => {
-    if (activeStages.size > 0) {
-      return activeStages.has(stages[index].id);
-    }
+  const connActive = (i: number) => {
+    if (activeStages.size > 0) return activeStages.has(STAGES[i].id);
     if (diagStep === null) return false;
-
-    // Sequential flow path check
-    if (diagStep >= 0 && diagStep <= 4) {
-      return diagStep === index;
-    }
-
-    // Accumulative flow path check
-    if (diagStep >= 6 && diagStep <= 11) {
-      return (index + 1) <= (diagStep - 6);
-    }
-
-    return false;
+    return diagStep <= 4 ? diagStep === i : diagStep >= 6 ? (i + 1) <= diagStep - 6 : false;
   };
 
-  const hasActiveProcessing = items.some(i => i.status === 'analyzing' || i.status === 'transcoding');
+  const hasLive = items.some(i => i.status === 'analyzing' || i.status === 'transcoding');
+
+  // Layout constants
+  const NODE_D = 38;        // node circle diameter
+  const CONN_H = 28;        // connector height between node centres
+  const ROW_H = NODE_D + CONN_H; // total vertical step
 
   return (
-    <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl p-5 relative">
+    <div
+      ref={containerRef}
+      style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderRadius: 12,
+        padding: '14px 16px 18px',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.025)',
+        position: 'relative',
+        overflow: 'visible',
+      }}
+    >
       {/* Header */}
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-px bg-[var(--accent)] opacity-60" />
-          <span className="text-[10px] font-mono uppercase tracking-[0.1em] text-[var(--text-secondary)] select-none">
-            Processing Pipeline
-          </span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div className={`w-1.5 h-1.5 rounded-full ${hasActiveProcessing ? 'bg-[var(--accent)] animate-pulse' : 'bg-[var(--status-ready)]'}`} />
-          <span className="font-mono text-[10px] text-[var(--text-tertiary)] select-none">
-            {hasActiveProcessing ? 'Processing' : 'Operational'}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <div className="section-label"><span>Processing Pipeline</span></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{
+            display: 'inline-block', width: 6, height: 6, borderRadius: '50%',
+            background: hasLive ? 'var(--accent)' : 'var(--status-ready)',
+            boxShadow: hasLive ? '0 0 8px rgba(245,158,11,0.5)' : 'none',
+            animation: hasLive ? 'pulseGlow 2s ease-in-out infinite' : 'none',
+          }} />
+          <span className="font-mono" style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>
+            {hasLive ? 'Active' : 'Nominal'}
           </span>
         </div>
       </div>
 
-      {/* Pipeline diagram */}
-      <div className="relative flex min-h-[360px]">
-        {/* Nodes column */}
-        <div className="flex flex-col items-start pl-4 justify-between py-2 flex-1">
-          {stages.map((stage, i) => {
-            const isActive = isStageGlowing(stage.id);
-            const isHovered = hoveredStage === stage.id;
-            const IconComp = stage.icon;
+      {/* Stage list — flex column, fully visible */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 0, position: 'relative' }}>
 
-            return (
-              <React.Fragment key={stage.id}>
-                {/* Node Row */}
-                <div className="relative flex items-center">
-                  <motion.div
-                    onMouseEnter={() => setHoveredStage(stage.id)}
-                    onMouseLeave={() => setHoveredStage(null)}
-                    className="relative flex items-center cursor-pointer gap-3"
-                    whileHover={{ scale: 1.02 }}
-                    transition={{ duration: 0.1 }}
-                  >
+        {/* Vertical rail behind all nodes */}
+        <div style={{
+          position: 'absolute',
+          left: NODE_D / 2 - 1,
+          top: NODE_D,
+          width: 1,
+          height: `calc(100% - ${NODE_D}px)`,
+          background: 'var(--border)',
+          zIndex: 0,
+        }} />
+
+        {STAGES.map((stage, i) => {
+          const active = stageActive(stage.id);
+          const hov = hovered === stage.id;
+          const { Icon } = stage;
+
+          return (
+            <div key={stage.id} style={{ position: 'relative', zIndex: 1 }}>
+              {/* Row */}
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: 12, height: NODE_D, cursor: 'pointer' }}
+                onMouseEnter={() => setHovered(stage.id)}
+                onMouseLeave={() => setHovered(null)}
+              >
+                {/* Node circle */}
+                <div style={{
+                  width: NODE_D, height: NODE_D, borderRadius: '50%', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: `1px solid ${active ? 'var(--accent)' : hov ? 'rgba(245,158,11,0.35)' : 'var(--border)'}`,
+                  background: active ? 'rgba(245,158,11,0.08)' : hov ? 'rgba(245,158,11,0.04)' : 'var(--bg-elevated)',
+                  boxShadow: active ? '0 0 16px rgba(245,158,11,0.25), inset 0 1px 0 rgba(245,158,11,0.1)' : 'none',
+                  transition: 'all 200ms ease',
+                }}>
+                  <Icon size={14} style={{
+                    color: active ? 'var(--accent)' : hov ? 'rgba(245,158,11,0.75)' : 'var(--text-tertiary)',
+                    transition: 'color 180ms ease',
+                  }} />
+                </div>
+
+                {/* Label + status */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <span className="font-mono" style={{
+                    fontSize: 11, letterSpacing: '0.04em',
+                    color: active ? 'var(--accent)' : hov ? 'var(--text-secondary)' : 'var(--text-tertiary)',
+                    transition: 'color 180ms ease',
+                    display: 'block',
+                  }}>
+                    {stage.label}
+                  </span>
+                  {active && activeStages.has(stage.id) && (
+                    <motion.span
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      className="font-mono"
+                      style={{ fontSize: 9, color: 'var(--accent)', opacity: 0.7, letterSpacing: '0.06em' }}
+                    >
+                      RUNNING
+                    </motion.span>
+                  )}
+                </div>
+
+                {/* Inline tooltip on hover — replaces absolute panel */}
+                <AnimatePresence>
+                  {hov && (
                     <motion.div
-                      className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-150"
+                      initial={{ opacity: 0, x: 6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 6 }}
+                      transition={{ duration: 0.14 }}
                       style={{
-                        border: `1.5px solid ${isActive ? 'var(--accent)' : isHovered ? 'rgba(245,158,11,0.5)' : 'var(--border)'}`,
-                        background: isActive
-                          ? 'rgba(245,158,11,0.06)'
-                          : isHovered
-                            ? 'rgba(245,158,11,0.04)'
-                            : 'var(--bg-surface)',
-                        boxShadow: isActive
-                          ? '0 0 20px rgba(245,158,11,0.2)'
-                          : isHovered
-                            ? '0 0 0 4px rgba(245,158,11,0.08), 0 0 16px rgba(245,158,11,0.12)'
-                            : 'none',
+                        background: 'var(--bg-overlay)',
+                        border: '1px solid var(--border-hover)',
+                        borderRadius: 8,
+                        padding: '8px 10px',
+                        pointerEvents: 'none',
+                        flexShrink: 0,
+                        maxWidth: 160,
+                        boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
                       }}
                     >
-                      <IconComp
-                        className={`w-4 h-4 transition-colors duration-150 ${
-                          isActive ? 'text-[var(--accent)]' : isHovered ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'
-                        }`}
-                      />
-                    </motion.div>
-
-                    <span className={`font-mono text-[10px] uppercase tracking-[0.08em] transition-colors duration-150 ${
-                      isActive ? 'text-[var(--accent)]' : isHovered ? 'text-[var(--text-secondary)]' : 'text-[var(--text-tertiary)]'
-                    }`}>
-                      {stage.label}
-                    </span>
-                  </motion.div>
-                </div>
-
-                {/* Connector line (absolute positioned to align between node centers) */}
-                {i < stages.length - 1 && (
-                  <div 
-                    className="absolute left-[35px] w-px bg-[var(--border)] overflow-hidden"
-                    style={{
-                      top: `${(i * 72) + 40 + 8}px`,
-                      height: '34px',
-                    }}
-                  >
-                    {isConnectorGlowing(i) && (
-                      <div className="absolute inset-0 bg-[var(--accent)]/30 overflow-hidden">
-                        <div 
-                          className="absolute inset-x-0 h-4 bg-gradient-to-b from-transparent via-[var(--accent)] to-transparent"
-                          style={{
-                            animation: 'flowDown 2.4s linear infinite',
-                          }}
-                        />
+                      {stage.info.codec && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                          <span className="font-mono" style={{ fontSize: 9.5, color: 'var(--text-tertiary)' }}>Codec</span>
+                          <span className="font-mono" style={{ fontSize: 9.5, color: 'var(--text-primary)' }}>{stage.info.codec}</span>
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
+                        <span className="font-mono" style={{ fontSize: 9.5, color: 'var(--text-tertiary)' }}>Time</span>
+                        <span className="font-mono" style={{ fontSize: 9.5, color: 'var(--text-primary)' }}>{stage.info.time}</span>
                       </div>
-                    )}
-                  </div>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
+                      <p className="font-sans" style={{ fontSize: 9.5, color: 'var(--text-tertiary)', lineHeight: 1.5, marginTop: 4, paddingTop: 4, borderTop: '1px solid var(--border)' }}>
+                        {stage.info.action}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
 
-        {/* Hover info panel */}
-        <AnimatePresence>
-          {hoveredStage && (
-            <motion.div
-              key={hoveredStage}
-              initial={{ opacity: 0, x: -6 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -4 }}
-              transition={{ duration: 0.12, ease: 'easeOut' }}
-              className="absolute left-[130px] top-0 bottom-0 flex items-center pointer-events-none z-20"
-            >
-              <div className="w-[172px] bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg p-3 shadow-xl">
-                <p className="text-[9px] font-mono uppercase tracking-[0.1em] text-[var(--text-tertiary)] mb-2">
-                  {hoveredStage.toUpperCase()}
-                </p>
-                <div className="space-y-1.5">
-                  {stageInfo[hoveredStage].codec && (
-                    <div className="flex justify-between">
-                      <span className="text-[10px] font-mono text-[var(--text-tertiary)]">Codec</span>
-                      <span className="text-[10px] font-mono text-[var(--text-primary)]">{stageInfo[hoveredStage].codec}</span>
+              {/* Connector segment between stages */}
+              {i < STAGES.length - 1 && (
+                <div style={{
+                  position: 'relative', height: CONN_H, width: NODE_D,
+                  display: 'flex', justifyContent: 'center', overflow: 'hidden',
+                }}>
+                  {/* Animated flow particle */}
+                  {connActive(i) && (
+                    <div style={{
+                      position: 'absolute', width: 1,
+                      top: 0, bottom: 0,
+                      background: 'rgba(245,158,11,0.15)',
+                      overflow: 'hidden',
+                    }}>
+                      <div style={{
+                        position: 'absolute', width: '3px', left: '-1px',
+                        height: 12,
+                        background: 'linear-gradient(to bottom, transparent, var(--accent), transparent)',
+                        animation: 'flowDown 1.4s linear infinite',
+                      }} />
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-[10px] font-mono text-[var(--text-tertiary)]">Avg time</span>
-                    <span className="text-[10px] font-mono text-[var(--text-primary)]">{stageInfo[hoveredStage].avgTime}</span>
-                  </div>
-                  <div className="pt-1 border-t border-[var(--border)]">
-                    <p className="text-[10px] text-[var(--text-tertiary)] leading-relaxed">
-                      {stageInfo[hoveredStage].action}
-                    </p>
-                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              )}
+            </div>
+          );
+        })}
       </div>
-      
-      {/* Keyframe definitions */}
-      <style dangerouslySetInnerHTML={{__html: `
-        @keyframes flowDown {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(200%); }
-        }
-      `}} />
     </div>
   );
 }

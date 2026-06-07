@@ -4,11 +4,19 @@
   <h3>Video Processing & Secure Distribution Platform</h3>
   <p>A full-stack application for exploring media workflows, secure content sharing, and analytics through a unified dashboard.</p>
 
-  <img src="https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/React-19.x-61DAFB.svg?style=flat&logo=react&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white" />
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?style=flat&logo=typescript&logoColor=white" />
+  <img src="./image.png" alt="AdaptFlow Dashboard" width="100%" />
 </div>
+
+> Dashboard view showing media ingestion, processing workflows, secure sharing, and playback analytics.
+
+---
+
+  <br/>
+
+![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat&logo=vite&logoColor=white)
+![React](https://img.shields.io/badge/React-19.x-61DAFB.svg?style=flat&logo=react&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?style=flat&logo=typescript&logoColor=white)
 
 ---
 
@@ -16,7 +24,7 @@
 
 AdaptFlow is a full-stack media management platform that models the lifecycle of a video asset—from upload and processing to optimization, secure distribution, and playback analytics.
 
-The project was built to explore how modern video platforms organize media workflows, manage access-controlled content delivery, and surface operational insights through a developer-focused dashboard.
+The project explores how modern media platforms manage content workflows, access-controlled delivery, and operational visibility through a unified dashboard.
 
 ---
 
@@ -24,39 +32,39 @@ The project was built to explore how modern video platforms organize media workf
 
 ### Media Library
 
-* Upload and manage video assets
-* Browse media through a centralized dashboard
-* View metadata including resolution, codec, bitrate, frame rate, and duration
-* Track processing states across the media lifecycle
+- Upload and manage video assets
+- Browse media through a centralized dashboard
+- View metadata such as resolution, codec, bitrate, frame rate, and duration
+- Track processing status across the asset lifecycle
 
 ### Processing & Optimization
 
-* Simulate media processing workflows
-* Trigger video optimization jobs
-* Compare original and optimized file sizes
-* View compression statistics and codec information
+- Simulate media processing workflows
+- Trigger video optimization jobs
+- Compare original and optimized file sizes
+- View compression statistics and codec information
 
 ### Secure Sharing
 
-* Generate shareable playback links
-* Configure password protection
-* Set expiration windows
-* Limit the number of allowed views
-* Revoke links when no longer needed
+- Generate shareable playback links
+- Configure password protection
+- Set expiration windows
+- Limit the number of allowed views
+- Revoke links when no longer needed
 
 ### Analytics
 
-* Track total views and unique viewers
-* Monitor average completion rates
-* Explore device distribution metrics
-* View asset-level and platform-wide analytics
+- Track total views and unique viewers
+- Monitor average completion rates
+- Explore device distribution metrics
+- View asset-level and platform-wide analytics
 
 ### Notifications
 
-* Event-driven notification center
-* Upload status updates
-* Optimization alerts
-* Share-link activity events
+- Event-driven notification center
+- Upload status updates
+- Optimization alerts
+- Share-link activity events
 
 ---
 
@@ -64,26 +72,26 @@ The project was built to explore how modern video platforms organize media workf
 
 ### Frontend
 
-* React 19
-* TypeScript
-* Vite
-* Tailwind CSS v4
-* Framer Motion
-* React Router
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS v4
+- Framer Motion
+- React Router
 
 ### Backend
 
-* Node.js
-* Express
+- Node.js
+- Express
 
 ### Visualization
 
-* @tremor/react
+- @tremor/react
 
 ### Build Tools
 
-* Vite
-* esbuild
+- Vite
+- esbuild
 
 ---
 
@@ -107,29 +115,29 @@ The application uses seeded demo data and mock processing workflows to simulate 
 
 ### Media
 
-| Method | Endpoint                   | Description               |
-| ------ | -------------------------- | ------------------------- |
-| GET    | /api/v1/media              | Retrieve all media assets |
-| GET    | /api/v1/media/:id          | Retrieve a single asset   |
-| POST   | /api/v1/upload             | Upload a media file       |
-| DELETE | /api/v1/media/:id          | Delete a media asset      |
-| POST   | /api/v1/media/:id/optimize | Run optimization workflow |
+| Method | Endpoint                     | Description               |
+| ------ | ---------------------------- | ------------------------- |
+| GET    | `/api/v1/media`              | Retrieve all media assets |
+| GET    | `/api/v1/media/:id`          | Retrieve a single asset   |
+| POST   | `/api/v1/upload`             | Upload a media file       |
+| DELETE | `/api/v1/media/:id`          | Delete a media asset      |
+| POST   | `/api/v1/media/:id/optimize` | Run optimization workflow |
 
 ### Sharing
 
-| Method | Endpoint                      | Description              |
-| ------ | ----------------------------- | ------------------------ |
-| POST   | /api/v1/media/:id/share       | Create a share link      |
-| GET    | /api/v1/media/:id/share-links | List share links         |
-| DELETE | /api/v1/share/:slug           | Revoke a share link      |
-| GET    | /s/:slug                      | Resolve playback details |
+| Method | Endpoint                        | Description              |
+| ------ | ------------------------------- | ------------------------ |
+| POST   | `/api/v1/media/:id/share`       | Create a share link      |
+| GET    | `/api/v1/media/:id/share-links` | List share links         |
+| DELETE | `/api/v1/share/:slug`           | Revoke a share link      |
+| GET    | `/s/:slug`                      | Resolve playback details |
 
 ### Analytics
 
-| Method | Endpoint                         | Description              |
-| ------ | -------------------------------- | ------------------------ |
-| GET    | /api/v1/media/:id/analytics      | Retrieve analytics       |
-| POST   | /api/v1/media/:id/playback-event | Record playback activity |
+| Method | Endpoint                           | Description              |
+| ------ | ---------------------------------- | ------------------------ |
+| GET    | `/api/v1/media/:id/analytics`      | Retrieve analytics       |
+| POST   | `/api/v1/media/:id/playback-event` | Record playback activity |
 
 ---
 
@@ -137,8 +145,8 @@ The application uses seeded demo data and mock processing workflows to simulate 
 
 ### Prerequisites
 
-* Node.js 20+
-* npm 10+
+- Node.js 20+
+- npm 10+
 
 ### Installation
 
@@ -206,12 +214,12 @@ vite.config.ts
 
 This project was built to explore:
 
-* Full-stack application architecture
-* Media processing workflows
-* Secure content distribution patterns
-* Analytics dashboard design
-* REST API development
-* React and TypeScript application development
+- Full-stack application architecture
+- Media processing workflows
+- Secure content distribution patterns
+- Analytics dashboard design
+- REST API development
+- React and TypeScript application development
 
 ---
 
@@ -219,12 +227,11 @@ This project was built to explore:
 
 Potential extensions include:
 
-* Persistent database storage
-* Background job processing
-* Object storage integration
-* Real transcoding pipelines
-* Role-based access control
-* Cloud deployment workflows
+- Persistent database storage
+- Background job processing
+- Object storage integration
+- Real transcoding pipelines
+- Role-based access control
+- Cloud deployment workflows
 
 ---
-

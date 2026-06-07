@@ -3,188 +3,316 @@
 @theme {
   --font-sans: "Geist", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  --animate-ping-slow: ping 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+/* ═══════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════ */
 :root {
-  --bg-base: #050505;          /* Deep black foundation */
-  --bg-surface: #0F0F11;       /* Dark grey card surfaces */
-  --bg-elevated: #161619;      /* Inset areas, elevated blocks */
-  --bg-overlay: #1e1e24;       /* Modals, dropdowns */
+  /* Backgrounds — layered depth system */
+  --bg-base:     #07070A;   /* canvas */
+  --bg-surface:  #0D0D11;   /* cards */
+  --bg-elevated: #12121A;   /* raised panels, inputs */
+  --bg-overlay:  #18181F;   /* modals, dropdowns */
 
-  --border: #232328;
-  --border-hover: #32323b;
+  /* Borders */
+  --border:       #1C1C26;
+  --border-hover: #2A2A38;
+  --border-focus: rgba(245,158,11,0.4);
 
-  --text-primary: #F5F5F5;
-  --text-secondary: #A1A1AA;
-  --text-tertiary: #71717A;
+  /* Text */
+  --text-primary:   #F0F0F0;
+  --text-secondary: #8C8C9A;
+  --text-tertiary:  #4A4A58;
 
-  --accent: #F59E0B;           /* Amber primary accent */
-  --accent-secondary: #4F6B8A; /* Cool grey-blue secondary accent */
-  --accent-dim: #D97706;       /* Darker amber */
+  /* Accent — amber, used sparingly */
+  --accent:           #F59E0B;
+  --accent-dim:       #D97706;
+  --accent-glow:      rgba(245,158,11,0.12);
+  --accent-secondary: #4E6A82;   /* steel blue — data viz only */
 
-  --status-ready: #10B981;
+  /* Status */
+  --status-ready:      #10B981;
   --status-processing: #F59E0B;
-  --status-failed: #EF4444;
-  --status-pending: #71717A;
-
-  /* Card inner glow — applied to InfraCards and featured cards */
-  --card-glow-subtle: inset 0 1px 0 rgba(255,255,255,0.03);
+  --status-failed:     #EF4444;
+  --status-pending:    #3F3F52;
 }
 
-/* ─── Body Background Grid & Noise Layers ─── */
+/* ═══════════════════════════════════════════
+   BODY — atmospheric background
+═══════════════════════════════════════════ */
 body {
-  font-family: 'Geist', sans-serif;
+  font-family: var(--font-sans);
   background-color: var(--bg-base);
-  background-image:
-    /* Layer 2: Subtle noise texture */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E"),
-    /* Layer 3: Technical grid */
-    linear-gradient(rgba(255,255,255,0.007) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.007) 1px, transparent 1px);
-  background-size: 300px 300px, 32px 32px, 32px 32px;
-  background-position: 0 0, center center, center center;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* Three-layer background: noise + grid + base */
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.018'/%3E%3C/svg%3E"),
+    linear-gradient(rgba(255,255,255,0.0055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.0055) 1px, transparent 1px);
+  background-size: 200px 200px, 40px 40px, 40px 40px;
+  background-position: 0 0, -0.5px -0.5px, -0.5px -0.5px;
 }
 
-/* ─── Page-level radial lighting on Dashboard hero area ─── */
+/* ═══════════════════════════════════════════
+   AMBIENT RADIAL GLOWS — page atmosphere
+═══════════════════════════════════════════ */
+.bg-ambient {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(245,158,11,0.028) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 95% 15%,  rgba(78,106,130,0.032) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 50% 120%,  rgba(16,185,129,0.012) 0%, transparent 50%);
+}
+
+/* ═══════════════════════════════════════════
+   HERO LIGHTING — dashboard left column
+═══════════════════════════════════════════ */
 .hero-lighting {
   background:
-    radial-gradient(ellipse 70% 40% at 30% 0%, rgba(245,158,11,0.03) 0%, transparent 65%),
-    radial-gradient(ellipse 40% 60% at 85% 20%, rgba(79,107,138,0.02) 0%, transparent 70%);
+    radial-gradient(ellipse 70% 40% at 0% 0%, rgba(245,158,11,0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 100% 0%, rgba(78,106,130,0.025) 0%, transparent 55%);
 }
 
-/* ─── Focus Ring System ─── */
+/* ═══════════════════════════════════════════
+   FOCUS SYSTEM
+═══════════════════════════════════════════ */
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 1.5px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* ─── Form Element Base ─── */
+/* ═══════════════════════════════════════════
+   FORM ELEMENTS
+═══════════════════════════════════════════ */
 input, textarea, select {
-  background: var(--bg-surface);
+  background: var(--bg-elevated);
   color: var(--text-primary);
   border: 1px solid var(--border);
+  font-family: var(--font-mono);
 }
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--accent);
+  border-color: rgba(245,158,11,0.5);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.06);
 }
 
-/* ─── Custom Scrollbar ─── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: var(--bg-surface); }
-::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 999px; }
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+* { scrollbar-width: thin; scrollbar-color: var(--border-hover) transparent; }
 
-/* Firefox scrollbar */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-hover) var(--bg-surface);
-}
-
-/* ─── Pipeline Flow Laser Animation ─── */
+/* ═══════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════ */
 @keyframes flowDown {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(300%); }
+  0%   { transform: translateY(-100%); opacity: 0; }
+  15%  { opacity: 1; }
+  85%  { opacity: 1; }
+  100% { transform: translateY(250%); opacity: 0; }
 }
 
-/* ─── Shimmer Animation ─── */
+@keyframes scanBeam {
+  0%   { top: -2px; opacity: 0; }
+  8%   { opacity: 0.8; }
+  92%  { opacity: 0.8; }
+  100% { top: 100%; opacity: 0; }
+}
+
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-.shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgba(245,158,11,0.08) 50%, transparent 75%);
-  background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
 
-/* ─── Custom Video.js Skin ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+  50%       { box-shadow: 0 0 12px 2px rgba(245,158,11,0.2); }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent 20%, rgba(245,158,11,0.06) 50%, transparent 80%);
+  background-size: 200% 100%;
+  animation: shimmer 2.4s ease-in-out infinite;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease forwards;
+}
+
+/* ═══════════════════════════════════════════
+   SECTION LABELS — consistent across app
+═══════════════════════════════════════════ */
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.section-label::before {
+  content: '';
+  display: block;
+  width: 12px;
+  height: 1px;
+  background: var(--accent);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+.section-label span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════════════
+   VIDEO.JS CUSTOM SKIN
+═══════════════════════════════════════════ */
 .vjs-adaptflow .vjs-control-bar {
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(12px);
+  background: rgba(0,0,0,0.88);
+  backdrop-filter: blur(16px);
 }
-.vjs-adaptflow .vjs-play-progress {
-  background: var(--accent);
-}
-.vjs-adaptflow .vjs-volume-level {
-  background: var(--accent);
-}
+.vjs-adaptflow .vjs-play-progress,
+.vjs-adaptflow .vjs-volume-level { background: var(--accent); }
 .vjs-adaptflow .vjs-big-play-button {
-  background-color: var(--accent);
+  background-color: rgba(245,158,11,0.9);
   border: none;
   border-radius: 50%;
-  width: 64px;
-  height: 64px;
-  line-height: 64px;
-  top: 50%;
-  left: 50%;
+  width: 56px; height: 56px; line-height: 56px;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   margin: 0;
+  transition: background-color 150ms ease;
 }
-.vjs-adaptflow:hover .vjs-big-play-button {
-  background-color: var(--accent-dim);
-}
+.vjs-adaptflow:hover .vjs-big-play-button { background-color: var(--accent); }
+.vjs-adaptflow.video-js { width: 100% !important; height: 100% !important; background: #000 !important; }
+.video-js .vjs-tech { object-fit: contain !important; background: #000 !important; }
 
-.vjs-adaptflow.video-js {
-  width: 100% !important;
-  height: 100% !important;
-  background-color: #000000 !important;
-}
-
-.video-js .vjs-tech {
-  object-fit: contain !important;  /* Letterbox rather than stretch portrait video */
-  background: #000000 !important;
-}
-
-/* ============================================
+/* ═══════════════════════════════════════════
    CURSOR DISCIPLINE
-   Prevents text cursor on all non-input elements
-   ============================================ */
-
-/* Prevent text selection and cursor on all non-interactive content */
+═══════════════════════════════════════════ */
 p, span, h1, h2, h3, h4, h5, h6, div, label,
 [class*="text-"], td, th, li {
   cursor: default;
   user-select: none;
 }
-
-/* Inputs and textareas — restore text cursor ONLY here */
 input, textarea, [contenteditable="true"] {
   cursor: text;
   user-select: text;
 }
-
-/* Interactive elements — pointer cursor */
+/* Every interactive element gets pointer — no exceptions */
 button, a, [role="button"], [role="link"],
-[role="tab"], [role="menuitem"],
-.cursor-pointer {
+[role="tab"], [role="menuitem"], .cursor-pointer,
+[data-clickable], summary {
   cursor: pointer !important;
 }
+[data-drag-zone] { cursor: copy; }
 
-/* Explicitly non-interactive */
-.cursor-default {
-  cursor: default !important;
+/* ═══════════════════════════════════════════
+   SPOTLIGHT CURSOR
+═══════════════════════════════════════════ */
+.spotlight-cursor {
+  pointer-events: none;
+  position: fixed;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+  mix-blend-mode: screen;
+  transition: width 200ms ease, height 200ms ease, opacity 200ms ease;
+  background: radial-gradient(circle, rgba(245,158,11,0.10) 0%, transparent 70%);
 }
 
-/* Drag zones */
-[data-drag-zone] {
-  cursor: copy;
-}
-[data-drag-zone].drag-over {
-  cursor: copy;
+/* ═══════════════════════════════════════════
+   CARD TILT — applied via JS, declared here
+═══════════════════════════════════════════ */
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 80ms ease, box-shadow 80ms ease;
 }
 
-/* In index.css — override Tremor's chart colors for our dark theme */
-.tremor-AreaChart-curve {
-  stroke: #F59E0B !important;
+/* ═══════════════════════════════════════════
+   PARALLAX GRID — asset library scroll
+═══════════════════════════════════════════ */
+.parallax-col { will-change: transform; }
+
+/* ═══════════════════════════════════════════
+   CARD BASE — reused throughout
+═══════════════════════════════════════════ */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.025), 0 1px 3px rgba(0,0,0,0.4);
 }
-.tremor-AreaChart-area {
-  fill: rgba(245,158,11,0.15) !important;
+
+.card-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
-[data-tremor-color="amber"] {
-  background-color: #F59E0B !important;
+
+/* ═══════════════════════════════════════════
+   PREMIUM BUTTON BASE
+═══════════════════════════════════════════ */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #000;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 120ms ease, transform 80ms ease;
 }
+.btn-primary:hover { background: var(--accent-dim); }
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+}
+.btn-secondary:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background: var(--bg-overlay);
+}
+
+/* ═══════════════════════════════════════════
+   TREMOR OVERRIDES
+═══════════════════════════════════════════ */
+.tremor-AreaChart-curve  { stroke: var(--accent-secondary) !important; }
+.tremor-AreaChart-area   { fill: rgba(78,106,130,0.15) !important; }

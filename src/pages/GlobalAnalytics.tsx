@@ -31,12 +31,12 @@ function SimpleAreaChart({ data }: { data: { date: string; Views: number }[] }) 
       <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-44" preserveAspectRatio="none">
         <defs>
           <linearGradient id="areaGrad" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.3" />
-            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.02" />
+            <stop offset="0%" stopColor="var(--accent-secondary)" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="var(--accent-secondary)" stopOpacity="0.02" />
           </linearGradient>
         </defs>
         <path d={areaD} fill="url(#areaGrad)" />
-        <path d={pathD} fill="none" stroke="var(--accent)" strokeWidth="2" />
+        <path d={pathD} fill="none" stroke="var(--accent-secondary)" strokeWidth="2" />
       </svg>
       {/* x-axis labels */}
       <div className="flex justify-between mt-2 px-1">
@@ -57,9 +57,9 @@ function AssetPerformanceChart({ items }: { items: { name: string; Views: number
       {items.map((item, i) => (
         <div key={i} className="flex-1 flex flex-col items-center gap-1 group min-w-0">
           <div
-            className="w-full rounded-t-sm bg-[var(--accent)] opacity-60 group-hover:opacity-100
+            className="w-full rounded-t-sm opacity-60 group-hover:opacity-100
                        transition-all duration-200 min-h-[2px]"
-            style={{ height: `${Math.max((item.Views / max) * 100, 3)}%` }}
+            style={{ height: `${Math.max((item.Views / max) * 100, 3)}%`, background: 'var(--accent-secondary)' }}
           />
           <span className="text-[9px] font-mono text-[var(--text-tertiary)] truncate w-full text-center select-none mt-1">
             {item.name.split('-')[0].slice(0, 8)}
@@ -245,7 +245,7 @@ export default function GlobalAnalytics() {
             label="Unique Viewers"
             value={<NumberTicker value={getScaledUniqueViewers()} />}
             icon={<Users className="w-3.5 h-3.5" />}
-            trend={{ value: '+8.3%', positive: true }}
+            trend={stats.totalViews > 0 ? { value: `${((getScaledUniqueViewers() / Math.max(1, stats.uniqueViewers)) * 100 - 100).toFixed(1)}%`, positive: getScaledUniqueViewers() >= stats.uniqueViewers } : undefined}
           />
           <InfraCard
             label="Total Assets"

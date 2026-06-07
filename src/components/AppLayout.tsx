@@ -4,6 +4,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { TopBar } from '@/components/layout/TopBar';
 import { NotificationDrawer } from '@/components/layout/NotificationDrawer';
+import { useSpotlight } from '@/hooks/useSpotlight';
 
 interface AppNotification {
   id: number;
@@ -16,6 +17,7 @@ interface AppNotification {
 export function AppLayout() {
   const location = useLocation();
   const [notifOpen, setNotifOpen] = useState(false);
+  useSpotlight();
   const [notifications, setNotifications] = useState<AppNotification[]>([
     { id: 1, type: 'success', message: 'Asset demo_video.mp4 has completed transcoding', time: '2 mins ago', unread: true },
     { id: 2, type: 'warning', message: 'Disk space on node us-east-4 at 78% capacity', time: '1 hour ago', unread: true },
@@ -52,14 +54,16 @@ export function AppLayout() {
 
   return (
     <div className="flex h-screen bg-[var(--bg-base)] overflow-hidden">
+      {/* Ambient background glow layer */}
+      <div className="bg-ambient" aria-hidden="true" />
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         <TopBar
           unreadCount={unreadCount}
           onBellClick={() => setNotifOpen(true)}
         />
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="max-w-7xl mx-auto px-6 py-7">
             <Outlet />
           </div>
         </main>

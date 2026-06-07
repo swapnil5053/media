@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, BarChart2, Settings } from 'lucide-react';
 
 const navItems = [
-  { label: 'Library', path: '/upload', icon: LayoutDashboard },
+  { label: 'Library',   path: '/upload',    icon: LayoutDashboard },
   { label: 'Analytics', path: '/analytics', icon: BarChart2 },
-  { label: 'Settings', path: '/settings', icon: Settings },
+  { label: 'Settings',  path: '/settings',  icon: Settings },
 ];
 
 export function Sidebar() {
@@ -17,66 +17,99 @@ export function Sidebar() {
     <motion.nav
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
-      animate={{ width: expanded ? 224 : 56 }}
-      transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
-      className="flex-shrink-0 bg-[var(--bg-surface)] border-r border-[var(--border)] flex flex-col h-screen overflow-hidden relative z-30"
+      animate={{ width: expanded ? 220 : 52 }}
+      transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      className="flex-shrink-0 flex flex-col h-screen overflow-hidden relative z-30"
+      style={{ background: 'var(--bg-surface)', borderRight: '1px solid var(--border)' }}
     >
-      {/* Logo Area */}
-      <div className="h-12 flex items-center px-3.5 gap-3 border-b border-[var(--border)] shrink-0">
-        <div className="w-7 h-7 rounded-md bg-[var(--accent)] flex items-center justify-center shrink-0">
-          <span className="text-black font-bold text-[11px] font-mono tracking-tight">AF</span>
+      {/* Logo */}
+      <Link
+        to="/upload"
+        className="h-11 flex items-center px-3 gap-3 shrink-0 cursor-pointer select-none"
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
+        {/* Wordmark logo mark — two overlapping rectangles */}
+        <div className="shrink-0 w-[26px] h-[26px] relative flex items-center justify-center">
+          <div
+            className="absolute"
+            style={{
+              width: 14, height: 18,
+              background: 'var(--accent)',
+              borderRadius: 2,
+              left: 0, top: 4,
+              opacity: 0.9,
+            }}
+          />
+          <div
+            className="absolute"
+            style={{
+              width: 14, height: 18,
+              background: 'var(--text-primary)',
+              borderRadius: 2,
+              right: 0, top: 4,
+              opacity: 0.15,
+            }}
+          />
         </div>
-        <motion.span
-          animate={{ opacity: expanded ? 1 : 0, width: expanded ? 'auto' : 0 }}
-          transition={{ duration: 0.12, delay: expanded ? 0.06 : 0 }}
-          className="overflow-hidden inline-block font-sans text-[14px] font-semibold tracking-[-0.03em] text-[var(--text-primary)] whitespace-nowrap"
-        >
-          Adapt<span className="text-[var(--accent)]">Flow</span>
-        </motion.span>
-      </div>
 
-      {/* Nav items */}
-      <div className="flex-1 p-2 mt-1 flex flex-col gap-0.5">
+        <motion.div
+          animate={{ opacity: expanded ? 1 : 0, x: expanded ? 0 : -6 }}
+          transition={{ duration: 0.14, delay: expanded ? 0.07 : 0 }}
+          className="overflow-hidden whitespace-nowrap"
+        >
+          <span className="font-sans text-[13px] font-semibold tracking-[-0.04em] text-[var(--text-primary)] select-none">
+            adapt<span style={{ color: 'var(--accent)' }}>flow</span>
+          </span>
+        </motion.div>
+      </Link>
+
+      {/* Nav */}
+      <div className="flex-1 flex flex-col gap-px p-1.5 mt-1">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path ||
-            (item.path === '/upload' && (location.pathname === '/' || location.pathname.startsWith('/media')));
+          const isActive =
+            location.pathname === item.path ||
+            (item.path === '/upload' &&
+              (location.pathname === '/' || location.pathname.startsWith('/media')));
 
           return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              className="block w-full"
-            >
+            <NavLink key={item.path} to={item.path} className="block">
               <div
-                className={`
-                  flex items-center gap-3 h-9 rounded-md transition-colors duration-100 relative w-full
-                  ${expanded ? 'px-3.5' : 'px-0 justify-center'}
-                  ${isActive
-                    ? 'bg-[rgba(245,158,11,0.06)]'
-                    : 'hover:bg-[rgba(255,255,255,0.03)]'
-                  }
-                `}
+                className="relative flex items-center h-8 rounded-[6px] transition-colors duration-100"
+                style={{
+                  padding: expanded ? '0 10px' : '0',
+                  justifyContent: expanded ? 'flex-start' : 'center',
+                  gap: 10,
+                  background: isActive ? 'rgba(245,158,11,0.07)' : 'transparent',
+                }}
+                onMouseEnter={e => {
+                  if (!isActive) (e.currentTarget as HTMLDivElement).style.background = 'rgba(255,255,255,0.03)';
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) (e.currentTarget as HTMLDivElement).style.background = 'transparent';
+                }}
               >
                 {isActive && (
                   <motion.div
-                    layoutId="sidebar-active-indicator"
-                    className="absolute left-0 top-1 bottom-1 w-[2px] bg-[var(--accent)] rounded-r"
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    layoutId="nav-pill"
+                    className="absolute left-0 top-[6px] bottom-[6px] w-[2px] rounded-r-full"
+                    style={{ background: 'var(--accent)' }}
+                    transition={{ type: 'spring', stiffness: 600, damping: 40 }}
                   />
                 )}
                 <item.icon
-                  className={`w-[18px] h-[18px] shrink-0 ${isActive ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)]'}`}
+                  size={15}
+                  className="shrink-0 transition-colors duration-100"
+                  style={{ color: isActive ? 'var(--accent)' : 'var(--text-tertiary)' }}
                 />
                 <motion.span
-                  animate={{
-                    opacity: expanded ? 1 : 0,
-                    x: expanded ? 0 : -4,
+                  animate={{ opacity: expanded ? 1 : 0 }}
+                  transition={{ duration: 0.12, delay: expanded ? 0.09 : 0 }}
+                  className="font-sans text-[12.5px] whitespace-nowrap overflow-hidden select-none"
+                  style={{
+                    color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
+                    fontWeight: isActive ? 500 : 400,
+                    letterSpacing: '-0.01em',
                   }}
-                  transition={{ duration: 0.12, delay: expanded ? 0.08 : 0 }}
-                  className={`
-                    font-sans text-[13px] whitespace-nowrap overflow-hidden
-                    ${isActive ? 'text-[var(--accent)] font-medium' : 'text-[var(--text-secondary)]'}
-                  `}
                 >
                   {item.label}
                 </motion.span>
@@ -86,15 +119,25 @@ export function Sidebar() {
         })}
       </div>
 
-      {/* Bottom status */}
-      <div className="p-3.5 border-t border-[var(--border)] flex items-center gap-2.5 shrink-0">
-        <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-ready)] shrink-0" />
+      {/* Footer */}
+      <div
+        className="p-3 flex items-center gap-2.5 shrink-0"
+        style={{ borderTop: '1px solid var(--border)' }}
+      >
+        <div className="relative shrink-0">
+          <span className="block w-[7px] h-[7px] rounded-full" style={{ background: 'var(--status-ready)' }} />
+          <span
+            className="absolute inset-0 rounded-full animate-ping"
+            style={{ background: 'var(--status-ready)', opacity: 0.3, animationDuration: '2.5s' }}
+          />
+        </div>
         <motion.span
           animate={{ opacity: expanded ? 1 : 0 }}
-          transition={{ duration: 0.1, delay: expanded ? 0.08 : 0 }}
-          className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] whitespace-nowrap overflow-hidden"
+          transition={{ duration: 0.1, delay: expanded ? 0.09 : 0 }}
+          className="font-mono text-[10px] uppercase tracking-[0.1em] whitespace-nowrap overflow-hidden select-none"
+          style={{ color: 'var(--text-tertiary)' }}
         >
-          Systems OK
+          All systems OK
         </motion.span>
       </div>
     </motion.nav>

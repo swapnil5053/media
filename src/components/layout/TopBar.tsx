@@ -8,14 +8,14 @@ interface TopBarProps {
 }
 
 const routeTitles: Record<string, string> = {
-  '/upload': 'Library',
-  '/analytics': 'Analytics Overview',
-  '/settings': 'Configuration',
+  '/upload':    'Library',
+  '/analytics': 'Analytics',
+  '/settings':  'Settings',
 };
 
 function getPageTitle(pathname: string): string {
   if (routeTitles[pathname]) return routeTitles[pathname];
-  if (pathname.startsWith('/media/') && pathname.endsWith('/share')) return 'Share Link Builder';
+  if (pathname.startsWith('/media/') && pathname.endsWith('/share'))     return 'Share Link Builder';
   if (pathname.startsWith('/media/') && pathname.endsWith('/analytics')) return 'Asset Analytics';
   if (pathname.startsWith('/media/')) return 'Asset Detail';
   return 'AdaptFlow';
@@ -26,54 +26,80 @@ export function TopBar({ unreadCount, onBellClick }: TopBarProps) {
   const [utc, setUtc] = useState('');
 
   useEffect(() => {
-    const tick = () => {
-      const now = new Date();
-      setUtc(now.toISOString().slice(11, 19) + ' UTC');
-    };
+    const tick = () => setUtc(new Date().toISOString().slice(11, 19) + ' UTC');
     tick();
-    const interval = setInterval(tick, 1000);
-    return () => clearInterval(interval);
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
   }, []);
 
-  const title = getPageTitle(location.pathname);
-
   return (
-    <header className="h-12 flex-shrink-0 bg-[var(--bg-surface)]/80 backdrop-blur-sm border-b border-[var(--border)] flex items-center justify-between px-4">
-      {/* Left: page title with divider */}
-      <div className="flex items-center h-full">
-        <div className="border-l border-[var(--border)] pl-4 ml-1">
-          <span className="text-[13px] font-medium text-[var(--text-secondary)] tracking-[-0.01em]">
-            {title}
-          </span>
-        </div>
+    <header
+      className="h-11 flex-shrink-0 flex items-center justify-between px-5"
+      style={{
+        background: 'rgba(15,15,17,0.85)',
+        backdropFilter: 'blur(12px)',
+        borderBottom: '1px solid var(--border)',
+      }}
+    >
+      {/* Left */}
+      <div className="flex items-center gap-2.5">
+        <span
+          className="font-sans text-[13px] font-medium tracking-[-0.02em] select-none"
+          style={{ color: 'var(--text-secondary)' }}
+        >
+          {getPageTitle(location.pathname)}
+        </span>
       </div>
 
-      {/* Right: status + clock + bell */}
-      <div className="flex items-center gap-3">
-        {/* System status */}
+      {/* Right */}
+      <div className="flex items-center gap-4">
         <div className="hidden md:flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--status-ready)]" />
-          <span className="font-mono text-[11px] text-[var(--text-tertiary)]">Healthy</span>
+          <span
+            className="w-1.5 h-1.5 rounded-full"
+            style={{ background: 'var(--status-ready)' }}
+          />
+          <span
+            className="font-mono text-[11px] select-none"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
+            Healthy
+          </span>
         </div>
 
-        <div className="hidden md:block w-px h-4 bg-[var(--border)]" />
+        <div
+          className="hidden md:block w-px h-3.5"
+          style={{ background: 'var(--border)' }}
+        />
 
-        {/* UTC clock */}
-        <span className="hidden sm:block font-mono text-[12px] text-[var(--text-tertiary)] tabular-nums">
+        <span
+          className="hidden sm:block font-mono text-[11px] tabular-nums select-none"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
           {utc}
         </span>
 
-        <div className="w-px h-4 bg-[var(--border)]" />
+        <div className="w-px h-3.5" style={{ background: 'var(--border)' }} />
 
-        {/* Bell */}
         <button
           onClick={onBellClick}
-          className="relative p-1.5 rounded-md hover:bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          className="relative flex items-center justify-center w-7 h-7 rounded-md transition-colors cursor-pointer"
+          style={{ color: 'var(--text-tertiary)' }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'var(--bg-elevated)';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-primary)';
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+            (e.currentTarget as HTMLButtonElement).style.color = 'var(--text-tertiary)';
+          }}
           aria-label="Notifications"
         >
-          <Bell className="w-4 h-4" />
+          <Bell size={14} />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[var(--accent)] animate-pulse" />
+            <span
+              className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full"
+              style={{ background: 'var(--accent)' }}
+            />
           )}
         </button>
       </div>

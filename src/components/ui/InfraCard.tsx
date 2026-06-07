@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 interface InfraCardProps {
@@ -13,68 +12,87 @@ interface InfraCardProps {
 }
 
 export function InfraCard({ label, value, subtext, icon, variant = 'default', trend, className }: InfraCardProps) {
-  const variantStyles = {
-    default: 'bg-[var(--bg-surface)] border-[var(--border)]',
-    elevated: 'bg-[var(--bg-elevated)] border-[var(--border-hover)]',
-    active: 'bg-[var(--bg-surface)] border-[var(--border)] border-l-2 border-l-[var(--accent)]',
-    processing: 'bg-[var(--bg-surface)] border-[var(--border)] relative overflow-hidden',
-  };
+  const isActive = variant === 'active';
+  const isProcessing = variant === 'processing';
 
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.15 }}
-      className={cn(
-        'relative overflow-hidden rounded-xl p-4 flex flex-col justify-between min-h-[120px] transition-colors duration-200',
-        variantStyles[variant],
-        className
-      )}
-      style={{ boxShadow: 'var(--card-glow-subtle)' }}
+    <div
+      className={cn('relative overflow-hidden rounded-xl flex flex-col', className)}
+      style={{
+        background: 'var(--bg-surface)',
+        border: '1px solid var(--border)',
+        borderLeft: isActive ? '2px solid var(--accent)' : undefined,
+        padding: '14px 16px 16px',
+        minHeight: 108,
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
+      }}
     >
-      {variant === 'processing' && (
-        <div className="absolute top-0 left-0 right-0 h-[2px] shimmer" />
+      {/* Processing shimmer bar */}
+      {isProcessing && (
+        <div className="absolute top-0 left-0 right-0 h-[1.5px] shimmer" />
       )}
 
-      {/* Top row: label + icon */}
-      <div className="flex items-center justify-between mb-3">
-        <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--text-tertiary)] select-none">
+      {/* Corner micro-glow */}
+      <div
+        className="absolute top-0 right-0 pointer-events-none"
+        style={{
+          width: 64, height: 64,
+          background: 'radial-gradient(circle at 100% 0%, rgba(255,255,255,0.018) 0%, transparent 70%)',
+        }}
+      />
+
+      {/* Label row */}
+      <div className="flex items-center justify-between mb-auto">
+        <span
+          className="font-mono text-[10px] uppercase tracking-[0.1em] select-none"
+          style={{ color: 'var(--text-tertiary)' }}
+        >
           {label}
         </span>
         {icon && (
-          <div className="text-[var(--text-tertiary)] opacity-50 select-none">
+          <span style={{ color: 'var(--text-tertiary)', opacity: 0.4 }}>
             {icon}
-          </div>
+          </span>
         )}
       </div>
 
-      {/* Value — large, dominant */}
-      <div className="mt-auto">
-        <div className="text-[26px] font-semibold text-[var(--text-primary)] leading-none tracking-tight select-none">
+      {/* Value */}
+      <div className="mt-3">
+        <div
+          className="font-sans leading-none tracking-tight select-none"
+          style={{
+            fontSize: 24,
+            fontWeight: 600,
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.03em',
+          }}
+        >
           {value}
         </div>
 
-        {/* Subtext / trend */}
+        {/* Trend */}
         {trend && (
-          <span className={cn(
-            'inline-block mt-2 font-mono text-[11px] px-1.5 py-0.5 rounded select-none',
-            trend.positive
-              ? 'text-[var(--status-ready)] bg-[var(--status-ready)]/5'
-              : 'text-[var(--status-failed)] bg-[var(--status-failed)]/5'
-          )}>
+          <span
+            className="inline-block mt-1.5 font-mono text-[10px] px-1.5 py-0.5 rounded select-none"
+            style={{
+              color: trend.positive ? 'var(--status-ready)' : 'var(--status-failed)',
+              background: trend.positive ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)',
+            }}
+          >
             {trend.value}
           </span>
         )}
+
+        {/* Subtext */}
         {subtext && (
-          <div className="mt-2 text-[11px] font-mono text-[var(--text-tertiary)] select-none">
+          <div
+            className="mt-1.5 font-mono text-[10px] select-none"
+            style={{ color: 'var(--text-tertiary)' }}
+          >
             {subtext}
           </div>
         )}
       </div>
-
-      {/* Subtle corner accent — barely visible gradient */}
-      <div className="absolute top-0 right-0 w-16 h-16 rounded-bl-full
-                      bg-gradient-to-bl from-[rgba(255,255,255,0.012)] to-transparent
-                      pointer-events-none" />
-    </motion.div>
+    </div>
   );
 }

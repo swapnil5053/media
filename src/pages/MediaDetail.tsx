@@ -150,15 +150,27 @@ export default function MediaDetail() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!media || !confirm(`Delete ${media.filename}? This action cannot be undone.`)) return;
-    try {
-      await deleteMedia(media.id);
-      toast.success('Asset deleted');
-      navigate('/upload');
-    } catch {
-      toast.error('Failed to delete asset');
-    }
+  const handleDelete = () => {
+    if (!media) return;
+    toast(`Delete ${media.filename}?`, {
+      description: 'This action cannot be undone.',
+      action: {
+        label: 'Delete',
+        onClick: async () => {
+          try {
+            await deleteMedia(media.id);
+            toast.success('Asset deleted');
+            navigate('/upload');
+          } catch {
+            toast.error('Failed to delete asset');
+          }
+        }
+      },
+      cancel: {
+        label: 'Cancel',
+        onClick: () => {}
+      }
+    });
   };
 
   const handleDownloadVariant = async (name: string) => {

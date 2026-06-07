@@ -1,8 +1,10 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
-type StatusValue = 'pending' | 'analyzing' | 'transcoding' | 'ready' | 'failed' | 'active' | 'expired' | 'deactivated';
+type StatusValue =
+  | 'pending' | 'analyzing' | 'transcoding'
+  | 'ready' | 'failed'
+  | 'active' | 'expired' | 'deactivated';
 
 interface StatusBadgeProps {
   status: StatusValue;
@@ -10,39 +12,45 @@ interface StatusBadgeProps {
 }
 
 const config: Record<StatusValue, { label: string; color: string; pulse: boolean }> = {
-  pending:      { label: 'Pending',      color: 'var(--status-pending)',    pulse: false },
-  analyzing:    { label: 'Analyzing',    color: 'var(--status-processing)', pulse: true },
-  transcoding:  { label: 'Transcoding',  color: 'var(--status-processing)', pulse: true },
-  ready:        { label: 'Ready',        color: 'var(--status-ready)',      pulse: false },
-  failed:       { label: 'Failed',       color: 'var(--status-failed)',     pulse: false },
-  active:       { label: 'Active',       color: 'var(--status-ready)',      pulse: false },
-  expired:      { label: 'Expired',      color: 'var(--status-pending)',    pulse: false },
-  deactivated:  { label: 'Deactivated',  color: 'var(--status-failed)',     pulse: false },
+  pending:     { label: 'Pending',     color: '#71717A', pulse: false },
+  analyzing:   { label: 'Analyzing',   color: '#F59E0B', pulse: true  },
+  transcoding: { label: 'Transcoding', color: '#F59E0B', pulse: true  },
+  ready:       { label: 'Ready',       color: '#10B981', pulse: false },
+  failed:      { label: 'Failed',      color: '#EF4444', pulse: false },
+  active:      { label: 'Active',      color: '#10B981', pulse: false },
+  expired:     { label: 'Expired',     color: '#71717A', pulse: false },
+  deactivated: { label: 'Deactivated', color: '#EF4444', pulse: false },
 };
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
   const { label, color, pulse } = config[status] ?? config.pending;
 
   return (
-    <div className={cn(
-      'inline-flex items-center gap-1.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-full px-2 py-0.5',
-      className
-    )}>
-      <span className="relative flex h-1.5 w-1.5 items-center justify-center">
+    <span
+      className={cn('inline-flex items-center gap-1.5 select-none', className)}
+      style={{
+        background: 'var(--bg-elevated)',
+        border: '1px solid var(--border)',
+        borderRadius: 999,
+        padding: '2px 7px 2px 6px',
+      }}
+    >
+      {/* Dot */}
+      <span className="relative flex items-center justify-center" style={{ width: 6, height: 6 }}>
         {pulse && (
-          <motion.span
-            animate={{ scale: [1, 2, 1], opacity: [0.6, 0, 0.6] }}
-            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-            className="absolute inline-flex h-full w-full rounded-full"
-            style={{ backgroundColor: color }}
+          <span
+            className="absolute inset-0 rounded-full animate-ping"
+            style={{ background: color, opacity: 0.45, animationDuration: '1.8s' }}
           />
         )}
-        <span
-          className="relative inline-flex rounded-full h-1.5 w-1.5"
-          style={{ backgroundColor: color }}
-        />
+        <span className="relative rounded-full block" style={{ width: 5, height: 5, background: color }} />
       </span>
-      <span className="font-mono text-[11px] text-[var(--text-secondary)]">{label}</span>
-    </div>
+      <span
+        className="font-mono"
+        style={{ fontSize: 10, color: 'var(--text-secondary)', letterSpacing: '0.03em' }}
+      >
+        {label}
+      </span>
+    </span>
   );
 }
