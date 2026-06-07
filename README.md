@@ -9,8 +9,6 @@
 
 > Dashboard view showing media ingestion, processing workflows, secure sharing, and playback analytics.
 
----
-
   <br/>
 
 ![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat&logo=vite&logoColor=white)
