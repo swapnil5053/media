@@ -1,148 +1,230 @@
 # AdaptFlow
 
 <div align="center">
-  <h3>High-Performance Video Ingestion & Secure Edge Delivery Console</h3>
-  <p>A self-contained developer console for multi-format video ingestion, real-time encoding telemetry, compression diagnostics, and time-sensitive secure playback links.</p>
+  <h3>Video Processing & Secure Distribution Platform</h3>
+  <p>A full-stack application for exploring media workflows, secure content sharing, and analytics through a unified dashboard.</p>
 
-  [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat&logo=vite&logoColor=white)](https://vite.dev)
-  [![React](https://img.shields.io/badge/React-19.x-61DAFB.svg?style=flat&logo=react&logoColor=white)](https://react.dev)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+  <img src="https://img.shields.io/badge/Vite-6.x-646CFF.svg?style=flat&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-19.x-61DAFB.svg?style=flat&logo=react&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4.x-38B2AC.svg?style=flat&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?style=flat&logo=typescript&logoColor=white" />
 </div>
 
 ---
 
 ## Overview
 
-**AdaptFlow** is a professional video infrastructure console designed to manage, transcode, and securely distribute video assets across edge networks. Designed specifically for video engineering teams, it provides real-time encoding telemetry, compression diagnostics, time-sensitive streaming link builders, and system-wide bandwidth analytics in a modern, single-pane-of-glass dashboard.
+AdaptFlow is a full-stack media management platform that models the lifecycle of a video asset—from upload and processing to optimization, secure distribution, and playback analytics.
+
+The project was built to explore how modern video platforms organize media workflows, manage access-controlled content delivery, and surface operational insights through a developer-focused dashboard.
 
 ---
 
-## Core Features
+## Features
 
-### 🚀 Video Ingestion Pipeline
-Ingest multi-format files (MP4, MOV, MKV, AVI) through a state-driven processing pipeline. Telemetry covers:
-- **Analyzing**: Metadata extraction (resolution, codec, frame rate, duration).
-- **Transcoding**: Active compression & container conversions (e.g., standard to HEVC/H.265).
-- **Ready**: Instant playback ready via standard HLS streaming.
+### Media Library
 
-### ⚙️ Compression Telemetry & Optimization
-Track encoding efficiency with diagnostics including:
-- Dynamic HEVC/H.265 transcoding option reducing storage requirements by up to 75%.
-- Real-time bit-rate constraints advice and video attributes mapping.
+* Upload and manage video assets
+* Browse media through a centralized dashboard
+* View metadata including resolution, codec, bitrate, frame rate, and duration
+* Track processing states across the media lifecycle
 
-### 🔒 Secure Streaming Link Builder
-Build secure, access-controlled edge playback URLs with advanced validation controls:
-- **View Limits**: Automatic link deactivation after a threshold number of loads.
-- **Passwords**: Access protection requiring client-side password verification.
-- **Expiration Hours**: Automatic link expiration based on configured durations.
+### Processing & Optimization
 
-### 📊 Edge Analytics & Playback Telemetry
-Comprehensive viewer activity monitoring powered by high-performance data visualizations:
-- Total views and unique viewer tracking.
-- Average watch completion rate statistics.
-- Device segmentation breakdowns.
+* Simulate media processing workflows
+* Trigger video optimization jobs
+* Compare original and optimized file sizes
+* View compression statistics and codec information
 
-### 🔔 Event-Driven Notification Drawer
-Real-time alerts that pop out to notify developers of background uploads, completed transcoding operations, and security modifications.
+### Secure Sharing
 
----
+* Generate shareable playback links
+* Configure password protection
+* Set expiration windows
+* Limit the number of allowed views
+* Revoke links when no longer needed
 
-## Architecture & Technology Stack
+### Analytics
 
-The platform is designed to be self-contained and run on local or containerized environments:
+* Track total views and unique viewers
+* Monitor average completion rates
+* Explore device distribution metrics
+* View asset-level and platform-wide analytics
 
-- **Frontend**: Single Page Application built on **React 19**, **TypeScript 5**, and styled with **Tailwind CSS v4** and customized custom theme layouts.
-- **Charts**: High-fidelity data visualizations provided by `@tremor/react` for telemetry.
-- **Video Player**: Integrated **video.js** HTML5 player with a custom skin tailored for the dark mode console interface.
-- **Backend**: **Node.js Express** server providing mock REST API endpoints, streaming endpoints, and serving static assets in production mode.
-- **Build System**: Bundled and compiled down to ES Modules using `esbuild` for maximum execution speed.
+### Notifications
+
+* Event-driven notification center
+* Upload status updates
+* Optimization alerts
+* Share-link activity events
 
 ---
 
-## REST API Specification
+## Tech Stack
 
-AdaptFlow includes a robust mock backend API exposing endpoints for media management, sharing, and analytics:
+### Frontend
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `POST` | `/api/v1/upload` | Upload a raw video file (multipart/form-data) |
-| `GET` | `/api/v1/upload/:id/status` | Retrieve active ingestion/transcoding status and progress |
-| `GET` | `/api/v1/media` | List all ingested media items with metadata |
-| `GET` | `/api/v1/media/:id` | Get metadata details for a specific media item |
-| `DELETE` | `/api/v1/media/:id` | Delete a media item and all associated share links |
-| `GET` | `/api/v1/media/:id/stream` | Retrieve HLS stream URL for video playback |
-| `POST` | `/api/v1/media/:id/optimize` | Run H.265/HEVC optimization (reduces file size by 75%) |
-| `POST` | `/api/v1/media/:id/share` | Generate a new access-controlled secure share link |
-| `GET` | `/api/v1/media/:id/share-links` | List all secure share links created for the asset |
-| `GET` | `/s/:slug` | Resolve secure share link playback details (supports password verification) |
-| `DELETE` | `/api/v1/share/:slug` | Deactivate/revoke a secure share link |
-| `GET` | `/api/v1/media/:id/analytics` | Get total views, unique viewers, and completion rate analytics |
-| `POST` | `/api/v1/media/:id/playback-event` | Record playback telemetry and completion events |
+* React 19
+* TypeScript
+* Vite
+* Tailwind CSS v4
+* Framer Motion
+* React Router
+
+### Backend
+
+* Node.js
+* Express
+
+### Visualization
+
+* @tremor/react
+
+### Build Tools
+
+* Vite
+* esbuild
+
+---
+
+## Architecture
+
+```text
+React Frontend
+       │
+       ▼
+ Express REST API
+       │
+       ▼
+ In-Memory Data Store
+```
+
+The application uses seeded demo data and mock processing workflows to simulate a media management platform without requiring external cloud infrastructure.
+
+---
+
+## API Overview
+
+### Media
+
+| Method | Endpoint                   | Description               |
+| ------ | -------------------------- | ------------------------- |
+| GET    | /api/v1/media              | Retrieve all media assets |
+| GET    | /api/v1/media/:id          | Retrieve a single asset   |
+| POST   | /api/v1/upload             | Upload a media file       |
+| DELETE | /api/v1/media/:id          | Delete a media asset      |
+| POST   | /api/v1/media/:id/optimize | Run optimization workflow |
+
+### Sharing
+
+| Method | Endpoint                      | Description              |
+| ------ | ----------------------------- | ------------------------ |
+| POST   | /api/v1/media/:id/share       | Create a share link      |
+| GET    | /api/v1/media/:id/share-links | List share links         |
+| DELETE | /api/v1/share/:slug           | Revoke a share link      |
+| GET    | /s/:slug                      | Resolve playback details |
+
+### Analytics
+
+| Method | Endpoint                         | Description              |
+| ------ | -------------------------------- | ------------------------ |
+| GET    | /api/v1/media/:id/analytics      | Retrieve analytics       |
+| POST   | /api/v1/media/:id/playback-event | Record playback activity |
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-- **Node.js** (v20+ recommended)
-- **NPM** (v10+ recommended)
+
+* Node.js 20+
+* npm 10+
 
 ### Installation
-Clone the repository and install dependencies:
+
 ```bash
 git clone https://github.com/swapnil5053/media.git
 cd media
 npm install
 ```
 
-### Local Development
+### Run Locally
 
-1. **Build the assets**:
-   Compile the React frontend into static assets and bundle the Express server code:
-   ```bash
-   npm run build
-   ```
+Build the application:
 
-2. **Start the server**:
-   Start the Express server on port `8000`:
-   ```bash
-   npm run start
-   ```
+```bash
+npm run build
+```
 
-3. **Launch the console**:
-   Open your browser and navigate to `http://localhost:8000`.
+Start the server:
+
+```bash
+npm run start
+```
+
+Open:
+
+```text
+http://localhost:8000
+```
 
 ---
 
 ## Environment Variables
 
-Configure your local environment parameters by copying `.env.example` to `.env.local`:
+Create a `.env.local` file:
 
 ```env
-# Server Environment Configuration
 PORT=8000
-APP_URL="http://localhost:8000"
+APP_URL=http://localhost:8000
 
-# Client Environment Configuration
-VITE_API_BASE="http://localhost:8000/api/v1"
+VITE_API_BASE=http://localhost:8000/api/v1
 ```
 
 ---
 
 ## Project Structure
 
+```text
+src/
+├── api/
+├── components/
+├── hooks/
+├── layouts/
+├── pages/
+├── lib/
+├── main.tsx
+└── index.css
+
+server.ts
+vite.config.ts
 ```
-├── dist/                # Compiled frontend & backend assets
-├── src/
-│   ├── api/             # API client & endpoint integrations
-│   ├── components/      # React UI Primitives, layout, and pipeline components
-│   ├── hooks/           # Custom React hooks (e.g. useUpload)
-│   ├── lib/             # Helper utilities and styles
-│   ├── pages/           # Application views (Dashboard, Settings, Analytics)
-│   ├── index.css        # Main stylesheet (custom theme properties)
-│   └── main.tsx         # Application entry point
-├── server.ts            # Express server (API router & static asset serving)
-├── package.json         # Scripts and dependencies
-└── tsconfig.json        # TypeScript configuration
-```
+
+---
+
+## Learning Objectives
+
+This project was built to explore:
+
+* Full-stack application architecture
+* Media processing workflows
+* Secure content distribution patterns
+* Analytics dashboard design
+* REST API development
+* React and TypeScript application development
+
+---
+
+## Future Improvements
+
+Potential extensions include:
+
+* Persistent database storage
+* Background job processing
+* Object storage integration
+* Real transcoding pipelines
+* Role-based access control
+* Cloud deployment workflows
+
+---
+
