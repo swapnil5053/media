@@ -1,15 +1,10 @@
 # AdaptFlow
 
-<div align="center">
+<div>
   <h3>Video Processing & Secure Distribution Platform</h3>
   <p>A full-stack application for exploring media workflows, secure content sharing, and analytics through a unified dashboard.</p>
-
-  <img src="./image.png" alt="AdaptFlow Dashboard" width="100%" />
 </div>
 
-  <br/>
-
----
 
 ## Overview
 
