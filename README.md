@@ -5,7 +5,6 @@
   <p>A full-stack application for exploring media workflows, secure content sharing, and analytics through a unified dashboard.</p>
 </div>
 
-
 ## Overview
 
 AdaptFlow is a full-stack media management platform that models the lifecycle of a video asset—from upload and processing to optimization, secure distribution, and playback analytics.
@@ -137,8 +136,8 @@ The application uses seeded demo data and mock processing workflows to simulate 
 ### Installation
 
 ```bash
-git clone https://github.com/swapnil5053/media.git
-cd media
+git clone https://github.com/swapnil5053/AdaptFlow.git
+cd AdaptFlow
 npm install
 ```
 
