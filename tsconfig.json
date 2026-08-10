@@ -1,26 +1,31 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "experimentalDecorators": true,
-    "useDefineForClassFields": false,
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "allowJs": true,
     "jsx": "react-jsx",
+    "types": ["node", "vite/client"],
+
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+
+    "allowJs": false,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "noEmit": true,
+
+    "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "allowImportingTsExtensions": true,
-    "noEmit": true
-  }
+      "@/*": ["src/*"],
+      "@shared/*": ["shared/*"]
+    }
+  },
+  "include": ["src", "server", "shared", "tests", "vite.config.ts"]
 }

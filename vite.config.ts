@@ -1,34 +1,26 @@
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
-import path from 'path';
-import {defineConfig} from 'vite';
+import { fileURLToPath, URL } from "node:url";
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
-export default defineConfig(() => {
-  return {
-    plugins: [react(), tailwindcss()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, './src'),
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+      "@shared": fileURLToPath(new URL("./shared", import.meta.url)),
+    },
+  },
+  build: {
+    outDir: "dist/client",
+    emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          player: ["hls.js"],
+          charts: ["recharts"],
+        },
       },
     },
-    server: {
-      port: 5173,
-      host: '0.0.0.0',
-      proxy: {
-        '/api/v1': {
-          target: 'http://localhost:8000',
-          changeOrigin: true,
-        },
-        '/s/': {
-          target: 'http://localhost:8000',
-          changeOrigin: true,
-        },
-        '/uploads': {
-          target: 'http://localhost:8000',
-          changeOrigin: true,
-        },
-      },
-      hmr: true,
-    },
-  };
+  },
 });
