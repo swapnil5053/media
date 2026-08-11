@@ -76,6 +76,13 @@ export interface MediaSource {
   rotation: number;
 }
 
+export interface CaptionTrack {
+  id: string;
+  label: string;
+  language: string;
+  url: string;
+}
+
 export interface Media {
   id: string;
   title: string;
@@ -85,10 +92,14 @@ export interface Media {
   sizeBytes: number;
   deliverySizeBytes: number | null;
   hasHls: boolean;
+  hasStoryboard: boolean;
   posterUrl: string | null;
+  spriteUrl: string | null;
   source: MediaSource | null;
   wasConverted: boolean;
   compatibility: CompatibilityReport | null;
+  duplicateOf: { id: string; title: string } | null;
+  captions: CaptionTrack[];
   progress: number;
   createdAt: string;
   readyAt: string | null;
@@ -137,6 +148,64 @@ export interface WatchPayload {
   posterUrl: string | null;
   mp4Url: string;
   hlsUrl: string | null;
+  storyboardUrl: string | null;
+  captions: CaptionTrack[];
   durationSeconds: number;
   convertedFrom: string | null;
+}
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  prefix: string;
+  lastUsedAt: string | null;
+  createdAt: string;
+  /** Only present in the response that creates the key. */
+  token?: string;
+}
+
+export interface Webhook {
+  id: string;
+  url: string;
+  secret: string;
+  active: boolean;
+  createdAt: string;
+  deliveries: Array<{
+    id: string;
+    event: string;
+    statusCode: number | null;
+    ok: boolean;
+    attempts: number;
+    error: string | null;
+    createdAt: string;
+  }>;
+}
+
+export interface JobSummary {
+  id: string;
+  type: string;
+  mediaId: string | null;
+  status: string;
+  stage: string;
+  progress: number;
+  attempts: number;
+  maxAttempts: number;
+  error: string | null;
+  durationMs: number | null;
+  createdAt: string;
+}
+
+export interface SystemStatus {
+  queue: {
+    queued: number;
+    running: number;
+    failed: number;
+    completedToday: number;
+    averageDurationMs: number;
+    oldestQueuedSeconds: number;
+  };
+  workers: number;
+  uptimeSeconds: number;
+  counters: Record<string, number>;
+  jobs: JobSummary[];
 }

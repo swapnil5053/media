@@ -9,6 +9,11 @@ export const mediaPaths = {
   poster: (mediaId: string) => path.join(config.mediaDir, mediaId, "poster.jpg"),
   hlsDir: (mediaId: string) => path.join(config.mediaDir, mediaId, "hls"),
   hlsMaster: (mediaId: string) => path.join(config.mediaDir, mediaId, "hls", "master.m3u8"),
+  sprite: (mediaId: string) => path.join(config.mediaDir, mediaId, "sprite.jpg"),
+  storyboardVtt: (mediaId: string) => path.join(config.mediaDir, mediaId, "storyboard.vtt"),
+  captionsDir: (mediaId: string) => path.join(config.mediaDir, mediaId, "captions"),
+  caption: (mediaId: string, captionId: string) =>
+    path.join(config.mediaDir, mediaId, "captions", `${captionId}.vtt`),
 };
 
 export function findSourceFile(mediaId: string): string | null {

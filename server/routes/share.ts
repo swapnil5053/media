@@ -62,6 +62,8 @@ shareRouter.post("/:slug/open", openLimiter, validateBody(openSchema), async (re
     posterUrl: media.posterUrl ? `/api/stream/${mediaId}/poster.jpg` : null,
     mp4Url: `/api/stream/${mediaId}/video.mp4`,
     hlsUrl: media.hasHls ? `/api/stream/${mediaId}/hls/master.m3u8` : null,
+    storyboardUrl: media.hasStoryboard ? `/api/stream/${mediaId}/storyboard.vtt` : null,
+    captions: media.captions,
     durationSeconds: media.source?.durationSeconds ?? 0,
     convertedFrom: media.wasConverted && media.source ? codecLabel(media.source.videoCodec) : null,
   };

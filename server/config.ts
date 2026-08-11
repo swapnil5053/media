@@ -19,6 +19,8 @@ export const config = {
   dataDir,
   mediaDir: path.join(dataDir, "media"),
   databaseFile: path.join(dataDir, "adaptflow.db"),
+  /** Transcoding is CPU-bound, so the default leaves a core for the web server. */
+  workerConcurrency: Number(process.env.WORKER_CONCURRENCY ?? 2),
   sessionTtlDays: 30,
   /** How long a viewer keeps access to segment URLs after opening a share link. */
   watchTokenTtlSeconds: 60 * 60 * 4,

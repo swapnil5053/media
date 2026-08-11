@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { Router } from "express";
 import { forbidden, notFound } from "../lib/errors.js";
+import { param } from "../lib/params.js";
 import { mediaPaths, resolveInsideMediaDir } from "../media/storage.js";
 import { findMedia } from "../services/media-service.js";
 import { watchGrantFor } from "./stream-access.js";
@@ -11,6 +12,7 @@ const CONTENT_TYPES: Record<string, string> = {
   ".ts": "video/mp2t",
   ".mp4": "video/mp4",
   ".jpg": "image/jpeg",
+  ".vtt": "text/vtt",
 };
 
 export const streamRouter = Router();
@@ -36,21 +38,40 @@ function send(res: import("express").Response, filePath: string) {
 }
 
 streamRouter.get("/:mediaId/video.mp4", (req, res) => {
-  assertCanWatch(req, req.params.mediaId!);
-  send(res, mediaPaths.delivery(req.params.mediaId!));
+  const mediaId = param(req, "mediaId");
+  assertCanWatch(req, mediaId);
+  send(res, mediaPaths.delivery(mediaId));
 });
 
 streamRouter.get("/:mediaId/poster.jpg", (req, res) => {
-  assertCanWatch(req, req.params.mediaId!);
-  send(res, mediaPaths.poster(req.params.mediaId!));
+  const mediaId = param(req, "mediaId");
+  assertCanWatch(req, mediaId);
+  send(res, mediaPaths.poster(mediaId));
+});
+
+streamRouter.get("/:mediaId/sprite.jpg", (req, res) => {
+  const mediaId = param(req, "mediaId");
+  assertCanWatch(req, mediaId);
+  send(res, mediaPaths.sprite(mediaId));
+});
+
+streamRouter.get("/:mediaId/storyboard.vtt", (req, res) => {
+  const mediaId = param(req, "mediaId");
+  assertCanWatch(req, mediaId);
+  send(res, mediaPaths.storyboardVtt(mediaId));
+});
+
+streamRouter.get("/:mediaId/captions/:captionId.vtt", (req, res) => {
+  const mediaId = param(req, "mediaId");
+  assertCanWatch(req, mediaId);
+  send(res, mediaPaths.caption(mediaId, param(req, "captionId")));
 });
 
 streamRouter.get("/:mediaId/hls/*splat", (req, res) => {
-  const mediaId = req.params.mediaId!;
+  const mediaId = param(req, "mediaId");
   assertCanWatch(req, mediaId);
 
-  const requested = Array.isArray(req.params.splat) ? req.params.splat.join("/") : String(req.params.splat ?? "");
-  const resolved = resolveInsideMediaDir(mediaId, path.join("hls", requested));
+  const resolved = resolveInsideMediaDir(mediaId, path.join("hls", param(req, "splat")));
   if (!resolved) throw forbidden("That path is not allowed.");
 
   send(res, resolved);
