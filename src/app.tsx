@@ -13,6 +13,8 @@ import { Library } from "./pages/library";
 import { MediaDetail } from "./pages/media-detail";
 import { Settings } from "./pages/settings";
 import { Watch } from "./pages/watch";
+import { Embed } from "./pages/embed";
+import { System } from "./pages/system";
 import { NotFound } from "./pages/not-found";
 
 // The charting library is only needed on this one route, so it loads with it.
@@ -51,6 +53,7 @@ export function App() {
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/w/:slug" element={<Watch />} />
+            <Route path="/embed/:slug" element={<Embed />} />
 
             <Route
               path="/library"
@@ -75,6 +78,14 @@ export function App() {
                   <Suspense fallback={<Skeleton className="h-72 w-full" />}>
                     <Insights />
                   </Suspense>
+                </RequireAccount>
+              }
+            />
+            <Route
+              path="/system"
+              element={
+                <RequireAccount>
+                  <System />
                 </RequireAccount>
               }
             />

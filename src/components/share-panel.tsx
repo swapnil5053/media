@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Link2Off } from "lucide-react";
+import { Code2, Copy, Link2Off } from "lucide-react";
 import { toast } from "sonner";
 import type { ShareLink } from "@shared/types";
 import { formatDate } from "@/lib/format";
@@ -24,10 +24,18 @@ const STATUS_TONES = {
   exhausted: "caution",
 } as const;
 
+const embedSnippet = (slug: string) =>
+  `<iframe src="${window.location.origin}/embed/${slug}" width="720" height="405" frameborder="0" allow="fullscreen; picture-in-picture" allowfullscreen title="AdaptFlow video"></iframe>`;
+
 function LinkRow({ link, onRevoke }: { link: ShareLink; onRevoke: (slug: string) => void }) {
   async function copy() {
     await navigator.clipboard.writeText(link.url);
     toast.success("Link copied");
+  }
+
+  async function copyEmbed() {
+    await navigator.clipboard.writeText(embedSnippet(link.slug));
+    toast.success("Embed code copied", { description: "Paste it anywhere that accepts HTML." });
   }
 
   return (
@@ -48,6 +56,11 @@ function LinkRow({ link, onRevoke }: { link: ShareLink; onRevoke: (slug: string)
         <Button variant="ghost" size="sm" onClick={copy} aria-label="Copy link">
           <Copy size={15} aria-hidden />
         </Button>
+        {link.status === "active" ? (
+          <Button variant="ghost" size="sm" onClick={copyEmbed} aria-label="Copy embed code">
+            <Code2 size={15} aria-hidden />
+          </Button>
+        ) : null}
         {link.status === "active" ? (
           <Button variant="ghost" size="sm" onClick={() => onRevoke(link.slug)} aria-label="Turn off link">
             <Link2Off size={15} aria-hidden />

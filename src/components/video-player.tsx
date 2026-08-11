@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type { CaptionTrack } from "@shared/types";
 import { api } from "@/lib/api";
 
 const PROGRESS_INTERVAL_SECONDS = 15;
@@ -9,13 +10,14 @@ interface VideoPlayerProps {
   hlsUrl: string | null;
   posterUrl: string | null;
   title: string;
+  captions?: CaptionTrack[];
 }
 
 /**
  * Native controls on purpose: they are already accessible, they behave the way
  * each platform expects, and they cost nothing to download.
  */
-export function VideoPlayer({ mediaId, mp4Url, hlsUrl, posterUrl, title }: VideoPlayerProps) {
+export function VideoPlayer({ mediaId, mp4Url, hlsUrl, posterUrl, title, captions = [] }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const reported = useRef({ started: false, completed: false, lastProgressAt: 0 });
 
@@ -107,7 +109,19 @@ export function VideoPlayer({ mediaId, mp4Url, hlsUrl, posterUrl, title }: Video
       preload="metadata"
       poster={posterUrl ?? undefined}
       title={title}
+      crossOrigin="anonymous"
       className="aspect-video w-full rounded-card bg-black object-contain"
-    />
+    >
+      {captions.map((caption, index) => (
+        <track
+          key={caption.id}
+          kind="subtitles"
+          src={caption.url}
+          srcLang={caption.language}
+          label={caption.label}
+          default={index === 0}
+        />
+      ))}
+    </video>
   );
 }

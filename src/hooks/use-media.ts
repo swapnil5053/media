@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { Media } from "@shared/types";
+import type { CaptionTrack, JobSummary, Media } from "@shared/types";
 import { api } from "@/lib/api";
 import { accountKey } from "./use-account";
 
@@ -47,6 +47,48 @@ export function useDeleteMedia() {
       void queryClient.invalidateQueries({ queryKey: mediaKeys.all });
       void queryClient.invalidateQueries({ queryKey: accountKey });
     },
+  });
+}
+
+export function useCancelProcessing() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => api.post<void>(`/media/${id}/cancel`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: mediaKeys.all }),
+  });
+}
+
+export function useAddCaption(mediaId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { file: File; label: string; language: string }) => {
+      const formData = new FormData();
+      formData.append("file", input.file);
+      formData.append("label", input.label);
+      formData.append("language", input.language);
+      return api.upload<CaptionTrack>(`/media/${mediaId}/captions`, formData);
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: mediaKeys.detail(mediaId) }),
+  });
+}
+
+export function useDeleteCaption(mediaId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (captionId: string) => api.delete<void>(`/media/${mediaId}/captions/${captionId}`),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: mediaKeys.detail(mediaId) }),
+  });
+}
+
+export function useMediaJobs(mediaId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: ["media", mediaId, "jobs"],
+    queryFn: () => api.get<JobSummary[]>(`/media/${mediaId}/jobs`),
+    enabled,
+    refetchInterval: enabled ? 3_000 : false,
   });
 }
 

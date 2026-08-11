@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { PLANS, type PlanId } from "@shared/types";
 import { formatBytes, formatDate } from "@/lib/format";
 import { useAccount, useUpdateProfile } from "@/hooks/use-account";
+import { DeveloperPanel } from "@/components/developer-panel";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
@@ -120,6 +121,8 @@ export function Settings() {
           </div>
         </div>
       </Card>
+
+      <DeveloperPanel />
     </div>
   );
 }

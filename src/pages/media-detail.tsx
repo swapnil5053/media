@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft, Copy, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { formatBytes, formatDuration, formatPercent, formatResolution } from "@/lib/format";
-import { useDeleteMedia, useMedia, useRenameMedia } from "@/hooks/use-media";
+import { useCancelProcessing, useDeleteMedia, useMedia, useMediaJobs, useRenameMedia } from "@/hooks/use-media";
 import { useMediaAnalytics } from "@/hooks/use-sharing";
+import { CaptionsPanel } from "@/components/captions-panel";
 import { CompatibilityReport } from "@/components/compatibility-report";
+import { JobTimeline } from "@/components/job-timeline";
 import { SharePanel } from "@/components/share-panel";
 import { StatusBadge } from "@/components/media-card";
 import { VideoPlayer } from "@/components/video-player";
@@ -30,7 +32,11 @@ export function MediaDetail() {
   const analytics = useMediaAnalytics(id);
   const rename = useRenameMedia(id);
   const remove = useDeleteMedia();
+  const cancel = useCancelProcessing();
   const [title, setTitle] = useState<string | null>(null);
+
+  const processing = media.data ? media.data.status !== "ready" && media.data.status !== "failed" : false;
+  const jobs = useMediaJobs(id, Boolean(media.data));
 
   if (media.isPending) {
     return (
@@ -46,7 +52,6 @@ export function MediaDetail() {
   }
 
   const item = media.data;
-  const processing = item.status !== "ready" && item.status !== "failed";
 
   return (
     <div className="space-y-6">
@@ -57,23 +62,42 @@ export function MediaDetail() {
         </Link>
         <StatusBadge status={item.status} />
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ml-auto text-critical hover:bg-critical-soft"
-          onClick={() => {
-            if (!confirm(`Delete “${item.title}”? This cannot be undone.`)) return;
-            remove.mutate(item.id, {
-              onSuccess: () => {
-                toast.success("Video deleted");
-                navigate("/library");
-              },
-            });
-          }}
-        >
-          <Trash2 size={15} aria-hidden />
-          Delete
-        </Button>
+        <div className="ml-auto flex items-center gap-2">
+          {processing ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() =>
+                cancel.mutate(item.id, {
+                  onSuccess: () => {
+                    toast.success("Processing cancelled");
+                    navigate("/library");
+                  },
+                })
+              }
+            >
+              Cancel
+            </Button>
+          ) : null}
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-critical hover:bg-critical-soft"
+            onClick={() => {
+              if (!confirm(`Delete “${item.title}”? This cannot be undone.`)) return;
+              remove.mutate(item.id, {
+                onSuccess: () => {
+                  toast.success("Video deleted");
+                  navigate("/library");
+                },
+              });
+            }}
+          >
+            <Trash2 size={15} aria-hidden />
+            Delete
+          </Button>
+        </div>
       </div>
 
       <Input
@@ -86,6 +110,19 @@ export function MediaDetail() {
           rename.mutate(title.trim(), { onSuccess: () => setTitle(null) });
         }}
       />
+
+      {item.duplicateOf ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-card border border-caution/25 bg-caution-soft px-5 py-3.5">
+          <Copy size={16} className="text-caution" aria-hidden />
+          <p className="text-sm text-ink">
+            This looks like the same footage as{" "}
+            <Link to={`/library/${item.duplicateOf.id}`} className="font-medium underline">
+              {item.duplicateOf.title}
+            </Link>
+            . Matched by perceptual hash, so a re-encode or resize still counts.
+          </p>
+        </div>
+      ) : null}
 
       {item.status === "failed" ? (
         <ErrorState message={item.error ?? "This video could not be processed."} />
@@ -106,6 +143,7 @@ export function MediaDetail() {
           mp4Url={`/api/stream/${item.id}/video.mp4`}
           hlsUrl={item.hasHls ? `/api/stream/${item.id}/hls/master.m3u8` : null}
           posterUrl={item.posterUrl}
+          captions={item.captions}
         />
       )}
 
@@ -125,6 +163,7 @@ export function MediaDetail() {
               <SpecRow label="Uploaded size" value={formatBytes(item.sizeBytes)} />
               <SpecRow label="Delivered size" value={formatBytes(item.deliverySizeBytes ?? item.sizeBytes)} />
               <SpecRow label="Streaming" value={item.hasHls ? "Adaptive (HLS) + MP4" : "MP4"} />
+              <SpecRow label="Storyboard" value={item.hasStoryboard ? "25 frame sprite" : "not generated"} />
             </dl>
           </Card>
         ) : null}
@@ -141,10 +180,7 @@ export function MediaDetail() {
               <SpecRow label="Unique viewers" value={String(analytics.data.uniqueViewers)} />
               <SpecRow label="Average completion" value={formatPercent(analytics.data.averageCompletion)} />
               <SpecRow label="Watch time" value={formatDuration(analytics.data.totalWatchSeconds)} />
-              <SpecRow
-                label="Most common device"
-                value={analytics.data.devices[0]?.name ?? "Unknown"}
-              />
+              <SpecRow label="Most common device" value={analytics.data.devices[0]?.name ?? "Unknown"} />
             </dl>
           ) : (
             <p className="px-5 py-8 text-center text-[13px] text-muted">
@@ -154,6 +190,12 @@ export function MediaDetail() {
         </Card>
       </div>
 
+      <Card>
+        <CardHeader title="Processing history" description="Every stage this file went through, including retries." />
+        <JobTimeline jobs={jobs.data ?? []} />
+      </Card>
+
+      {item.status === "ready" ? <CaptionsPanel mediaId={item.id} captions={item.captions} /> : null}
       {item.status === "ready" ? <SharePanel mediaId={item.id} /> : null}
     </div>
   );

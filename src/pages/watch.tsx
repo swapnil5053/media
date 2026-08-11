@@ -99,6 +99,7 @@ export function Watch() {
               mp4Url={state.video.mp4Url}
               hlsUrl={state.video.hlsUrl}
               posterUrl={state.video.posterUrl}
+              captions={state.video.captions}
             />
             <div className="mt-4 flex flex-wrap items-baseline justify-between gap-2">
               <h1 className="text-lg font-semibold text-ink">{state.video.title}</h1>

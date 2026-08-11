@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, LibraryBig, LogOut, Moon, Settings2, Sun } from "lucide-react";
+import { Activity, BarChart3, LibraryBig, LogOut, Moon, Settings2, Sun } from "lucide-react";
 import type { Account } from "@shared/types";
 import { cn } from "@/lib/cn";
 import { useSignOut } from "@/hooks/use-account";
@@ -12,6 +12,7 @@ import { useTheme } from "./theme";
 const NAV = [
   { to: "/library", label: "Library", icon: LibraryBig },
   { to: "/insights", label: "Insights", icon: BarChart3 },
+  { to: "/system", label: "System", icon: Activity },
   { to: "/settings", label: "Settings", icon: Settings2 },
 ];
 

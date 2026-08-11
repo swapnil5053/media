@@ -1,5 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { Film, ShieldCheck } from "lucide-react";
+import { Copy, Film, ShieldCheck } from "lucide-react";
 import type { Media, MediaStatus } from "@shared/types";
 import { formatBytes, formatDuration, formatRelative } from "@/lib/format";
 import { Badge, Progress } from "./ui/feedback";
@@ -12,33 +13,84 @@ const STATUS_LABELS: Record<MediaStatus, string> = {
   failed: "Failed",
 };
 
+const SPRITE_COLUMNS = 5;
+const SPRITE_ROWS = 5;
+const FRAME_MS = 180;
+
 export function StatusBadge({ status }: { status: MediaStatus }) {
   if (status === "ready") return <Badge tone="positive">Ready</Badge>;
   if (status === "failed") return <Badge tone="critical">Failed</Badge>;
   return <Badge tone="caution">{STATUS_LABELS[status]}</Badge>;
 }
 
+/**
+ * Steps through the storyboard sprite while the pointer is over the card, which
+ * gives a moving preview without downloading any video.
+ */
+function StoryboardPreview({ spriteUrl, active }: { spriteUrl: string; active: boolean }) {
+  const [frame, setFrame] = useState(0);
+  const timer = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (!active) {
+      setFrame(0);
+      return;
+    }
+
+    timer.current = window.setInterval(() => {
+      setFrame((current) => (current + 1) % (SPRITE_COLUMNS * SPRITE_ROWS));
+    }, FRAME_MS);
+
+    return () => window.clearInterval(timer.current);
+  }, [active]);
+
+  const column = frame % SPRITE_COLUMNS;
+  const row = Math.floor(frame / SPRITE_COLUMNS);
+
+  return (
+    <div
+      aria-hidden
+      className="absolute inset-0 transition-opacity duration-150"
+      style={{
+        opacity: active ? 1 : 0,
+        backgroundImage: `url(${spriteUrl})`,
+        backgroundSize: `${SPRITE_COLUMNS * 100}% ${SPRITE_ROWS * 100}%`,
+        backgroundPosition: `${(column / (SPRITE_COLUMNS - 1)) * 100}% ${(row / (SPRITE_ROWS - 1)) * 100}%`,
+      }}
+    />
+  );
+}
+
 export function MediaCard({ media }: { media: Media }) {
+  const [hovering, setHovering] = useState(false);
   const processing = media.status !== "ready" && media.status !== "failed";
 
   return (
     <Link
       to={`/library/${media.id}`}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onFocus={() => setHovering(true)}
+      onBlur={() => setHovering(false)}
       className="group rounded-card border border-line bg-surface transition-colors duration-150 hover:border-line-strong"
     >
       <div className="relative aspect-video overflow-hidden rounded-t-[calc(var(--radius-card)-1px)] bg-sunken">
         {media.posterUrl ? (
-          <img
-            src={media.posterUrl}
-            alt=""
-            loading="lazy"
-            className="size-full object-cover transition-opacity duration-150 group-hover:opacity-95"
-          />
+          <img src={media.posterUrl} alt="" loading="lazy" className="size-full object-cover" />
         ) : (
           <div className="flex size-full items-center justify-center text-subtle">
             <Film size={22} aria-hidden />
           </div>
         )}
+
+        {media.spriteUrl ? <StoryboardPreview spriteUrl={media.spriteUrl} active={hovering} /> : null}
+
+        {media.duplicateOf ? (
+          <span className="absolute left-2 top-2 rounded bg-caution-soft px-1.5 py-0.5 text-[12px] font-medium text-caution">
+            <Copy size={11} className="mr-1 inline" aria-hidden />
+            Duplicate
+          </span>
+        ) : null}
 
         {media.source && media.status === "ready" ? (
           <span className="absolute bottom-2 right-2 rounded bg-black/70 px-1.5 py-0.5 font-mono text-[12px] text-white">
@@ -56,7 +108,9 @@ export function MediaCard({ media }: { media: Media }) {
         {processing ? (
           <div className="mt-3">
             <Progress value={media.progress} label={`Processing ${media.title}`} />
-            <p className="mt-1.5 text-[13px] text-muted">{STATUS_LABELS[media.status]} · {Math.round(media.progress * 100)}%</p>
+            <p className="mt-1.5 text-[13px] text-muted">
+              {STATUS_LABELS[media.status]} · {Math.round(media.progress * 100)}%
+            </p>
           </div>
         ) : (
           <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-muted">
