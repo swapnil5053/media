@@ -14,7 +14,7 @@ The fix is completely routine if you work with video, and completely invisible i
 
 ## What makes it more than a CRUD app
 
-**A compatibility engine, not a file converter.** Every upload is probed with `ffprobe` and evaluated against a matrix of real playback targets — Android Chrome, iPhone Safari, desktop Chrome/Edge, Firefox, macOS Safari, smart TVs — each with the container, video codec, audio codec and HDR support it can actually handle. The result is a score and a per-device explanation ("Cannot decode HEVC video"). A stock HEVC/MOV from an iPhone scores **33/100**; after conversion it scores **100/100**.
+**A compatibility engine, not a file converter.** Every upload is probed with `ffprobe` and evaluated against a matrix of real playback targets — Android Chrome, iPhone Safari, desktop Chrome/Edge, Firefox, macOS Safari, smart TVs — each with the container, video codec, audio codec and HDR support it can actually handle. The result is a score and a per-device explanation ("Cannot decode HEVC video"). A stock HEVC/MOV from an iPhone reaches **2 of 6** targets; after conversion it reaches **all 6**.
 
 **A durable job queue with a worker pool.** Jobs live in SQLite, not in memory. Workers claim rows inside a transaction so two of them can never take the same job, failures retry with exponential backoff and jitter, paid plans get a lower priority number so they are claimed first, cancellation propagates through an `AbortSignal` that kills the running ffmpeg process, and `SIGTERM` drains in-flight work before exit. Anything still marked running at boot is requeued, because the process that owned it no longer exists.
 
@@ -24,7 +24,7 @@ The fix is completely routine if you work with video, and completely invisible i
 
 **A platform, not just a UI.** Hashed API keys for programmatic upload (`Bearer af_live_…`), and outbound webhooks for `video.ready` / `video.failed` signed with a timestamped HMAC-SHA256 the receiver recomputes, delivered through the same retrying queue. API keys deliberately cannot touch account settings.
 
-**Observability that is actually wired up.** Prometheus metrics at `/api/system/metrics` (queue depth, job durations as a histogram, HTTP request counts), per-request IDs echoed in `X-Request-Id`, structured JSON logs, and a System page in the app showing live queue state and the retry history of every job.
+**Observability that is actually wired up.** Prometheus metrics at `/api/system/metrics` (queue depth, job durations as a histogram, HTTP request counts), per-request IDs echoed in `X-Request-Id`, structured JSON logs, and an Activity page in the app showing what is being prepared right now.
 
 ---
 
