@@ -22,7 +22,7 @@ function CurlExample({ token }: { token: string }) {
   -F "file=@holiday.mov"`;
 
   return (
-    <pre className="mt-3 overflow-x-auto rounded-lg bg-sunken p-3 font-mono text-[12.5px] leading-relaxed text-ink">
+    <pre className="mt-3 overflow-x-auto rounded-lg bg-raised p-3 font-mono text-[12.5px] leading-relaxed text-ink">
       {snippet}
     </pre>
   );
@@ -74,7 +74,7 @@ export function DeveloperPanel() {
         <div className="px-5 py-4">
           <div className="flex flex-wrap items-end gap-3">
             <div className="min-w-48 flex-1">
-              <label className="field-label" htmlFor="key-name">
+              <label className="mb-2 block text-[13px] text-muted" htmlFor="key-name">
                 Key name
               </label>
               <Input
@@ -100,7 +100,7 @@ export function DeveloperPanel() {
           </div>
 
           {freshToken ? (
-            <div className="mt-4 rounded-lg border border-accent/25 bg-accent-soft p-4">
+            <div className="mt-4 rounded-lg border border-line-strong/25 bg-raised p-4">
               <div className="flex items-center gap-2">
                 <p className="text-[13px] font-medium text-ink">Copy this now — it will not be shown again.</p>
                 <Button
@@ -171,7 +171,7 @@ export function DeveloperPanel() {
 
         <div className="flex flex-wrap items-end gap-3 px-5 py-4">
           <div className="min-w-48 flex-1">
-            <label className="field-label" htmlFor="webhook-url">
+            <label className="mb-2 block text-[13px] text-muted" htmlFor="webhook-url">
               Endpoint URL
             </label>
             <Input

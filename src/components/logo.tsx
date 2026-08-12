@@ -7,7 +7,7 @@ export function Logo({ to = "/" }: { to?: string }) {
         <rect x="0.75" y="3.75" width="12.5" height="12.5" rx="3.25" stroke="currentColor" strokeWidth="1.5" />
         <path
           d="M13.25 7.5H16.25C17.6307 7.5 18.75 8.61929 18.75 10V13.75C18.75 15.1307 17.6307 16.25 16.25 16.25H13.25"
-          stroke="var(--accent)"
+          stroke="var(--positive)"
           strokeWidth="1.5"
           strokeLinecap="round"
         />

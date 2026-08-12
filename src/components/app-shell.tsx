@@ -12,7 +12,7 @@ import { useTheme } from "./theme";
 const NAV = [
   { to: "/library", label: "Library", icon: LibraryBig },
   { to: "/insights", label: "Insights", icon: BarChart3 },
-  { to: "/system", label: "System", icon: Activity },
+  { to: "/system", label: "Activity", icon: Activity },
   { to: "/settings", label: "Settings", icon: Settings2 },
 ];
 
@@ -24,8 +24,8 @@ export function AppShell({ account, children }: { account: Account; children: Re
   usePipelineEvents(true);
 
   return (
-    <div className="min-h-dvh bg-canvas">
-      <header className="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur">
+    <div className="min-h-dvh bg-backdrop">
+      <header className="sticky top-0 z-20 border-b border-line bg-backdrop/85 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center gap-6 px-4 sm:px-6">
           <Logo to="/library" />
 
@@ -37,7 +37,7 @@ export function AppShell({ account, children }: { account: Account; children: Re
                 className={({ isActive }) =>
                   cn(
                     "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition-colors duration-150 sm:px-3",
-                    isActive ? "bg-sunken text-ink" : "text-muted hover:text-ink",
+                    isActive ? "bg-raised text-ink" : "text-muted hover:text-ink",
                   )
                 }
               >

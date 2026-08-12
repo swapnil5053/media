@@ -42,7 +42,7 @@ The fix is completely routine if you work with video, and completely invisible i
 
 ## Screens
 
-`/` landing · `/library` uploads and grid · `/library/:id` player, compatibility report, captions, job history, sharing · `/insights` analytics · `/system` queue and metrics · `/settings` profile, plan, API keys, webhooks · `/w/:slug` public viewer · `/embed/:slug` iframe
+`/` landing · `/library` uploads and grid · `/library/:id` player, compatibility report, captions, job history, sharing · `/insights` analytics · `/system` activity · `/settings` profile, plan, API keys, webhooks · `/w/:slug` public viewer · `/embed/:slug` iframe
 
 ---
 

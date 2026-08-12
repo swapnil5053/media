@@ -28,7 +28,7 @@ export function SignUp() {
       footer={
         <>
           Already have one?{" "}
-          <Link to="/signin" className="text-accent hover:underline">
+          <Link to="/signin" className="text-positive hover:underline">
             Sign in
           </Link>
         </>

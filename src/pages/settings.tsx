@@ -14,9 +14,9 @@ function UsageBar({ used, limit }: { used: number; limit: number }) {
 
   return (
     <div>
-      <div className="h-2 overflow-hidden rounded-full bg-sunken">
+      <div className="h-2 overflow-hidden rounded-full bg-raised">
         <div
-          className={`h-full rounded-full ${fraction > 0.9 ? "bg-critical" : "bg-accent"}`}
+          className={`h-full rounded-full ${fraction > 0.9 ? "bg-critical" : "bg-invert"}`}
           style={{ width: `${fraction * 100}%` }}
         />
       </div>
@@ -51,7 +51,7 @@ export function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="display text-3xl">Settings</h1>
+        <h1 className="text-3xl">Settings</h1>
         <p className="mt-1 text-sm text-muted">Member since {formatDate(account.createdAt)}.</p>
       </div>
 
@@ -78,16 +78,16 @@ export function Settings() {
       <Card>
         <CardHeader
           title="Plan and usage"
-          action={<Badge tone="accent">{plan.name}</Badge>}
+          action={<Badge tone="positive">{plan.name}</Badge>}
         />
         <div className="space-y-5 px-5 py-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <p className="field-label">Storage</p>
+              <p className="mb-2 block text-[13px] text-muted">Storage</p>
               <UsageBar used={account.usage.storageBytes} limit={plan.maxStorageBytes} />
             </div>
             <div>
-              <p className="field-label">Videos</p>
+              <p className="mb-2 block text-[13px] text-muted">Videos</p>
               <UsageBar used={account.usage.videos} limit={plan.maxVideos} />
             </div>
           </div>
@@ -97,7 +97,7 @@ export function Settings() {
               <div
                 key={option.id}
                 className={`rounded-lg border p-4 ${
-                  option.id === account.plan ? "border-accent bg-accent-soft" : "border-line"
+                  option.id === account.plan ? "border-line-strong bg-raised" : "border-line"
                 }`}
               >
                 <div className="flex items-baseline justify-between">

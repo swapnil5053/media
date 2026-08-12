@@ -7,7 +7,7 @@ function Row({ label, supported, reason }: { label: string; supported: boolean; 
     <li className="flex items-start gap-2.5 py-1.5">
       <span
         className={`mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-full ${
-          supported ? "bg-positive-soft text-positive" : "bg-critical-soft text-critical"
+          supported ? "bg-positive/10 text-positive" : "bg-critical/10 text-critical"
         }`}
       >
         {supported ? <Check size={11} aria-hidden /> : <X size={11} aria-hidden />}
@@ -35,12 +35,15 @@ export function CompatibilityReport({ report, wasConverted }: { report: Report; 
       </div>
 
       <div className="grid gap-px bg-line sm:grid-cols-2">
-        <div className="bg-surface px-5 py-4">
+        <div className="bg-panel px-5 py-4">
           <p className="text-[13px] font-medium text-muted">You uploaded</p>
           <p className="mt-1 font-mono text-[13px] text-ink">{report.sourceLabel}</p>
           <p className="mt-2 text-2xl font-semibold tabular-nums text-ink">
-            {report.sourceScore}
-            <span className="text-base font-normal text-muted"> / 100 devices</span>
+            {report.sourceScore}%
+            <span className="text-base font-normal text-muted"> of devices</span>
+          </p>
+          <p className="text-[13px] text-muted">
+            {report.targets.length - blocked.length} of {report.targets.length} play it natively
           </p>
           <ul className="mt-3">
             {report.targets.map((target) => (
@@ -49,12 +52,15 @@ export function CompatibilityReport({ report, wasConverted }: { report: Report; 
           </ul>
         </div>
 
-        <div className="bg-surface px-5 py-4">
+        <div className="bg-panel px-5 py-4">
           <p className="text-[13px] font-medium text-muted">We deliver</p>
           <p className="mt-1 font-mono text-[13px] text-ink">{report.deliveryLabel}</p>
           <p className="mt-2 text-2xl font-semibold tabular-nums text-positive">
-            {report.deliveryScore}
-            <span className="text-base font-normal text-muted"> / 100 devices</span>
+            {report.deliveryScore}%
+            <span className="text-base font-normal text-muted"> of devices</span>
+          </p>
+          <p className="text-[13px] text-muted">
+            {report.targets.length} of {report.targets.length} play it natively
           </p>
           <p className="mt-3 text-[13px] text-muted">
             {wasConverted

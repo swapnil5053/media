@@ -39,11 +39,11 @@ export function UploadPanel({ storageHint }: { storageHint: string }) {
       onDragLeave={() => setDragging(false)}
       onDrop={onDrop}
       className={`rounded-card border border-dashed px-5 py-6 transition-colors duration-150 ${
-        isDragging ? "border-accent bg-accent-soft" : "border-line bg-surface"
+        isDragging ? "border-line-strong bg-raised" : "border-line bg-panel"
       }`}
     >
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-sunken text-muted">
+        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-raised text-muted">
           <UploadCloud size={18} aria-hidden />
         </div>
 

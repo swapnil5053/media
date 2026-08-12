@@ -44,13 +44,13 @@ export function CaptionsPanel({ mediaId, captions }: { mediaId: string; captions
 
       <div className="flex flex-wrap items-end gap-3 px-5 py-4">
         <div className="w-32">
-          <label className="field-label" htmlFor="caption-label">
+          <label className="mb-2 block text-[13px] text-muted" htmlFor="caption-label">
             Label
           </label>
           <Input id="caption-label" value={label} onChange={(event) => setLabel(event.target.value)} />
         </div>
         <div className="w-20">
-          <label className="field-label" htmlFor="caption-language">
+          <label className="mb-2 block text-[13px] text-muted" htmlFor="caption-language">
             Code
           </label>
           <Input id="caption-language" value={language} onChange={(event) => setLanguage(event.target.value)} />

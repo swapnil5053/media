@@ -1,5 +1,5 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { BarChart3 } from "lucide-react";
+
 import { formatDuration, formatPercent } from "@/lib/format";
 import { useOverview } from "@/hooks/use-sharing";
 import { Card, CardHeader, Stat } from "@/components/ui/card";
@@ -27,13 +27,12 @@ export function Insights() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="display text-3xl">Insights</h1>
+        <h1 className="text-3xl">Insights</h1>
         <p className="mt-1 text-sm text-muted">Everything here comes from real plays — nothing is estimated.</p>
       </div>
 
       {data.totalViews === 0 ? (
         <EmptyState
-          icon={<BarChart3 size={20} aria-hidden />}
           title="No plays yet"
           description="Share a video and come back. Views, devices and completion rates appear as people watch."
         />
@@ -55,16 +54,16 @@ export function Insights() {
                   <XAxis dataKey="label" tickLine={false} axisLine={false} tick={AXIS} />
                   <YAxis allowDecimals={false} tickLine={false} axisLine={false} tick={AXIS} />
                   <Tooltip
-                    cursor={{ fill: "var(--surface-sunken)" }}
+                    cursor={{ fill: "var(--raised)" }}
                     contentStyle={{
-                      background: "var(--surface)",
+                      background: "var(--panel)",
                       border: "1px solid var(--line)",
                       borderRadius: 8,
                       fontSize: 13,
                       color: "var(--ink)",
                     }}
                   />
-                  <Bar dataKey="views" fill="var(--accent)" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                  <Bar dataKey="views" fill="var(--positive)" radius={[4, 4, 0, 0]} maxBarSize={40} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -78,8 +77,8 @@ export function Insights() {
                 return (
                   <li key={device.name} className="flex items-center gap-4 px-5 py-3">
                     <span className="w-32 shrink-0 text-sm text-ink">{device.name}</span>
-                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-sunken">
-                      <span className="block h-full rounded-full bg-accent" style={{ width: `${share * 100}%` }} />
+                    <span className="h-2 flex-1 overflow-hidden rounded-full bg-raised">
+                      <span className="block h-full rounded-full bg-invert" style={{ width: `${share * 100}%` }} />
                     </span>
                     <span className="w-16 shrink-0 text-right font-mono text-[13px] text-muted">
                       {device.views} · {formatPercent(share)}

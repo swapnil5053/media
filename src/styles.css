@@ -1,97 +1,95 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant light (&:where(.light, .light *));
 
 /*
   Two tiers: raw values live here, components only ever use the semantic names
-  below. Dark mode is the same set of names pointing at different values.
+  in @theme below. Light mode is the same names pointing at different values.
 */
 :root {
-  --canvas: oklch(0.99 0.003 90);
-  --surface: oklch(1 0 0);
-  --surface-sunken: oklch(0.975 0.004 90);
-  --line: oklch(0.915 0.005 90);
-  --line-strong: oklch(0.85 0.007 90);
+  --backdrop: #0a0a0a;
+  --panel: #141414;
+  --raised: #1c1c1c;
+  --sunken: #101010;
+  --line: rgb(255 255 255 / 0.09);
+  --line-strong: rgb(255 255 255 / 0.18);
 
-  --ink: oklch(0.24 0.012 60);
-  --ink-muted: oklch(0.52 0.012 60);
-  --ink-subtle: oklch(0.66 0.01 60);
-  --on-accent: oklch(0.99 0 0);
+  --ink: #fafafa;
+  --muted: rgb(250 250 250 / 0.62);
+  --subtle: rgb(250 250 250 / 0.4);
+  --on-invert: #0a0a0a;
+  --invert: #fafafa;
 
-  --accent: oklch(0.5 0.15 262);
-  --accent-hover: oklch(0.44 0.15 262);
-  --accent-soft: oklch(0.955 0.025 262);
+  --positive: #c9f2da;
+  --positive-ink: #0a0a0a;
+  --caution: #f0d9a8;
+  --critical: #f2b8b8;
 
-  --positive: oklch(0.55 0.13 155);
-  --positive-soft: oklch(0.955 0.04 155);
-  --caution: oklch(0.62 0.13 70);
-  --caution-soft: oklch(0.96 0.05 70);
-  --critical: oklch(0.55 0.19 25);
-  --critical-soft: oklch(0.96 0.04 25);
+  --mesh-mint: #c9f2da;
+  --mesh-seafoam: #dff3d4;
+  --mesh-citron: #f0f0be;
+  --mesh-sand: #f7e6c8;
+  --mesh-blush: #f3d3e2;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.dark {
-  --canvas: oklch(0.19 0.008 265);
-  --surface: oklch(0.23 0.009 265);
-  --surface-sunken: oklch(0.21 0.008 265);
-  --line: oklch(0.31 0.011 265);
-  --line-strong: oklch(0.4 0.014 265);
+.light {
+  --backdrop: #eceae5;
+  --panel: #f4f4f1;
+  --raised: #ffffff;
+  --sunken: #e9e8e3;
+  --line: rgb(14 14 14 / 0.1);
+  --line-strong: rgb(14 14 14 / 0.22);
 
-  --ink: oklch(0.96 0.004 265);
-  --ink-muted: oklch(0.73 0.011 265);
-  --ink-subtle: oklch(0.58 0.012 265);
-  --on-accent: oklch(0.99 0 0);
+  --ink: #0e0e0e;
+  --muted: rgb(14 14 14 / 0.62);
+  --subtle: rgb(14 14 14 / 0.42);
+  --on-invert: #fafafa;
+  --invert: #0e0e0e;
 
-  --accent: oklch(0.66 0.15 262);
-  --accent-hover: oklch(0.73 0.14 262);
-  --accent-soft: oklch(0.3 0.06 262);
-
-  --positive: oklch(0.72 0.14 155);
-  --positive-soft: oklch(0.29 0.05 155);
-  --caution: oklch(0.78 0.13 70);
-  --caution-soft: oklch(0.3 0.05 70);
-  --critical: oklch(0.68 0.17 25);
-  --critical-soft: oklch(0.3 0.07 25);
+  --positive: #1f7a4d;
+  --positive-ink: #ffffff;
+  --caution: #8a6318;
+  --critical: #a33232;
 }
 
 @theme inline {
-  --color-canvas: var(--canvas);
-  --color-surface: var(--surface);
-  --color-sunken: var(--surface-sunken);
+  --color-backdrop: var(--backdrop);
+  --color-panel: var(--panel);
+  --color-raised: var(--raised);
+  --color-sunken: var(--sunken);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
 
   --color-ink: var(--ink);
-  --color-muted: var(--ink-muted);
-  --color-subtle: var(--ink-subtle);
-  --color-on-accent: var(--on-accent);
-
-  --color-accent: var(--accent);
-  --color-accent-hover: var(--accent-hover);
-  --color-accent-soft: var(--accent-soft);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-invert: var(--invert);
+  --color-on-invert: var(--on-invert);
 
   --color-positive: var(--positive);
-  --color-positive-soft: var(--positive-soft);
+  --color-positive-ink: var(--positive-ink);
   --color-caution: var(--caution);
-  --color-caution-soft: var(--caution-soft);
   --color-critical: var(--critical);
-  --color-critical-soft: var(--critical-soft);
 
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif;
-  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-sans: Switzer, "General Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 
-  --radius-card: 0.75rem;
+  --radius-panel: 1.75rem;
+  --radius-mega: 3rem;
+  --radius-card: 1.25rem;
+  --radius-tile: 0.625rem;
 }
 
 @layer base {
   html {
     -webkit-text-size-adjust: 100%;
+    background-color: var(--backdrop);
   }
 
   body {
-    background-color: var(--canvas);
+    background-color: var(--backdrop);
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 15px;
@@ -100,58 +98,109 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--ink);
     outline-offset: 2px;
-    border-radius: 2px;
+    border-radius: 3px;
   }
 
   ::selection {
-    background: var(--accent-soft);
+    background: var(--positive);
+    color: var(--positive-ink);
   }
 
   h1,
   h2,
   h3 {
     text-wrap: balance;
+    letter-spacing: -0.025em;
+    font-weight: 500;
   }
 }
 
 @layer components {
-  .display {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: -0.01em;
-    line-height: 1.08;
+  /* The gradient mesh behind every light section. */
+  .mesh {
+    background:
+      radial-gradient(60% 80% at 12% 20%, var(--mesh-mint) 0%, transparent 65%),
+      radial-gradient(55% 70% at 78% 12%, var(--mesh-citron) 0%, transparent 62%),
+      radial-gradient(70% 90% at 88% 82%, var(--mesh-blush) 0%, transparent 68%),
+      radial-gradient(50% 60% at 30% 95%, var(--mesh-sand) 0%, transparent 60%),
+      radial-gradient(45% 55% at 55% 45%, var(--mesh-seafoam) 0%, transparent 60%),
+      #f4f4f1;
   }
 
-  .field-label {
-    display: block;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    color: var(--ink-muted);
-    margin-bottom: 0.375rem;
+  /* 3% noise stops the mesh banding on wide displays. */
+  .mesh::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .rule {
+    position: relative;
+  }
+
+  /* The vertical hairline that marks a header column boundary. */
+  .rule::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: -2.5rem;
+    bottom: -2.5rem;
+    width: 1px;
+    background: var(--line);
   }
 }
 
-/* One entrance per route change, and nothing else moves on its own. */
 @keyframes enter {
   from {
     opacity: 0;
-    transform: translateY(4px);
+    transform: translateY(6px);
+  }
+}
+
+/* The hero river's ambient movement. Transform only, so it stays off the main thread. */
+@keyframes drift {
+  from {
+    transform: translate3d(-2%, 1.5%, 0);
+  }
+  to {
+    transform: translate3d(2%, -1.5%, 0);
+  }
+}
+
+.drift {
+  animation: drift 36s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+/* Each marketing section is a rounded panel sitting on the backdrop. */
+.panel-section {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-panel);
+  margin-inline: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .panel-section {
+    margin-inline: 1rem;
   }
 }
 
 .page-enter {
-  animation: enter 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: enter 260ms var(--ease);
 }
 
-/* Landing sections settle in as they are scrolled to; disabled if unwanted. */
 .reveal {
   opacity: 0;
-  transform: translateY(14px);
+  transform: translateY(20px);
   transition:
-    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 500ms cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 600ms var(--ease),
+    transform 600ms var(--ease);
 }
 
 .reveal[data-visible="true"] {
@@ -164,6 +213,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 

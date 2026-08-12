@@ -14,14 +14,14 @@ export function AuthCard({
   footer: ReactNode;
 }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex min-h-dvh flex-col bg-backdrop">
       <header className="border-b border-line px-6 py-4">
         <Logo />
       </header>
 
       <main className="page-enter flex flex-1 items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          <h1 className="display text-3xl">{title}</h1>
+          <h1 className="text-3xl">{title}</h1>
           <p className="mt-1.5 text-sm text-muted">{subtitle}</p>
 
           <div className="mt-7 space-y-4">{children}</div>

@@ -27,7 +27,7 @@ export function SignIn() {
       footer={
         <>
           New here?{" "}
-          <Link to="/signup" className="text-accent hover:underline">
+          <Link to="/signup" className="text-positive hover:underline">
             Create an account
           </Link>
         </>

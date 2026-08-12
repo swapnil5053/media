@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Film, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { PLANS } from "@shared/types";
 import { formatBytes } from "@/lib/format";
 import { useAccount } from "@/hooks/use-account";
@@ -29,7 +29,7 @@ export function Library() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="display text-3xl">Your library</h1>
+        <h1 className="text-3xl">Your library</h1>
         <p className="mt-1 text-sm text-muted">
           {account ? `${remaining} of ${plan.maxVideos} uploads left on ${plan.name}.` : ""}
         </p>
@@ -78,13 +78,11 @@ export function Library() {
           <ErrorState message="We could not load your library." onRetry={() => void media.refetch()} />
         ) : filtered.length === 0 && query ? (
           <EmptyState
-            icon={<Search size={20} aria-hidden />}
             title={`Nothing matches “${query}”`}
             description="Try a different word, or clear the search to see everything."
           />
         ) : filtered.length === 0 ? (
           <EmptyState
-            icon={<Film size={20} aria-hidden />}
             title="No videos yet"
             description="Upload the video that would not open on someone else's phone. We will make it play."
           />

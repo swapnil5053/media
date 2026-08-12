@@ -83,7 +83,7 @@ export function MediaDetail() {
           <Button
             variant="ghost"
             size="sm"
-            className="text-critical hover:bg-critical-soft"
+            className="text-critical hover:bg-critical/10"
             onClick={() => {
               if (!confirm(`Delete “${item.title}”? This cannot be undone.`)) return;
               remove.mutate(item.id, {
@@ -112,14 +112,14 @@ export function MediaDetail() {
       />
 
       {item.duplicateOf ? (
-        <div className="flex flex-wrap items-center gap-3 rounded-card border border-caution/25 bg-caution-soft px-5 py-3.5">
+        <div className="flex flex-wrap items-center gap-3 rounded-card border border-caution/25 bg-caution/10 px-5 py-3.5">
           <Copy size={16} className="text-caution" aria-hidden />
           <p className="text-sm text-ink">
             This looks like the same footage as{" "}
             <Link to={`/library/${item.duplicateOf.id}`} className="font-medium underline">
               {item.duplicateOf.title}
             </Link>
-            . Matched by perceptual hash, so a re-encode or resize still counts.
+            . You can delete this copy if you do not need both.
           </p>
         </div>
       ) : null}
@@ -162,8 +162,8 @@ export function MediaDetail() {
               <SpecRow label="Frame rate" value={`${item.source.fps} fps`} />
               <SpecRow label="Uploaded size" value={formatBytes(item.sizeBytes)} />
               <SpecRow label="Delivered size" value={formatBytes(item.deliverySizeBytes ?? item.sizeBytes)} />
-              <SpecRow label="Streaming" value={item.hasHls ? "Adaptive (HLS) + MP4" : "MP4"} />
-              <SpecRow label="Storyboard" value={item.hasStoryboard ? "25 frame sprite" : "not generated"} />
+              <SpecRow label="Playback" value={item.hasHls ? "Adapts to the viewer’s connection" : "Standard"} />
+              
             </dl>
           </Card>
         ) : null}
@@ -191,7 +191,7 @@ export function MediaDetail() {
       </div>
 
       <Card>
-        <CardHeader title="Processing history" description="Every stage this file went through, including retries." />
+        <CardHeader title="Activity" description="What happened while this video was prepared." />
         <JobTimeline jobs={jobs.data ?? []} />
       </Card>
 

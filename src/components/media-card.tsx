@@ -72,9 +72,9 @@ export function MediaCard({ media }: { media: Media }) {
       onMouseLeave={() => setHovering(false)}
       onFocus={() => setHovering(true)}
       onBlur={() => setHovering(false)}
-      className="group rounded-card border border-line bg-surface transition-colors duration-150 hover:border-line-strong"
+      className="group rounded-card border border-line bg-panel transition-colors duration-150 hover:border-line-strong"
     >
-      <div className="relative aspect-video overflow-hidden rounded-t-[calc(var(--radius-card)-1px)] bg-sunken">
+      <div className="relative aspect-video overflow-hidden rounded-t-[calc(var(--radius-card)-1px)] bg-raised">
         {media.posterUrl ? (
           <img src={media.posterUrl} alt="" loading="lazy" className="size-full object-cover" />
         ) : (
@@ -86,7 +86,7 @@ export function MediaCard({ media }: { media: Media }) {
         {media.spriteUrl ? <StoryboardPreview spriteUrl={media.spriteUrl} active={hovering} /> : null}
 
         {media.duplicateOf ? (
-          <span className="absolute left-2 top-2 rounded bg-caution-soft px-1.5 py-0.5 text-[12px] font-medium text-caution">
+          <span className="absolute left-2 top-2 rounded bg-caution/10 px-1.5 py-0.5 text-[12px] font-medium text-caution">
             <Copy size={11} className="mr-1 inline" aria-hidden />
             Duplicate
           </span>
@@ -132,11 +132,11 @@ export function MediaCard({ media }: { media: Media }) {
 
 export function MediaCardSkeleton() {
   return (
-    <div className="rounded-card border border-line bg-surface">
-      <div className="aspect-video animate-pulse rounded-t-[calc(var(--radius-card)-1px)] bg-sunken" />
+    <div className="rounded-card border border-line bg-panel">
+      <div className="aspect-video animate-pulse rounded-t-[calc(var(--radius-card)-1px)] bg-raised" />
       <div className="space-y-2 p-4">
-        <div className="h-4 w-3/5 animate-pulse rounded bg-sunken" />
-        <div className="h-3 w-2/5 animate-pulse rounded bg-sunken" />
+        <div className="h-4 w-3/5 animate-pulse rounded bg-raised" />
+        <div className="h-3 w-2/5 animate-pulse rounded bg-raised" />
       </div>
     </div>
   );

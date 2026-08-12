@@ -48,7 +48,7 @@ export function Watch() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-canvas">
+    <div className="flex min-h-dvh flex-col bg-backdrop">
       <header className="border-b border-line px-6 py-4">
         <Logo />
       </header>
@@ -58,10 +58,10 @@ export function Watch() {
 
         {state.kind === "password" ? (
           <form onSubmit={submitPassword} className="mx-auto w-full max-w-sm text-center">
-            <div className="mx-auto mb-4 flex size-11 items-center justify-center rounded-full bg-sunken text-muted">
+            <div className="mx-auto mb-4 flex size-11 items-center justify-center rounded-full bg-raised text-muted">
               <Lock size={18} aria-hidden />
             </div>
-            <h1 className="display text-2xl">This video is protected</h1>
+            <h1 className="text-2xl">This video is protected</h1>
             <p className="mt-1.5 text-sm text-muted">Enter the password you were given.</p>
 
             <div className="mt-6 text-left">
@@ -86,7 +86,7 @@ export function Watch() {
 
         {state.kind === "error" ? (
           <div className="mx-auto max-w-md text-center">
-            <h1 className="display text-2xl">This link is not available</h1>
+            <h1 className="text-2xl">This link is not available</h1>
             <p className="mt-2 text-sm text-muted">{state.message}</p>
           </div>
         ) : null}
