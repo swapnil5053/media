@@ -25,6 +25,17 @@
   --caution: #f0d9a8;
   --critical: #f2b8b8;
 
+  /* Hero artwork: the greys a file that will not open is drawn in. */
+  --river-dead-1: #2a2a2a;
+  --river-dead-2: #1e1e1e;
+  --river-dead-3: #262626;
+  --river-bar: #3a3a3a;
+  --device-shell: #0d0d0d;
+
+  /* The mesh panels are light in both themes, so their ink is fixed. */
+  --on-mesh: #0e0e0e;
+  --on-mesh-invert: #fafafa;
+
   --mesh-mint: #c9f2da;
   --mesh-seafoam: #dff3d4;
   --mesh-citron: #f0f0be;
@@ -67,6 +78,9 @@
   --color-subtle: var(--subtle);
   --color-invert: var(--invert);
   --color-on-invert: var(--on-invert);
+
+  --color-on-mesh: var(--on-mesh);
+  --color-on-mesh-invert: var(--on-mesh-invert);
 
   --color-positive: var(--positive);
   --color-positive-ink: var(--positive-ink);

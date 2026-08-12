@@ -104,10 +104,10 @@ export function Landing() {
           <div className="reveal relative mx-auto grid max-w-6xl items-center gap-14 px-5 py-24 lg:grid-cols-2">
             <DevicePostcards />
             <div className="rule lg:pl-12">
-              <h2 className="max-w-[12ch] text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] text-[#0e0e0e]">
+              <h2 className="max-w-[12ch] text-[clamp(2rem,4vw,3.25rem)] leading-[1.05] text-on-mesh">
                 Locked down by default.
               </h2>
-              <p className="mt-5 max-w-md text-sm text-[#0e0e0e]/70">
+              <p className="mt-5 max-w-md text-sm text-on-mesh/70">
                 Passwords are hashed, expiry and view limits are enforced on the server, and every share link hands out
                 short-lived access to a single video. Knowing the URL is never enough.
               </p>
@@ -115,7 +115,7 @@ export function Landing() {
                 to="/signup"
                 variant="secondary"
                 arrow
-                className="mt-8 border-[#0e0e0e]/20 text-[#0e0e0e] hover:border-[#0e0e0e]/40 hover:bg-white/40"
+                className="mt-8 border-on-mesh/20 text-on-mesh hover:border-on-mesh/40 hover:bg-white/40"
               >
                 Start sharing
               </ButtonLink>
@@ -138,25 +138,25 @@ export function Landing() {
 
         {/* 5 — Pricing, closing, footer */}
         <section id="pricing" className="panel-section mesh">
-          <div className="reveal relative mx-auto max-w-6xl px-5 py-24 text-[#0e0e0e]">
+          <div className="reveal relative mx-auto max-w-6xl px-5 py-24 text-on-mesh">
             <div className="text-center">
               <h2 className="mx-auto max-w-[16ch] text-[clamp(2rem,4vw,3.25rem)] leading-[1.05]">
                 Stop asking people what phone they have.
               </h2>
-              <p className="mx-auto mt-5 max-w-md text-sm text-[#0e0e0e]/70">
+              <p className="mx-auto mt-5 max-w-md text-sm text-on-mesh/70">
                 Free for your first five videos. No card needed.
               </p>
               <ButtonLink
                 to="/signup"
                 size="lg"
                 arrow
-                className="mt-9 bg-[#0e0e0e] text-[#fafafa] hover:opacity-90"
+                className="mt-9 bg-on-mesh text-on-mesh-invert hover:opacity-90"
               >
                 Get started, free
               </ButtonLink>
             </div>
 
-            <footer className="mt-24 border-t border-[#0e0e0e]/10 pt-10">
+            <footer className="mt-24 border-t border-on-mesh/10 pt-10">
               <div className="grid gap-8 sm:grid-cols-3">
                 {[
                   ["Product", [["How it works", "#how"], ["Pricing", "#pricing"], ["Sign in", "/signin"]]],
@@ -168,7 +168,7 @@ export function Landing() {
                     <ul className="mt-3 space-y-2">
                       {(links as string[][]).map(([label, href]) => (
                         <li key={label}>
-                          <a href={href} className="text-[13px] text-[#0e0e0e]/65 transition-colors hover:text-[#0e0e0e]">
+                          <a href={href} className="text-[13px] text-on-mesh/65 transition-colors hover:text-on-mesh">
                             {label}
                           </a>
                         </li>

@@ -20,7 +20,7 @@ export function DevicePostcards() {
       {DEVICES.map((device, index) => (
         <figure
           key={device.label}
-          className="absolute w-56 overflow-hidden rounded-[2.25rem] border border-white/10 bg-[#0d0d0d] p-2 shadow-[0_24px_60px_rgb(0_0_0/0.45)] transition-transform duration-300 ease-[var(--ease)]"
+          className="absolute w-56 overflow-hidden rounded-[2.25rem] border border-white/10 bg-[var(--device-shell)] p-2 shadow-[0_24px_60px_rgb(0_0_0/0.45)] transition-transform duration-300 ease-[var(--ease)]"
           style={{
             left: `${device.offset}px`,
             top: `${index * 58}px`,

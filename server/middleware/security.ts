@@ -8,8 +8,8 @@ import { config } from "../config.js";
 const CSP = [
   "default-src 'self'",
   "script-src 'self'",
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "font-src 'self' https://fonts.gstatic.com",
+  "style-src 'self' 'unsafe-inline' https://api.fontshare.com",
+  "font-src 'self' https://cdn.fontshare.com",
   "img-src 'self' data: blob:",
   "media-src 'self' blob:",
   "connect-src 'self'",

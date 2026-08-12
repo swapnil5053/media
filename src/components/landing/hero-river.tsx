@@ -12,9 +12,9 @@ interface Card {
 }
 
 const BANDS = [
-  { name: "far", count: 30, scale: 0.4, blur: 6, opacity: 0.32, factor: 0.06 },
-  { name: "mid", count: 20, scale: 0.68, blur: 2, opacity: 0.7, factor: 0.14 },
-  { name: "near", count: 12, scale: 1, blur: 0, opacity: 1, factor: 0.26 },
+  { name: "far", count: 30, blur: 6, opacity: 0.32, factor: 0.06 },
+  { name: "mid", count: 20, blur: 2, opacity: 0.7, factor: 0.14 },
+  { name: "near", count: 12, blur: 0, opacity: 1, factor: 0.26 },
 ] as const;
 
 /** Deterministic pseudo-random so the layout is identical on every render. */
@@ -49,7 +49,7 @@ function buildBand(count: number, seed: number): Card[] {
 
 function CardTile({ card }: { card: Card }) {
   const background = card.broken
-    ? "linear-gradient(150deg, #2a2a2a 0%, #1e1e1e 60%, #262626 100%)"
+    ? "linear-gradient(150deg, var(--river-dead-1) 0%, var(--river-dead-2) 60%, var(--river-dead-3) 100%)"
     : `linear-gradient(150deg, hsl(${card.hue} 42% 62%) 0%, hsl(${card.hue + 40} 38% 44%) 55%, hsl(${card.hue + 70} 30% 30%) 100%)`;
 
   return (
@@ -68,7 +68,7 @@ function CardTile({ card }: { card: Card }) {
         ? Array.from({ length: card.bars }, (_, index) => (
             <span
               key={index}
-              className="absolute left-0 w-full bg-[#3a3a3a]"
+              className="absolute left-0 w-full bg-[var(--river-bar)]"
               style={{ top: `${18 + index * 26}%`, height: "9%" }}
             />
           ))

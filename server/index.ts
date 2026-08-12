@@ -16,7 +16,9 @@ async function main() {
   if (config.isProduction) {
     const clientDir = path.resolve("dist/client");
     app.use(express.static(clientDir, { index: false, maxAge: "1y" }));
-    app.get("/*splat", allowEmbedding, (_req, res) => {
+
+    // "/*splat" alone never matches the bare root in Express 5, so "/" is listed too.
+    app.get(["/", "/*splat"], allowEmbedding, (_req, res) => {
       res.sendFile(path.join(clientDir, "index.html"));
     });
   } else {
