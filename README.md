@@ -72,9 +72,12 @@ One process, one container, no external queue or object store.
 
 ```bash
 npm install
-cp .env.example .env.local     # set SESSION_SECRET
-npm run dev                    # http://localhost:8000
+npm approve-scripts --allow-scripts-pending   # npm 11+ blocks install scripts by default
+cp .env.example .env.local                    # set SESSION_SECRET
+npm run dev                                   # http://localhost:8000
 ```
+
+`better-sqlite3` and `esbuild` both need their install scripts to run — one compiles SQLite, the other fetches the bundler binary. On npm 11 the install appears to succeed without them and then fails at runtime, so approve them before starting.
 
 **Docker** (ffmpeg is baked in):
 
