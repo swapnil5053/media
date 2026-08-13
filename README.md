@@ -72,7 +72,8 @@ One process, one container, no external queue or object store.
 
 ```bash
 npm install
-npm approve-scripts --allow-scripts-pending   # npm 11+ blocks install scripts by default
+npm approve-scripts better-sqlite3 && npm approve-scripts esbuild   # npm 11+ blocks install scripts
+npm install                                   # re-run so the approved scripts execute
 cp .env.example .env.local                    # set SESSION_SECRET
 npm run dev                                   # http://localhost:8000
 ```
