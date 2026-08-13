@@ -68,7 +68,7 @@ One process, one container, no external queue or object store.
 
 ## Running it
 
-**Requirements:** Node 20+ and `ffmpeg`/`ffprobe` on your `PATH`.
+**Requirements:** Node 22+ and `ffmpeg`/`ffprobe` on your `PATH`. Node 22 matters — `better-sqlite3` ships prebuilt binaries for it, so no C++ toolchain is needed.
 
 ```bash
 npm install
