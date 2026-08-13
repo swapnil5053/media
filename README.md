@@ -98,12 +98,12 @@ docker compose up --build
 ## Tests
 
 ```bash
-npm test                          # 43 unit and API tests
+npm test                          # 68 tests: server, API and component suites
 npm run lint                      # tsc --noEmit, strict
 node scripts/verify-pipeline.mjs  # 25-check end-to-end run against real ffmpeg
 ```
 
-The unit suite covers the pure logic worth pinning down: the compatibility matrix, the difference hash (a uniform brightness shift must not change it; a reversed gradient must flip all 64 bits), the SubRip parser, retry backoff bounds and jitter, and webhook signature verification including replay rejection.
+Vitest runs two projects — `server` in Node against real SQLite, `ui` in jsdom with Testing Library. The server suite covers the pure logic worth pinning down: the compatibility matrix, the difference hash (a uniform brightness shift must not change it; a reversed gradient must flip all 64 bits), the SubRip parser, retry backoff bounds and jitter, and webhook signature verification including replay rejection. The component suite drives the real screens: sign-in submits what was typed and surfaces the server's own error text, the library moves through loading, empty, populated and failed states, share links send only the options that were set, the watch page asks for a password and explains a dead link instead of showing a broken player, and the tab lists are keyboard operable with correct `aria-selected`.
 
 `scripts/verify-pipeline.mjs` is the honest one, and it runs in CI. It generates a real HEVC `.MOV` with ffmpeg, then asserts end to end that it converts, that Android is correctly named as a blocked target, that a ladder and storyboard are produced, that re-uploading the same footage is caught as a duplicate, that SubRip captions convert, that a wrong password is refused and a right one works, that a stranger cannot stream the file, that path traversal through HLS segment names is blocked, that an API key can upload but not manage settings, and that metrics are exposed.
 
