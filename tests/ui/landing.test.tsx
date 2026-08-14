@@ -32,7 +32,8 @@ describe("hero compatibility card", () => {
   it("opens on the original, showing the problem before the fix", () => {
     renderApp(<CompatCard />);
 
-    expect(screen.getByText("33%")).toBeInTheDocument();
+    expect(screen.getByText("33")).toBeInTheDocument();
+    expect(screen.getByText(/of devices/i)).toBeInTheDocument();
     expect(screen.getByText(/2 of 6 play it natively/i)).toBeInTheDocument();
     expect(screen.getAllByText(/won't open/i)).toHaveLength(4);
   });
@@ -41,7 +42,7 @@ describe("hero compatibility card", () => {
     renderApp(<CompatCard />);
     await userEvent.click(screen.getByRole("tab", { name: "Converted" }));
 
-    expect(screen.getByText("100%")).toBeInTheDocument();
+    expect(screen.getByText("100")).toBeInTheDocument();
     expect(screen.getByText(/6 of 6 play it natively/i)).toBeInTheDocument();
     expect(screen.queryByText(/won't open/i)).not.toBeInTheDocument();
   });

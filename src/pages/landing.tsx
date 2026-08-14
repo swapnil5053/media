@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+
 import { useAccount } from "@/hooks/use-account";
 import { useReveal } from "@/hooks/use-reveal";
 import { CompatCard } from "@/components/landing/compat-card";
@@ -30,26 +30,21 @@ export function Landing() {
       <header className="sticky top-0 z-30 border-b border-line bg-backdrop/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-6xl items-center px-5">
           <Logo />
-          <nav className="ml-auto flex items-center gap-1.5">
-            <a href="#how" className="hidden rounded-full px-3.5 py-2 text-sm text-muted hover:text-ink sm:block">
+          <nav className="ml-auto flex items-center gap-5">
+            <a href="#how" className="hidden text-sm text-muted transition-colors hover:text-ink sm:block">
               How it works
             </a>
-            <a href="#pricing" className="hidden rounded-full px-3.5 py-2 text-sm text-muted hover:text-ink sm:block">
+            <a href="#pricing" className="hidden text-sm text-muted transition-colors hover:text-ink sm:block">
               Pricing
             </a>
             {account ? (
-              <ButtonLink to="/library" size="sm" arrow>
+              <ButtonLink to="/library" arrow>
                 Your library
               </ButtonLink>
             ) : (
-              <>
-                <Link to="/signin" className="rounded-full px-3.5 py-2 text-sm text-muted hover:text-ink">
-                  Sign in
-                </Link>
-                <ButtonLink to="/signup" size="sm" arrow>
-                  Get started
-                </ButtonLink>
-              </>
+              <ButtonLink to="/signup" arrow>
+                Get started
+              </ButtonLink>
             )}
           </nav>
         </div>
@@ -59,23 +54,23 @@ export function Landing() {
         {/* 1 — Hero */}
         <section className="panel-section bg-panel">
           <HeroRiver />
-          <div className="relative mx-auto grid min-h-[38rem] max-w-6xl items-center gap-12 px-5 py-24 lg:grid-cols-[1fr_auto]">
-            <div className="max-w-xl">
-              <h1 className="text-[clamp(2.75rem,6vw,4.75rem)] leading-[1.02] text-ink">
-                Send a video.
-                <br />
-                It just plays.
+          <div className="relative mx-auto grid min-h-[44rem] max-w-6xl items-center gap-14 px-6 py-28 lg:grid-cols-[minmax(0,1fr)_auto] lg:px-10">
+            <div className="max-w-[34rem]">
+              <h1 className="max-w-[9ch] text-[clamp(3.25rem,7.5vw,6rem)] leading-[0.98] tracking-[-0.035em] text-ink">
+                Send a video. It just plays.
               </h1>
-              <p className="mt-6 max-w-md text-[17px] text-muted">
+              <p className="mt-8 max-w-[34ch] text-[17px] leading-relaxed text-muted">
                 Your phone records in a format half the world can't open. AdaptFlow rebuilds it into one that plays on
                 every browser, phone and TV — then gives you a single link to share.
               </p>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <ButtonLink to={account ? "/library" : "/signup"} size="lg" arrow>
+
+              {/* Stacked, not side by side — the primary action gets its own line. */}
+              <div className="mt-10 flex flex-col items-start gap-3.5">
+                <ButtonLink to={account ? "/library" : "/signup"} size="lg" arrow className="px-8">
                   {account ? "Open your library" : "Upload your first video"}
                 </ButtonLink>
-                <ButtonLink to="/signin" variant="secondary" size="lg">
-                  Sign in
+                <ButtonLink to="#how" variant="secondary" size="lg" arrow className="px-8">
+                  See how it works
                 </ButtonLink>
               </div>
             </div>

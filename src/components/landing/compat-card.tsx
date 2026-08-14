@@ -21,14 +21,14 @@ export function CompatCard() {
   const percent = Math.round((playing / TARGETS.length) * 100);
 
   return (
-    <div className="w-full max-w-sm rounded-card border border-line bg-panel/85 p-5 backdrop-blur-xl">
+    <div className="w-full max-w-[26rem] rounded-[1.5rem] border border-line bg-panel/90 p-6 backdrop-blur-xl">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[13px] text-ink">IMG_4821.MOV</p>
-          <p className="mt-0.5 text-[13px] text-muted">{converted ? "H.264 · MP4" : "HEVC · MOV"}</p>
+          <p className="font-mono text-sm text-ink">IMG_4821.MOV</p>
+          <p className="mt-1 font-mono text-[13px] text-subtle">{converted ? "H.264 · MP4" : "HEVC · MOV"}</p>
         </div>
 
-        <div role="tablist" aria-label="Compatibility view" className="flex rounded-full border border-line p-0.5">
+        <div role="tablist" aria-label="Compatibility view" className="flex shrink-0 rounded-full bg-raised p-1">
           {[
             { key: false, label: "Original" },
             { key: true, label: "Converted" },
@@ -41,7 +41,7 @@ export function CompatCard() {
               tabIndex={converted === option.key ? 0 : -1}
               onClick={() => setConverted(option.key)}
               className={cn(
-                "rounded-full px-2.5 py-1 text-[12px] transition-colors duration-150 ease-[var(--ease)]",
+                "rounded-full px-3 py-1.5 text-[13px] transition-colors duration-150 ease-[var(--ease)]",
                 converted === option.key ? "bg-invert text-on-invert" : "text-muted hover:text-ink",
               )}
             >
@@ -51,32 +51,40 @@ export function CompatCard() {
         </div>
       </div>
 
-      <p className="mt-5 flex items-baseline gap-1.5">
-        <span
-          className={cn(
-            "text-[2.5rem] leading-none font-medium tabular-nums transition-colors duration-150",
-            converted ? "text-positive" : "text-ink",
-          )}
-        >
-          {percent}%
-        </span>
-        <span className="text-sm text-muted">of devices</span>
-      </p>
-      <p className="mt-1 text-[13px] text-subtle">
-        {playing} of {TARGETS.length} play it natively
+      <p className="mt-6 flex items-baseline gap-2">
+        <span className="text-[3.25rem] leading-none font-medium tabular-nums text-ink">{percent}</span>
+        <span className="text-2xl font-medium text-ink">%</span>
+        <span className="text-[15px] text-muted">of devices</span>
       </p>
 
-      <ul className="mt-4 space-y-2 border-t border-line pt-4">
+      {/* The score as a bar, so the jump from a third to all of them is felt. */}
+      <div className="mt-4 h-1 w-full overflow-hidden rounded-full bg-raised">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[var(--mesh-citron)] to-[var(--mesh-mint)] transition-[width] duration-500 ease-[var(--ease)]"
+          style={{ width: `${percent}%` }}
+        />
+      </div>
+
+      <ul className="mt-5 space-y-2.5">
         {TARGETS.map((target) => {
           const plays = converted || target.original;
           return (
-            <li key={target.label} className="flex items-center justify-between text-[13px]">
+            <li key={target.label} className="flex items-center justify-between gap-4 text-sm">
               <span className="text-muted">{target.label}</span>
-              <span className={plays ? "text-positive" : "text-subtle"}>{plays ? "plays" : "won't open"}</span>
+              <span className={cn("flex items-center gap-1.5", plays ? "text-ink" : "text-subtle")}>
+                <span aria-hidden className={plays ? "text-positive" : "text-subtle"}>
+                  {plays ? "✓" : "✗"}
+                </span>
+                {plays ? "plays" : "won't open"}
+              </span>
             </li>
           );
         })}
       </ul>
+
+      <p className="mt-5 border-t border-line pt-4 text-[13px] text-subtle">
+        {playing} of {TARGETS.length} play it natively · checked against six real devices.
+      </p>
     </div>
   );
 }
