@@ -176,19 +176,83 @@
   }
 }
 
-/* The hero river's ambient movement. Transform only, so it stays off the main thread. */
-@keyframes drift {
+/* Each hero band drifts on its own axis, which is what sells the depth. */
+@keyframes riverFar {
   from {
-    transform: translate3d(-2%, 1.5%, 0);
+    transform: translate3d(-22px, 12px, 0);
   }
   to {
-    transform: translate3d(2%, -1.5%, 0);
+    transform: translate3d(24px, -13px, 0);
   }
 }
 
-.drift {
-  animation: drift 36s ease-in-out infinite alternate;
+@keyframes riverMid {
+  from {
+    transform: translate3d(26px, -14px, 0);
+  }
+  to {
+    transform: translate3d(-24px, 13px, 0);
+  }
+}
+
+@keyframes riverNear {
+  from {
+    transform: translate3d(-30px, 16px, 0);
+  }
+  to {
+    transform: translate3d(30px, -16px, 0);
+  }
+}
+
+.river-drift {
   will-change: transform;
+}
+
+/* Compatibility card states, matching the design's data-attribute styling. */
+[data-state-btn] {
+  background: transparent;
+  color: rgb(250 250 250 / 0.55);
+}
+
+[data-state-btn="true"] {
+  background: rgb(255 255 255 / 0.14);
+  color: #fafafa;
+}
+
+[data-state-btn="false"]:hover {
+  color: #fafafa;
+  background: rgb(255 255 255 / 0.06);
+}
+
+[data-mark="true"] {
+  color: #c9f2da;
+}
+
+[data-mark="false"] {
+  color: rgb(250 250 250 / 0.4);
+}
+
+.compat-row:hover {
+  background: rgb(255 255 255 / 0.05);
+  color: #fafafa;
+}
+
+.compat-card:hover {
+  border-color: rgb(255 255 255 / 0.22);
+  transform: translateY(-2px);
+}
+
+/* Nav links draw their underline in rather than switching it on. */
+.underline-in {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-size: 0% 1px;
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  transition: background-size 150ms var(--ease);
+}
+
+.underline-in:hover {
+  background-size: 100% 1px;
 }
 
 /* Each marketing section is a rounded panel sitting on the backdrop. */
