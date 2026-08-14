@@ -72,13 +72,14 @@ One process, one container, no external queue or object store.
 
 ```bash
 npm install
-npm approve-scripts better-sqlite3 && npm approve-scripts esbuild   # npm 11+ blocks install scripts
-npm install                                   # re-run so the approved scripts execute
+# npm 11 blocks install scripts by default, so build the two native pieces directly:
+cd node_modules/better-sqlite3 && npx node-gyp rebuild && cd ../..
+node node_modules/esbuild/install.js
 cp .env.example .env.local                    # set SESSION_SECRET
 npm run dev                                   # http://localhost:8000
 ```
 
-`better-sqlite3` and `esbuild` both need their install scripts to run — one compiles SQLite, the other fetches the bundler binary. On npm 11 the install appears to succeed without them and then fails at runtime, so approve them before starting.
+`better-sqlite3` and `esbuild` both need their install scripts to run — one compiles SQLite, the other fetches the bundler binary. npm 11 skips them and the install still reports success, so the app fails at runtime unless you build them yourself. Running the two commands above is the reliable fix; `npm approve-scripts` does not always take. Compiling SQLite on Windows needs the Visual Studio C++ build tools including a Windows SDK.
 
 **Docker** (ffmpeg is baked in):
 
