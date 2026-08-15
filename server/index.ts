@@ -5,7 +5,6 @@ import { config } from "./config.js";
 import { registerJobHandlers } from "./jobs/index.js";
 import { startWorkers, stopWorkers } from "./jobs/runner.js";
 import { logger } from "./lib/logger.js";
-import { allowEmbedding } from "./middleware/security.js";
 
 async function main() {
   registerJobHandlers();
@@ -18,13 +17,13 @@ async function main() {
     app.use(express.static(clientDir, { index: false, maxAge: "1y" }));
 
     // "/*splat" alone never matches the bare root in Express 5, so "/" is listed too.
-    app.get(["/", "/*splat"], allowEmbedding, (_req, res) => {
+    app.get(["/", "/*splat"], (_req, res) => {
       res.sendFile(path.join(clientDir, "index.html"));
     });
   } else {
     const { createServer } = await import("vite");
     const vite = await createServer({ server: { middlewareMode: true }, appType: "spa" });
-    app.use(allowEmbedding, vite.middlewares);
+    app.use(vite.middlewares);
   }
 
   const server = app.listen(config.port, () => {

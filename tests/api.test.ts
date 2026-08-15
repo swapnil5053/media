@@ -1,8 +1,10 @@
 import fs from "node:fs";
+import express from "express";
 import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "../server/app.js";
 import { config } from "../server/config.js";
+import { securityHeaders } from "../server/middleware/security.js";
 import { db } from "../server/db/index.js";
 
 const app = createApp();
@@ -58,6 +60,30 @@ describe("auth", () => {
     expect(response.body.email).toBe(account.email);
     expect(response.body.plan).toBe("free");
     expect(response.body).not.toHaveProperty("password_hash");
+  });
+});
+
+describe("framing", () => {
+  // Served through a bare app: Express's own 404 handler replaces the CSP with
+  // its own, so an unmatched route would hide what the middleware actually set.
+  const framed = express();
+  framed.use(securityHeaders);
+  framed.get(["/", "/*splat"], (_request, response) => response.send("ok"));
+
+  it("lets anyone iframe an embed", async () => {
+    const response = await request(framed).get("/embed/some-slug");
+
+    expect(response.headers["content-security-policy"]).toContain("frame-ancestors *");
+    expect(response.headers).not.toHaveProperty("x-frame-options");
+  });
+
+  it("refuses to be framed anywhere else", async () => {
+    for (const route of ["/", "/library", "/settings", "/w/a-slug", "/embedded-but-not-really"]) {
+      const response = await request(framed).get(route);
+
+      expect(response.headers["content-security-policy"]).toContain("frame-ancestors 'self'");
+      expect(response.headers["x-frame-options"]).toBe("SAMEORIGIN");
+    }
   });
 });
 

@@ -156,6 +156,7 @@ const expected = crypto
 - HDR sources are converted to SDR with a straight pixel-format conversion rather than proper tone mapping, so HDR footage loses some highlight detail.
 - Workers run inside the web process. That's deliberate for a single-box deployment — the queue is already in the database, so moving them out is a config change, not a rewrite.
 - Plans and quotas are enforced, but payment isn't wired up. Switching plans in Settings is immediate.
+- `/api/system/metrics` is unauthenticated, so a Prometheus scraper can reach it without a credential. That's fine behind a private network and wrong on the open internet — put it behind your ingress if you deploy this.
 
 ## License
 

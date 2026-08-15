@@ -9,7 +9,7 @@ import { config } from "../config.js";
  * the React Fast Refresh preamble as an inline script, and it talks to the
  * browser over a websocket for hot reloading.
  */
-function contentSecurityPolicy(): string {
+function contentSecurityPolicy(frameAncestors: string): string {
   const scriptSrc = config.isProduction ? "script-src 'self'" : "script-src 'self' 'unsafe-inline'";
   const connectSrc = config.isProduction ? "connect-src 'self'" : "connect-src 'self' ws: wss:";
 
@@ -21,30 +21,41 @@ function contentSecurityPolicy(): string {
     "img-src 'self' data: blob:",
     "media-src 'self' blob:",
     connectSrc,
-    "frame-ancestors *",
+    `frame-ancestors ${frameAncestors}`,
     "base-uri 'self'",
     "form-action 'self'",
   ].join("; ");
 }
 
-const CSP = contentSecurityPolicy();
+const CSP = contentSecurityPolicy("'self'");
+const EMBED_CSP = contentSecurityPolicy("*");
 
-export function securityHeaders(_req: Request, res: Response, next: NextFunction): void {
+/**
+ * `/embed/:slug` exists to be put in someone else's page, so it is the one path
+ * that anyone may frame. Everything else — the library, settings, the sign-in
+ * form — must not be, or a hostile page could iframe it invisibly and harvest
+ * clicks meant for its own UI.
+ *
+ * Both headers are set together: `frame-ancestors` overrides `X-Frame-Options`
+ * wherever it is supported, and `X-Frame-Options` covers what is left.
+ */
+const EMBEDDABLE = /^\/embed\//;
+
+export function securityHeaders(req: Request, res: Response, next: NextFunction): void {
+  const embeddable = EMBEDDABLE.test(req.path);
+
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
-  res.setHeader("X-Frame-Options", "SAMEORIGIN");
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  res.setHeader("Content-Security-Policy", CSP);
+  res.setHeader("Content-Security-Policy", embeddable ? EMBED_CSP : CSP);
+
+  if (!embeddable) {
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  }
 
   if (config.isProduction) {
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
   }
 
-  next();
-}
-
-/** Embed and watch pages are meant to be iframed, so they opt out of the frame ban. */
-export function allowEmbedding(_req: Request, res: Response, next: NextFunction): void {
-  res.removeHeader("X-Frame-Options");
   next();
 }

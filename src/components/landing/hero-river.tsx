@@ -23,7 +23,7 @@ interface Card {
   progress: string | false;
 }
 
-/** Eleven frames, cycled by the seeded shuffle below. See public/stills/README.md. */
+/** Eleven frames, cycled by the seeded shuffle below. See docs/hero-frames.md. */
 const STILLS = Array.from({ length: 11 }, (_, i) => `/stills/f${String(i + 1).padStart(2, "0")}.jpg`);
 
 const BANDS = [
