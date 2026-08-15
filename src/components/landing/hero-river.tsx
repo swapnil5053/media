@@ -27,9 +27,9 @@ interface Card {
 const STILLS = Array.from({ length: 11 }, (_, i) => `/stills/f${String(i + 1).padStart(2, "0")}.jpg`);
 
 const BANDS = [
-  { key: "far", count: 34, width: 62, base: 60, opacity: 0.35, blur: "blur(6px)", animation: "riverFar 38s cubic-bezier(0.37,0,0.63,1) infinite alternate", factor: 0.06 },
-  { key: "mid", count: 24, width: 104, base: 78, opacity: 0.7, blur: "blur(2px)", animation: "riverMid 33s cubic-bezier(0.37,0,0.63,1) infinite alternate", factor: 0.14 },
-  { key: "near", count: 16, width: 168, base: 96, opacity: 1, blur: "none", animation: "riverNear 40s cubic-bezier(0.37,0,0.63,1) infinite alternate", factor: 0.26 },
+  { key: "far", count: 34, width: 62, base: 60, opacity: 0.35, blur: "blur(6px)", animation: "riverFar 38s cubic-bezier(0.37,0,0.63,1) infinite alternate" },
+  { key: "mid", count: 24, width: 104, base: 78, opacity: 0.7, blur: "blur(2px)", animation: "riverMid 33s cubic-bezier(0.37,0,0.63,1) infinite alternate" },
+  { key: "near", count: 16, width: 168, base: 96, opacity: 1, blur: "none", animation: "riverNear 40s cubic-bezier(0.37,0,0.63,1) infinite alternate" },
 ] as const;
 
 /** Fixed seed, so the composition is the same every load and matches the design. */

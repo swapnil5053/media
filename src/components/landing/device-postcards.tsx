@@ -1,4 +1,5 @@
 import { useRef, type PointerEvent, type ReactNode } from "react";
+import { LockGlyph } from "@/components/landing/lock-glyph";
 
 /** The frame, mid-playback: a play glyph over a still and a part-filled scrubber. */
 function Screen({ radius, children }: { radius: string; children?: ReactNode }) {
@@ -17,16 +18,6 @@ function Screen({ radius, children }: { radius: string; children?: ReactNode }) 
       </div>
       {children}
     </div>
-  );
-}
-
-function LockGlyph() {
-  return (
-    <svg width="20" height="22" viewBox="0 0 20 22" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden>
-      <rect x="1" y="9" width="18" height="12" rx="3" />
-      <path d="M5 9V6a5 5 0 0 1 10 0v3" />
-      <circle cx="10" cy="15" r="1.4" fill="currentColor" stroke="none" />
-    </svg>
   );
 }
 

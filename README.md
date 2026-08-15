@@ -68,18 +68,24 @@ One process, one container, no external queue or object store.
 
 ## Running it
 
-**Requirements:** Node 22+ and `ffmpeg`/`ffprobe` on your `PATH`. Node 22 matters — `better-sqlite3` ships prebuilt binaries for it, so no C++ toolchain is needed.
+**Requirements:** Node 22+ and `ffmpeg`/`ffprobe` on your `PATH`.
 
 ```bash
 npm install
-# npm 11 blocks install scripts by default, so build the two native pieces directly:
-cd node_modules/better-sqlite3 && npx node-gyp rebuild && cd ../..
-node node_modules/esbuild/install.js
-cp .env.example .env.local                    # set SESSION_SECRET
-npm run dev                                   # http://localhost:8000
+cp .env.example .env.local   # set SESSION_SECRET
+npm run dev                  # http://localhost:8000
 ```
 
-`better-sqlite3` and `esbuild` both need their install scripts to run — one compiles SQLite, the other fetches the bundler binary. npm 11 skips them and the install still reports success, so the app fails at runtime unless you build them yourself. Running the two commands above is the reliable fix; `npm approve-scripts` does not always take. Compiling SQLite on Windows needs the Visual Studio C++ build tools including a Windows SDK.
+No C++ toolchain needed: `better-sqlite3` ships prebuilt binaries, and `package.json` already lists the two packages whose install scripts npm 11 blocks by default.
+
+If npm skips them anyway — it sometimes writes an empty `allowScripts` and still reports success, which leaves the app broken at runtime rather than at install time — build the two directly:
+
+```bash
+cd node_modules/better-sqlite3 && npx node-gyp rebuild && cd ../..
+node node_modules/esbuild/install.js
+```
+
+That path compiles SQLite from source, which on Windows needs the Visual Studio C++ build tools including a Windows SDK.
 
 **Docker** (ffmpeg is baked in):
 

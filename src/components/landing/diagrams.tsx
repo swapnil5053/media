@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
+import { LockGlyph } from "@/components/landing/lock-glyph";
 
 /**
  * A labelled note pinned to a corner of a diagram: a chip, a short stem, and
  * one line of plain language. The stem is what ties the claim to the drawing.
  */
-export function Callout({
+function Callout({
   label,
   children,
   align = "start",
@@ -175,22 +176,12 @@ const SECURE_FLOW = [
   ["Scoped access", "Opening a link grants short-lived access to that one video."],
 ] as const;
 
-function LockGlyph({ size = 24 }: { size?: number }) {
-  return (
-    <svg width={size} height={size * (26 / 24)} viewBox="0 0 20 22" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden>
-      <rect data-node x="1" y="9" width="18" height="12" rx="3" />
-      <path d="M5 9V6a5 5 0 0 1 10 0v3" />
-      <circle cx="10" cy="15" r="1.4" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
 /** Step 3 — what a share link actually checks, in the order it checks it. */
 export function SharingDiagram() {
   return (
     <div className="swap-in flex h-full min-h-[596px] flex-col justify-center gap-[34px]">
       <div className="flex size-16 shrink-0 items-center justify-center rounded-2xl border border-white/[0.28] text-ink">
-        <LockGlyph />
+        <LockGlyph size={24} />
       </div>
 
       <div className="flex flex-col">

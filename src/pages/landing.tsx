@@ -204,7 +204,7 @@ export function Landing() {
         </div>
       </section>
 
-      <footer data-panel className="panel-section mesh text-on-mesh">
+      <footer data-panel className="panel-section bg-[#F4F4F1] text-on-mesh">
         <div className="grid justify-start px-[clamp(22px,4vw,60px)] py-[clamp(48px,6vw,88px)] [grid-template-columns:repeat(auto-fit,minmax(200px,240px))]">
           {FOOTER_COLUMNS.map((column) => (
             <div key={column.heading} className="flex flex-col gap-3 border-l border-on-mesh/10 px-6">

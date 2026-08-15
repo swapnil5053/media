@@ -3,6 +3,7 @@ import request from "supertest";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { createApp } from "../server/app.js";
 import { config } from "../server/config.js";
+import { db } from "../server/db/index.js";
 
 const app = createApp();
 const account = { email: `swapnil+${Date.now()}@example.com`, password: "correct-horse", name: "Swapnil" };
@@ -16,6 +17,9 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
+  // WAL mode keeps -wal and -shm open. Deleting the directory while SQLite is
+  // still writing them races the checkpoint and leaves the folder non-empty.
+  db.close();
   fs.rmSync(config.dataDir, { recursive: true, force: true });
 });
 

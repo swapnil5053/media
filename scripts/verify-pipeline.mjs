@@ -93,7 +93,7 @@ async function main() {
     check("processing finished", media.status === "ready", media.error ?? media.status);
     check("source detected as HEVC in a MOV", media.source?.videoCodec === "hevc" && media.source?.container === "mov");
     check("file was converted", media.wasConverted === true);
-    check("original would fail somewhere", media.compatibility?.sourceScore < 100, `${media.compatibility?.sourceScore}/100`);
+    check("original would fail somewhere", media.compatibility?.sourceScore < 100, `${media.compatibility?.sourceScore}% of targets`);
     check("delivery reaches every target", media.compatibility?.deliveryScore === 100);
     check(
       "android was one of the blocked targets",
