@@ -32,6 +32,17 @@
   --river-bar: #3a3a3a;
   --device-shell: #0d0d0d;
 
+  /* Two accents for shell snippets: quoted values, and output comments. */
+  --code-string: #d4a96a;
+  --code-comment: #8fa96a;
+
+  /* Diagram strokes. Three weights: the shape, its edges, its inner detail. */
+  --wire: rgb(250 250 250 / 0.42);
+  --wire-soft: rgb(250 250 250 / 0.24);
+  --wire-faint: rgb(250 250 250 / 0.16);
+  --wire-label: rgb(250 250 250 / 0.72);
+  --wire-label-soft: rgb(250 250 250 / 0.4);
+
   /* The mesh panels are light in both themes, so their ink is fixed. */
   --on-mesh: #0e0e0e;
   --on-mesh-invert: #fafafa;
@@ -81,6 +92,9 @@
 
   --color-on-mesh: var(--on-mesh);
   --color-on-mesh-invert: var(--on-mesh-invert);
+
+  --color-code-string: var(--code-string);
+  --color-code-comment: var(--code-comment);
 
   --color-positive: var(--positive);
   --color-positive-ink: var(--positive-ink);
@@ -269,6 +283,167 @@
   transform: translateY(-2px);
 }
 
+/* Particles crawling up the isometric pipeline. */
+@keyframes particles {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(120px, -62px, 0);
+  }
+}
+
+@keyframes swapIn {
+  from {
+    opacity: 0;
+  }
+}
+
+.swap-in {
+  animation: swapIn 100ms var(--ease);
+}
+
+/* Diagram vocabulary, so no stroke colour is written into a component. */
+.wire {
+  fill: none;
+  stroke: var(--wire);
+  stroke-width: 1.4;
+}
+
+.wire-soft {
+  stroke: var(--wire-soft);
+}
+
+.wire-faint {
+  stroke: var(--wire-faint);
+}
+
+.wire-dot {
+  fill: var(--positive);
+}
+
+.wire-label {
+  fill: var(--wire-label);
+  font-family: var(--font-sans);
+  letter-spacing: 1.1px;
+}
+
+.wire-label-soft {
+  fill: var(--wire-label-soft);
+  font-family: var(--font-sans);
+  letter-spacing: 1.1px;
+}
+
+/* Diagram nodes light up on hover, and dim their edges with them. */
+[data-node] {
+  transition:
+    stroke 150ms var(--ease),
+    opacity 150ms var(--ease);
+}
+
+[data-node]:hover {
+  stroke: rgb(250 250 250 / 0.9);
+}
+
+svg path {
+  transition: stroke 150ms var(--ease);
+}
+
+svg:has([data-node]:hover) path {
+  stroke: rgb(250 250 250 / 0.68);
+}
+
+/* Panels that rise a little when you point at them. */
+[data-lift] {
+  transition:
+    transform 260ms var(--ease),
+    border-color 260ms var(--ease),
+    box-shadow 260ms var(--ease);
+}
+
+[data-lift]:hover {
+  transform: translateY(-5px);
+  border-color: rgb(255 255 255 / 0.22);
+  box-shadow: 0 26px 60px rgb(0 0 0 / 0.45);
+}
+
+/* The vertical step list in "How it works". */
+[data-acc-head] {
+  background: transparent;
+  color: rgb(250 250 250 / 0.4);
+}
+
+[data-acc-head="true"] {
+  background: rgb(255 255 255 / 0.06);
+  color: #fafafa;
+}
+
+[data-acc-head="false"]:hover {
+  background: rgb(255 255 255 / 0.04);
+  color: rgb(250 250 250 / 0.78);
+}
+
+/* The frame each device is shown playing. */
+.device-still {
+  background:
+    radial-gradient(70% 60% at 30% 24%, var(--mesh-sand), rgb(0 0 0 / 0) 70%),
+    radial-gradient(80% 70% at 78% 40%, var(--mesh-seafoam), rgb(0 0 0 / 0) 72%),
+    linear-gradient(170deg, #5e6b57, #20241f);
+}
+
+.halo {
+  opacity: 0.45;
+  transform: translateY(8px);
+  transition:
+    opacity 300ms var(--ease),
+    transform 400ms var(--ease);
+  background:
+    radial-gradient(50% 60% at 20% 30%, var(--mesh-mint), rgb(244 244 241 / 0) 70%),
+    radial-gradient(50% 60% at 76% 24%, var(--mesh-citron), rgb(244 244 241 / 0) 70%),
+    radial-gradient(60% 70% at 70% 84%, var(--mesh-blush), rgb(244 244 241 / 0) 72%),
+    radial-gradient(50% 60% at 24% 88%, var(--mesh-sand), rgb(244 244 241 / 0) 70%);
+}
+
+/* The postcard stack fans out and its halo swells. */
+[data-stack]:hover [data-pc="a"] {
+  transform: rotate(-2.6deg) translate(-6px, -6px);
+}
+
+[data-stack]:hover [data-pc="b"] {
+  transform: rotate(1.6deg) translateY(-6px);
+}
+
+[data-stack]:hover [data-pc="c"] {
+  transform: rotate(3.4deg) translate(6px, -6px);
+}
+
+[data-stack]:hover [data-halo] {
+  opacity: 0.6;
+  transform: translateY(8px) scale(1.04);
+}
+
+/* A light sweeps across the footer wordmark. */
+[data-wordmark] {
+  background-image: linear-gradient(
+    100deg,
+    #0e0e0e 0%,
+    #0e0e0e 32%,
+    rgb(14 14 14 / 0.5) 45%,
+    #0e0e0e 58%,
+    #0e0e0e 100%
+  );
+  background-size: 170% 100%;
+  background-position: 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-position 600ms var(--ease);
+}
+
+[data-wordmark]:hover {
+  background-position: 20px 0;
+}
+
 /* Nav links draw their underline in rather than switching it on. */
 .underline-in {
   background-image: linear-gradient(currentColor, currentColor);
@@ -287,6 +462,12 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-panel);
+}
+
+/* Panels sink and fade as the next one rides over them, so they scale from the top. */
+[data-panel] {
+  transform-origin: 50% 0%;
+  will-change: transform, opacity;
 }
 
 .page-enter {
@@ -318,5 +499,14 @@
   .reveal {
     opacity: 1;
     transform: none;
+  }
+
+  [data-panel],
+  [data-band],
+  [data-head],
+  [data-bloom],
+  [data-hero-compat] {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }

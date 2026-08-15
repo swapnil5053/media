@@ -1,4 +1,4 @@
-import { forwardRef, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { forwardRef, type AnchorHTMLAttributes, type ButtonHTMLAttributes, type ReactNode } from "react";
 import { Link, type LinkProps } from "react-router-dom";
 import { cn } from "@/lib/cn";
 
@@ -55,6 +55,33 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     </button>
   );
 });
+
+/**
+ * The same button for anything the router should not own: in-page anchors and
+ * links off the site. Off-site destinations open in a new tab; anchors do not.
+ */
+export function ButtonAnchor({
+  variant = "secondary",
+  size = "md",
+  arrow = false,
+  className,
+  children,
+  href,
+  ...props
+}: AnchorHTMLAttributes<HTMLAnchorElement> & { variant?: Variant; size?: Size; arrow?: boolean }) {
+  const offSite = href?.startsWith("http") ?? false;
+  return (
+    <a
+      href={href}
+      className={buttonStyles(variant, size, className)}
+      {...(offSite ? { target: "_blank", rel: "noreferrer" } : {})}
+      {...props}
+    >
+      {children}
+      {arrow ? <Arrow /> : null}
+    </a>
+  );
+}
 
 export function ButtonLink({
   variant = "primary",

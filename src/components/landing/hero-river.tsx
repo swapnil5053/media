@@ -23,18 +23,14 @@ interface Card {
   progress: string | false;
 }
 
-const STILLS = [
-  "f01", "f02", "f03", "f04", "f05", "f06", "f07", "f09", "f10", "f11", "f12",
-].map((name) => `/stills/${name}.jpg`);
+/** Eleven frames, cycled by the seeded shuffle below. See public/stills/README.md. */
+const STILLS = Array.from({ length: 11 }, (_, i) => `/stills/f${String(i + 1).padStart(2, "0")}.jpg`);
 
 const BANDS = [
   { key: "far", count: 34, width: 62, base: 60, opacity: 0.35, blur: "blur(6px)", animation: "riverFar 38s cubic-bezier(0.37,0,0.63,1) infinite alternate", factor: 0.06 },
   { key: "mid", count: 24, width: 104, base: 78, opacity: 0.7, blur: "blur(2px)", animation: "riverMid 33s cubic-bezier(0.37,0,0.63,1) infinite alternate", factor: 0.14 },
   { key: "near", count: 16, width: 168, base: 96, opacity: 1, blur: "none", animation: "riverNear 40s cubic-bezier(0.37,0,0.63,1) infinite alternate", factor: 0.26 },
 ] as const;
-
-const CAP = 120;
-const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
 
 /** Fixed seed, so the composition is the same every load and matches the design. */
 function buildBands() {
@@ -185,16 +181,13 @@ function CardTile({ card }: { card: Card }) {
 export function HeroRiver() {
   const bands = useMemo(buildBands, []);
   const riverRef = useRef<HTMLDivElement | null>(null);
-  const bandRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
     const river = riverRef.current;
-    const hero = river?.parentElement;
-    if (!river || !hero) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!river || !("IntersectionObserver" in window)) return;
 
-    // The drift keyframes are the only thing running when nothing is scrolling,
-    // so stop them once the hero is off screen.
+    // The drift keyframes are the only thing still running when nothing is
+    // scrolling, so stop them once the hero is off screen.
     const observer = new IntersectionObserver(
       ([entry]) => {
         const state = entry?.isIntersecting ? "running" : "paused";
@@ -205,34 +198,7 @@ export function HeroRiver() {
       { threshold: 0 },
     );
     observer.observe(river);
-
-    let frame = 0;
-    const apply = () => {
-      frame = 0;
-      // How far the hero itself has travelled, not the page — they differ by the
-      // shell's padding, and the card offsets are small enough for that to show.
-      const offset = -hero.getBoundingClientRect().top;
-      bandRefs.current.forEach((node, index) => {
-        const factor = BANDS[index]?.factor ?? 0;
-        if (node) node.style.transform = `translate3d(0,${clamp(offset * factor, CAP).toFixed(1)}px,0)`;
-      });
-      const compat = document.querySelector<HTMLElement>("[data-hero-compat]");
-      if (compat) compat.style.transform = `translate3d(0,${clamp(offset * -0.05, CAP).toFixed(1)}px,0)`;
-    };
-
-    const schedule = () => {
-      if (!frame) frame = requestAnimationFrame(apply);
-    };
-
-    apply();
-    window.addEventListener("scroll", schedule, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-    return () => {
-      if (frame) cancelAnimationFrame(frame);
-      observer.disconnect();
-      window.removeEventListener("scroll", schedule);
-      window.removeEventListener("resize", schedule);
-    };
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -250,6 +216,7 @@ export function HeroRiver() {
       {/* The light the river is lit by. */}
       <div
         aria-hidden
+        data-bloom
         style={{
           position: "absolute",
           left: "38%",
@@ -311,14 +278,8 @@ export function HeroRiver() {
           WebkitMaskComposite: "source-in",
         }}
       >
-        {bands.map((band, index) => (
-          <div
-            key={band.key}
-            ref={(node) => {
-              bandRefs.current[index] = node;
-            }}
-            style={{ position: "absolute", inset: 0 }}
-          >
+        {bands.map((band) => (
+          <div key={band.key} data-band={band.key} style={{ position: "absolute", inset: 0 }}>
             <div data-drift style={{ position: "absolute", inset: 0, animation: band.animation }}>
               {band.cards.map((card, cardIndex) => (
                 <CardTile key={cardIndex} card={card} />
