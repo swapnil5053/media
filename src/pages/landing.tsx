@@ -235,6 +235,7 @@ export function Landing() {
         </div>
 
         <div className="relative overflow-hidden px-[clamp(22px,4vw,60px)] pt-[clamp(20px,3vw,36px)]">
+          <div aria-hidden data-bloom className="wordmark-bloom absolute -inset-[40%]" />
           <div
             data-wordmark
             className="relative z-[1] mb-[-0.14em] text-[clamp(72px,17vw,240px)] leading-[0.86] font-medium tracking-[-0.045em] whitespace-nowrap"
