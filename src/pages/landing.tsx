@@ -26,8 +26,8 @@ export function Landing() {
   const revealRef = useReveal<HTMLDivElement>();
 
   return (
-    <div ref={revealRef} className="bg-backdrop pb-4">
-      <main className="space-y-4">
+    <div ref={revealRef} className="flex flex-col gap-[14px] bg-backdrop p-[14px]">
+      <main className="contents">
         {/* 1 — Hero. The nav lives inside the panel, as in the design. */}
         <section
           className="panel-section flex flex-col"
@@ -39,28 +39,25 @@ export function Landing() {
         >
           <HeroRiver />
 
-          <nav className="relative z-30 flex items-center justify-between px-[clamp(22px,4vw,44px)] py-[26px]">
-            <Logo />
-            <div className="flex items-center gap-7 text-sm text-muted">
+          <nav className="relative z-[3] flex items-center justify-between px-[clamp(22px,4vw,44px)] py-[26px]">
+            <Logo size={17} />
+            <div className="flex items-center gap-7 text-sm whitespace-nowrap text-muted">
               <a href="#how" className="underline-in hidden sm:block">
                 How it works
               </a>
-              <a href="#pricing" className="underline-in hidden sm:block">
-                Pricing
-              </a>
               {account ? (
-                <ButtonLink to="/library" size="sm" arrow className="h-10 px-5">
+                <ButtonLink to="/library" size="sm" arrow className="pill h-10 gap-2.5 px-5 text-sm">
                   Your library
                 </ButtonLink>
               ) : (
-                <ButtonLink to="/signup" size="sm" arrow className="h-10 px-5 text-sm">
+                <ButtonLink to="/signup" size="sm" arrow className="pill h-10 gap-2.5 px-5 text-sm">
                   Get started
                 </ButtonLink>
               )}
             </div>
           </nav>
 
-          <div className="relative z-20 flex flex-1 items-center px-[clamp(22px,4vw,60px)] pb-[clamp(60px,8vh,110px)]">
+          <div className="relative z-[2] flex flex-1 items-center px-[clamp(22px,4vw,60px)] pb-[clamp(60px,8vh,110px)]">
             <div className="max-w-[420px]">
               <h1 className="max-w-[16ch] text-[clamp(44px,6vw,76px)] leading-[1.02] font-medium tracking-[-0.03em] text-ink">
                 Send a video.
@@ -72,10 +69,15 @@ export function Landing() {
                 every browser, phone and TV — then gives you a single link to share.
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
-                <ButtonLink to={account ? "/library" : "/signup"} arrow className="h-[46px] px-6 text-[15px]">
+                <ButtonLink to={account ? "/library" : "/signup"} arrow className="pill h-[46px] gap-3 px-6 text-[15px]">
                   {account ? "Open your library" : "Upload your first video"}
                 </ButtonLink>
-                <ButtonLink to="#how" variant="secondary" arrow className="h-[46px] px-6 text-[15px]">
+                <ButtonLink
+                  to="#how"
+                  variant="secondary"
+                  arrow
+                  className="pill h-[46px] gap-3 border-white/20 px-6 text-[15px] hover:border-white/45 hover:bg-transparent"
+                >
                   See how it works
                 </ButtonLink>
               </div>
@@ -83,7 +85,7 @@ export function Landing() {
           </div>
 
           {/* Anchored to the panel's lower right, overlapping the river. */}
-          <div className="absolute right-[clamp(16px,3vw,44px)] bottom-[clamp(20px,4vh,44px)] z-30">
+          <div data-hero-compat className="absolute right-[clamp(16px,3vw,44px)] bottom-[clamp(20px,4vh,44px)] z-[3]">
             <CompatCard />
           </div>
         </section>
@@ -138,8 +140,8 @@ export function Landing() {
           </div>
         </section>
 
-        {/* 5 — Pricing, closing, footer */}
-        <section id="pricing" className="panel-section mesh">
+        {/* 5 — Closing, footer */}
+        <section id="start" className="panel-section mesh">
           <div className="reveal relative mx-auto max-w-6xl px-5 py-24 text-on-mesh">
             <div className="text-center">
               <h2 className="mx-auto max-w-[16ch] text-[clamp(2rem,4vw,3.25rem)] leading-[1.05]">
@@ -161,7 +163,7 @@ export function Landing() {
             <footer className="mt-24 border-t border-on-mesh/10 pt-10">
               <div className="grid gap-8 sm:grid-cols-3">
                 {[
-                  ["Product", [["How it works", "#how"], ["Pricing", "#pricing"], ["Sign in", "/signin"]]],
+                  ["Product", [["How it works", "#how"], ["Get started", "#start"], ["Sign in", "/signin"]]],
                   ["Developers", [["API reference", "/signup"], ["Webhooks", "/signup"], ["Self-hosting", "/signup"]]],
                   ["Project", [["GitHub", "https://github.com/swapnil5053/AdaptFlow"]]],
                 ].map(([heading, links]) => (

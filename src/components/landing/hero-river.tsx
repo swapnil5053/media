@@ -33,6 +33,9 @@ const BANDS = [
   { key: "near", count: 16, width: 168, base: 96, opacity: 1, blur: "none", animation: "riverNear 40s cubic-bezier(0.37,0,0.63,1) infinite alternate", factor: 0.26 },
 ] as const;
 
+const CAP = 120;
+const clamp = (value: number, limit: number) => Math.max(-limit, Math.min(limit, value));
+
 /** Fixed seed, so the composition is the same every load and matches the design. */
 function buildBands() {
   let seed = 20260817;
@@ -173,63 +176,182 @@ function CardTile({ card }: { card: Card }) {
 }
 
 /**
- * Three depth bands of real frames drifting along a diagonal. Cards on the left
- * are desaturated, torn by dropped-frame bars and labelled "can't open"; toward
- * the right they gain colour, a play glyph and a progress bar.
+ * Everything painted behind the hero copy: a lit backdrop, and three depth bands
+ * of real frames drifting along a diagonal in the right-hand two thirds. Cards
+ * that start on the left are desaturated, torn by dropped-frame bars and
+ * labelled "can't open"; as they travel right they gain colour, a play glyph and
+ * a progress bar — the product's argument, told without a word of copy.
  */
 export function HeroRiver() {
   const bands = useMemo(buildBands, []);
-  const refs = useRef<Array<HTMLDivElement | null>>([]);
+  const riverRef = useRef<HTMLDivElement | null>(null);
+  const bandRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   useEffect(() => {
+    const river = riverRef.current;
+    const hero = river?.parentElement;
+    if (!river || !hero) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    let frame = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const offset = Math.min(window.scrollY, 900);
-        refs.current.forEach((node, index) => {
-          const factor = BANDS[index]?.factor ?? 0;
-          if (node) node.style.transform = `translate3d(0, ${Math.min(offset * factor, 120)}px, 0)`;
+    // The drift keyframes are the only thing running when nothing is scrolling,
+    // so stop them once the hero is off screen.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const state = entry?.isIntersecting ? "running" : "paused";
+        river.querySelectorAll<HTMLElement>("[data-drift]").forEach((node) => {
+          node.style.animationPlayState = state;
         });
+      },
+      { threshold: 0 },
+    );
+    observer.observe(river);
+
+    let frame = 0;
+    const apply = () => {
+      frame = 0;
+      // How far the hero itself has travelled, not the page — they differ by the
+      // shell's padding, and the card offsets are small enough for that to show.
+      const offset = -hero.getBoundingClientRect().top;
+      bandRefs.current.forEach((node, index) => {
+        const factor = BANDS[index]?.factor ?? 0;
+        if (node) node.style.transform = `translate3d(0,${clamp(offset * factor, CAP).toFixed(1)}px,0)`;
       });
+      const compat = document.querySelector<HTMLElement>("[data-hero-compat]");
+      if (compat) compat.style.transform = `translate3d(0,${clamp(offset * -0.05, CAP).toFixed(1)}px,0)`;
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(apply);
+    };
+
+    apply();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
     return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
     };
   }, []);
 
   return (
-    <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
-      {bands.map((band, index) => (
-        <div
-          key={band.key}
-          ref={(node) => {
-            refs.current[index] = node;
-          }}
-          style={{ position: "absolute", inset: 0 }}
-        >
-          <div className="river-drift" style={{ position: "absolute", inset: 0, animation: band.animation }}>
-            {band.cards.map((card, cardIndex) => (
-              <CardTile key={cardIndex} card={card} />
-            ))}
-          </div>
-        </div>
-      ))}
-
-      {/* Keeps the headline on clean ground. */}
+    <>
       <div
+        aria-hidden
         style={{
           position: "absolute",
           inset: 0,
-          background:
-            "radial-gradient(70% 90% at 0% 50%, #0C0C0C 0%, rgba(12,12,12,0.86) 34%, transparent 72%)",
+          zIndex: 0,
+          pointerEvents: "none",
+          background: "radial-gradient(118% 92% at 74% 6%,#262626 0%,#181818 32%,#0D0D0D 66%,#080808 100%)",
         }}
       />
-    </div>
+      {/* The light the river is lit by. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          left: "38%",
+          right: "-18%",
+          top: "-24%",
+          height: "96%",
+          zIndex: 0,
+          pointerEvents: "none",
+          background:
+            "radial-gradient(52% 50% at 50% 50%,rgba(255,255,255,0.16) 0%,rgba(255,255,255,0.055) 42%,rgba(255,255,255,0) 72%)",
+          filter: "blur(12px)",
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          left: "-12%",
+          bottom: "-34%",
+          width: "78%",
+          height: "70%",
+          zIndex: 0,
+          pointerEvents: "none",
+          background: "radial-gradient(50% 50% at 50% 50%,rgba(255,255,255,0.035) 0%,rgba(255,255,255,0) 70%)",
+        }}
+      />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          pointerEvents: "none",
+          opacity: 0.5,
+          background: "linear-gradient(107deg,rgba(255,255,255,0) 34%,rgba(255,255,255,0.028) 47%,rgba(255,255,255,0) 60%)",
+        }}
+      />
+
+      <div
+        aria-hidden
+        data-river
+        ref={riverRef}
+        style={{
+          position: "absolute",
+          left: "44%",
+          right: "-6%",
+          top: 0,
+          bottom: "-4%",
+          zIndex: 1,
+          pointerEvents: "none",
+          overflow: "hidden",
+          // Two masks intersected: the river fades in from the copy side and
+          // never touches the panel's top or bottom edge.
+          maskImage:
+            "linear-gradient(to right,rgba(0,0,0,0) 0,#000 9%),linear-gradient(to bottom,rgba(0,0,0,0) 0,#000 12%,#000 88%,rgba(0,0,0,0) 100%)",
+          WebkitMaskImage:
+            "linear-gradient(to right,rgba(0,0,0,0) 0,#000 9%),linear-gradient(to bottom,rgba(0,0,0,0) 0,#000 12%,#000 88%,rgba(0,0,0,0) 100%)",
+          maskComposite: "intersect",
+          WebkitMaskComposite: "source-in",
+        }}
+      >
+        {bands.map((band, index) => (
+          <div
+            key={band.key}
+            ref={(node) => {
+              bandRefs.current[index] = node;
+            }}
+            style={{ position: "absolute", inset: 0 }}
+          >
+            <div data-drift style={{ position: "absolute", inset: 0, animation: band.animation }}>
+              {band.cards.map((card, cardIndex) => (
+                <CardTile key={cardIndex} card={card} />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Sits above the river so the headline keeps clean ground under it. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 2,
+          pointerEvents: "none",
+          background: "radial-gradient(64% 74% at 18% 46%,rgba(8,8,8,0.94) 0%,rgba(8,8,8,0.62) 42%,rgba(8,8,8,0) 74%)",
+        }}
+      />
+      {/* 4% grain, which is what stops the gradients banding on a wide display. */}
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 3,
+          pointerEvents: "none",
+          opacity: 0.05,
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        }}
+      />
+    </>
   );
 }

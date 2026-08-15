@@ -153,6 +153,26 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 
+  /*
+    The marketing pages lift their buttons on hover. In-app buttons deliberately
+    do not — a control you press fifty times a day should stay where you put it.
+  */
+  .pill {
+    transition:
+      background-color 150ms var(--ease),
+      border-color 150ms var(--ease),
+      color 150ms var(--ease),
+      transform 200ms var(--ease);
+  }
+
+  .pill:hover {
+    transform: translateY(-2px);
+  }
+
+  .pill:active {
+    transform: translateY(0);
+  }
+
   .rule {
     position: relative;
   }
@@ -204,8 +224,15 @@
   }
 }
 
-.river-drift {
+[data-drift] {
   will-change: transform;
+}
+
+/* Below this the copy needs the whole panel, so the artwork steps aside. */
+@media (max-width: 900px) {
+  [data-river] {
+    display: none;
+  }
 }
 
 /* Compatibility card states, matching the design's data-attribute styling. */
@@ -260,13 +287,6 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius-panel);
-  margin-inline: 0.75rem;
-}
-
-@media (min-width: 768px) {
-  .panel-section {
-    margin-inline: 1rem;
-  }
 }
 
 .page-enter {

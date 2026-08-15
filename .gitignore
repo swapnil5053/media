@@ -9,10 +9,12 @@ coverage/
 metadata.json
 sample.mp4
 uploads/
-
-
-
 .vscode/
+
+# DATA_DIR — the SQLite database and every uploaded video land here.
+data/
+
+# Working notes for the rebuild, and the design export they came from.
 REBUILD_PROMPT.md
 DESIGN_*.md
 AdaptFlow landing page/
