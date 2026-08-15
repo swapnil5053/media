@@ -42,7 +42,8 @@ describe("hero compatibility card", () => {
     renderApp(<CompatCard />);
     await userEvent.click(screen.getByRole("tab", { name: "Converted" }));
 
-    expect(screen.getByText("100")).toBeInTheDocument();
+    // the score counts up over 600ms rather than snapping, so wait for it to land
+    expect(await screen.findByText("100")).toBeInTheDocument();
     expect(screen.getByText(/6 of 6 play it natively/i)).toBeInTheDocument();
     expect(screen.queryByText(/won't open/i)).not.toBeInTheDocument();
   });

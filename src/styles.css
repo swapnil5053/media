@@ -114,6 +114,13 @@
   html {
     -webkit-text-size-adjust: 100%;
     background-color: var(--backdrop);
+    /* Nav and footer anchors glide instead of cutting. */
+    scroll-behavior: smooth;
+  }
+
+  /* Land a section just below the shell's padding, not flush against it. */
+  [data-panel] {
+    scroll-margin-top: 14px;
   }
 
   body {
@@ -276,6 +283,7 @@
 .compat-row:hover {
   background: rgb(255 255 255 / 0.05);
   color: #fafafa;
+  transform: translateX(2px);
 }
 
 .compat-card:hover {
@@ -296,11 +304,43 @@
 @keyframes swapIn {
   from {
     opacity: 0;
+    transform: translateY(8px);
   }
 }
 
 .swap-in {
-  animation: swapIn 100ms var(--ease);
+  animation: swapIn 280ms var(--ease);
+}
+
+/*
+  Children of a revealed block arrive one after another rather than all at
+  once. 70ms is enough to read as deliberate and short enough that nobody
+  waits for it.
+*/
+.stagger > * {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 520ms var(--ease),
+    transform 520ms var(--ease);
+}
+
+.reveal[data-visible="true"] .stagger > *,
+.stagger.reveal[data-visible="true"] > * {
+  opacity: 1;
+  transform: none;
+}
+
+.stagger > *:nth-child(2) {
+  transition-delay: 70ms;
+}
+
+.stagger > *:nth-child(3) {
+  transition-delay: 140ms;
+}
+
+.stagger > *:nth-child(4) {
+  transition-delay: 210ms;
 }
 
 /* Diagram vocabulary, so no stroke colour is written into a component. */
@@ -371,6 +411,10 @@ svg:has([data-node]:hover) path {
 [data-acc-head] {
   background: transparent;
   color: rgb(250 250 250 / 0.4);
+  transition:
+    background-color 250ms var(--ease),
+    color 250ms var(--ease),
+    transform 250ms var(--ease);
 }
 
 [data-acc-head="true"] {
@@ -381,6 +425,7 @@ svg:has([data-node]:hover) path {
 [data-acc-head="false"]:hover {
   background: rgb(255 255 255 / 0.04);
   color: rgb(250 250 250 / 0.78);
+  transform: translateX(3px);
 }
 
 /*
@@ -498,12 +543,21 @@ svg:has([data-node]:hover) path {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .stagger > * {
+    opacity: 1;
+    transform: none;
   }
 
   .reveal {

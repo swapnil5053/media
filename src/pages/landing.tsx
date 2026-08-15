@@ -22,7 +22,7 @@ const HEADING = "text-[clamp(36px,4.2vw,56px)] leading-[1.05] font-medium tracki
  */
 function SectionHeader({ title, lead, action }: { title: string; lead: string; action: ReactNode }) {
   return (
-    <div className="reveal grid py-10 [grid-template-columns:minmax(0,1.15fr)_minmax(0,1fr)_0px] max-lg:[grid-template-columns:1fr] max-lg:gap-8">
+    <div className="reveal stagger grid py-10 [grid-template-columns:minmax(0,1.15fr)_minmax(0,1fr)_0px] max-lg:[grid-template-columns:1fr] max-lg:gap-8">
       <div className="border-l border-line pr-10 pl-8">
         <h2 data-head className={`${HEADING} max-w-[16ch]`}>
           {title}
@@ -205,7 +205,7 @@ export function Landing() {
       </section>
 
       <footer data-panel className="panel-section bg-[#F4F4F1] text-on-mesh">
-        <div className="grid justify-start px-[clamp(22px,4vw,60px)] py-[clamp(48px,6vw,88px)] [grid-template-columns:repeat(auto-fit,minmax(200px,240px))]">
+        <div className="reveal stagger grid justify-start px-[clamp(22px,4vw,60px)] py-[clamp(48px,6vw,88px)] [grid-template-columns:repeat(auto-fit,minmax(200px,240px))]">
           {FOOTER_COLUMNS.map((column) => (
             <div key={column.heading} className="flex flex-col gap-3 border-l border-on-mesh/10 px-6">
               <span className="text-[13px] font-medium">{column.heading}</span>

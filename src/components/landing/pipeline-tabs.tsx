@@ -69,7 +69,7 @@ export function PipelineTabs() {
                 data-acc-head={String(selected)}
                 onClick={() => setOpen(index)}
                 onKeyDown={onKeyDown(index)}
-                className="flex w-full cursor-pointer items-center gap-3.5 rounded-[10px] px-[18px] py-3.5 text-left text-[16px] transition-[background-color,color] duration-[250ms] ease-[var(--ease)]"
+                className="flex w-full cursor-pointer items-center gap-3.5 rounded-[10px] px-[18px] py-3.5 text-left text-[16px]"
               >
                 <span className="tabular-nums">{index + 1}.</span>
                 <span>{step.title}</span>

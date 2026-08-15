@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * The argument in one card. These are the numbers the compatibility engine
@@ -15,11 +15,55 @@ const DEVICES = [
 ];
 
 const EASE = "cubic-bezier(0.22,1,0.36,1)";
+const BAR_MS = 600;
+
+/**
+ * Counts to a new score over the same 600ms the bar takes, on the same curve —
+ * a number that snaps while the bar underneath it slides reads as two separate
+ * things happening.
+ */
+function useCountTo(target: number) {
+  const [shown, setShown] = useState(target);
+  const from = useRef(target);
+
+  useEffect(() => {
+    const start = from.current;
+    if (start === target) return;
+
+    const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    if (reduced || typeof requestAnimationFrame !== "function") {
+      from.current = target;
+      setShown(target);
+      return;
+    }
+
+    let frame = 0;
+    // Start the clock from the first frame's own timestamp. performance.now()
+    // and the rAF timeline share an origin in most browsers but not all, and a
+    // mismatch leaves t permanently below 1 — the count never lands.
+    let began = 0;
+    const step = (now: number) => {
+      if (!began) began = now;
+      const t = Math.min(1, (now - began) / BAR_MS);
+      // easeOutQuint, which is what cubic-bezier(0.22,1,0.36,1) looks like
+      const eased = 1 - (1 - t) ** 5;
+      setShown(Math.round(start + (target - start) * eased));
+      if (t < 1) frame = requestAnimationFrame(step);
+      else from.current = target;
+    };
+
+    frame = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(frame);
+  }, [target]);
+
+  return shown;
+}
 
 export function CompatCard() {
   const [converted, setConverted] = useState(false);
   const playing = converted ? DEVICES.length : DEVICES.filter((device) => device.original).length;
   const score = Math.round((playing / DEVICES.length) * 100);
+  const shownScore = useCountTo(score);
 
   return (
     <div
@@ -78,7 +122,7 @@ export function CompatCard() {
 
       <div style={{ display: "flex", alignItems: "flex-end", gap: 10, margin: "14px 0 8px" }}>
         <span style={{ fontSize: 38, fontWeight: 500, letterSpacing: "-0.03em", lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-          {score}
+          {shownScore}
         </span>
         <span style={{ fontSize: 15, fontWeight: 500, paddingBottom: 7 }}>%</span>
         <span style={{ fontSize: 13, color: "rgba(250,250,250,0.40)", paddingBottom: 8 }}>of devices</span>
@@ -112,7 +156,7 @@ export function CompatCard() {
                 margin: "0 -8px",
                 borderRadius: 8,
                 color: "rgba(250,250,250,0.62)",
-                transition: `background 150ms ${EASE}, color 150ms ${EASE}`,
+                transition: `background 150ms ${EASE}, color 150ms ${EASE}, transform 150ms ${EASE}`,
               }}
             >
               <span>{device.name}</span>

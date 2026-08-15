@@ -357,7 +357,7 @@ function QueueDiagram() {
 
 export function ArchitectureDiagrams() {
   return (
-    <div className="grid gap-[clamp(20px,3vw,32px)] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))]">
+    <div className="stagger grid gap-[clamp(20px,3vw,32px)] [grid-template-columns:repeat(auto-fit,minmax(340px,1fr))]">
       <DiagramCard label="The pipeline">
         <PipelineDiagram />
       </DiagramCard>

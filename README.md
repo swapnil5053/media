@@ -2,6 +2,8 @@
 
 **Upload any video. Get one link that plays on every device.**
 
+![The AdaptFlow landing page: a river of video frames, greyed and marked "can't open" on the left, in colour and playing on the right, with a compatibility card reporting that a stock iPhone .MOV reaches 2 of 6 devices](docs/landing.jpg)
+
 ---
 
 ## The problem
@@ -20,14 +22,14 @@ AdaptFlow works out which devices would fail to play a file, converts it so none
 
 A stock iPhone `.MOV` plays on **2 of 6** target devices. After AdaptFlow, **6 of 6**.
 
-| | |
-|---|---|
-| **Check** | Probed with `ffprobe` and scored against six real playback targets, each with the containers, codecs and HDR support it actually handles. You get a per-device reason — "cannot decode HEVC video" — not just a number. |
-| **Convert** | H.264 / AAC in a faststart MP4, capped at 1080p, `yuv420p` so 10-bit phone footage stops breaking older decoders. Files that already play everywhere are remuxed, not re-encoded. |
-| **Package** | An HLS ladder at 1080p / 720p / 360p in one ffmpeg pass, plus a poster and a storyboard sprite for scrub previews. |
-| **Share** | One link. Optional password, expiry and view limit, all enforced on the server. Revocable instantly. |
-| **Embed** | `/embed/:slug`, chrome-free, with a copy-ready snippet. |
-| **Measure** | Views, unique viewers, completion rate, watch time, device mix. |
+|             |                                                                                                                                                                                                                         |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Check**   | Probed with `ffprobe` and scored against six real playback targets, each with the containers, codecs and HDR support it actually handles. You get a per-device reason — "cannot decode HEVC video" — not just a number. |
+| **Convert** | H.264 / AAC in a faststart MP4, capped at 1080p, `yuv420p` so 10-bit phone footage stops breaking older decoders. Files that already play everywhere are remuxed, not re-encoded.                                       |
+| **Package** | An HLS ladder at 1080p / 720p / 360p in one ffmpeg pass, plus a poster and a storyboard sprite for scrub previews.                                                                                                      |
+| **Share**   | One link. Optional password, expiry and view limit, all enforced on the server. Revocable instantly.                                                                                                                    |
+| **Embed**   | `/embed/:slug`, chrome-free, with a copy-ready snippet.                                                                                                                                                                 |
+| **Measure** | Views, unique viewers, completion rate, watch time, device mix.                                                                                                                                                         |
 
 Captions (`.srt` or `.vtt`) ride along as a real `<track>` on every player, embeds included.
 
@@ -93,13 +95,13 @@ echo "SESSION_SECRET=$(openssl rand -hex 32)" > .env
 docker compose up --build
 ```
 
-| Variable | |
-|---|---|
-| `PORT` | HTTP port, default `8000` |
-| `APP_URL` | Public base URL used when building share links |
-| `SESSION_SECRET` | Signs session and playback cookies. Required in production |
-| `DATA_DIR` | Where SQLite and media files are written |
-| `WORKER_CONCURRENCY` | Parallel transcode workers, default `2` |
+| Variable             |                                                            |
+| -------------------- | ---------------------------------------------------------- |
+| `PORT`               | HTTP port, default `8000`                                  |
+| `APP_URL`            | Public base URL used when building share links             |
+| `SESSION_SECRET`     | Signs session and playback cookies. Required in production |
+| `DATA_DIR`           | Where SQLite and media files are written                   |
+| `WORKER_CONCURRENCY` | Parallel transcode workers, default `2`                    |
 
 ---
 
@@ -119,28 +121,31 @@ Vitest runs two projects: `server` in Node against real SQLite, `ui` in jsdom wi
 
 ## API
 
-| Method | Route | |
-|---|---|---|
-| `POST` | `/api/auth/signup` · `/signin` · `/signout` | Sessions in signed httpOnly cookies |
-| `GET` `PATCH` | `/api/auth/me` | Account, plan and usage |
-| `GET` `POST` | `/api/media` | List, upload (session **or** `Bearer af_live_…`) |
-| `GET` `PATCH` `DELETE` | `/api/media/:id` | Detail, rename, delete |
-| `POST` | `/api/media/:id/cancel` | Cancel in-flight processing |
-| `GET` | `/api/media/:id/jobs` | Stage-by-stage history |
-| `POST` `DELETE` | `/api/media/:id/captions` | Add or remove a caption track |
-| `GET` | `/api/events` | SSE stream of pipeline progress |
-| `POST` `DELETE` | `/api/shares` · `/api/shares/:slug` | Create, revoke |
-| `POST` | `/api/shares/:slug/open` | Public: resolve a link, check password |
-| `GET` | `/api/stream/:id/*` | Access-checked MP4, HLS, poster, sprite, captions |
-| `POST` `GET` | `/api/analytics/events` · `/overview` | Telemetry and aggregates |
-| `GET` `POST` `DELETE` | `/api/developer/keys` · `/webhooks` | Platform credentials |
-| `GET` | `/api/system/metrics` · `/status` | Prometheus text, queue state |
+| Method                 | Route                                       |                                                   |
+| ---------------------- | ------------------------------------------- | ------------------------------------------------- |
+| `POST`                 | `/api/auth/signup` · `/signin` · `/signout` | Sessions in signed httpOnly cookies               |
+| `GET` `PATCH`          | `/api/auth/me`                              | Account, plan and usage                           |
+| `GET` `POST`           | `/api/media`                                | List, upload (session **or** `Bearer af_live_…`)  |
+| `GET` `PATCH` `DELETE` | `/api/media/:id`                            | Detail, rename, delete                            |
+| `POST`                 | `/api/media/:id/cancel`                     | Cancel in-flight processing                       |
+| `GET`                  | `/api/media/:id/jobs`                       | Stage-by-stage history                            |
+| `POST` `DELETE`        | `/api/media/:id/captions`                   | Add or remove a caption track                     |
+| `GET`                  | `/api/events`                               | SSE stream of pipeline progress                   |
+| `POST` `DELETE`        | `/api/shares` · `/api/shares/:slug`         | Create, revoke                                    |
+| `POST`                 | `/api/shares/:slug/open`                    | Public: resolve a link, check password            |
+| `GET`                  | `/api/stream/:id/*`                         | Access-checked MP4, HLS, poster, sprite, captions |
+| `POST` `GET`           | `/api/analytics/events` · `/overview`       | Telemetry and aggregates                          |
+| `GET` `POST` `DELETE`  | `/api/developer/keys` · `/webhooks`         | Platform credentials                              |
+| `GET`                  | `/api/system/metrics` · `/status`           | Prometheus text, queue state                      |
 
 Verifying a webhook:
 
 ```js
 const [t, v1] = header.split(",").map((part) => part.split("=")[1]);
-const expected = crypto.createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
+const expected = crypto
+  .createHmac("sha256", secret)
+  .update(`${t}.${rawBody}`)
+  .digest("hex");
 // compare with timingSafeEqual, and reject if t is more than 5 minutes old
 ```
 

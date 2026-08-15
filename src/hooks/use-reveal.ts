@@ -29,30 +29,3 @@ export function useReveal<T extends HTMLElement>() {
 
   return ref;
 }
-
-/** The single parallax moment on the site: the hero image drifts as you scroll past it. */
-export function useHeroParallax<T extends HTMLElement>(strength = 0.06) {
-  const ref = useRef<T>(null);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    let frame = 0;
-    const onScroll = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const offset = Math.min(window.scrollY, 600) * strength;
-        element.style.transform = `translate3d(0, ${offset}px, 0)`;
-      });
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, [strength]);
-
-  return ref;
-}

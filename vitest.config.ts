@@ -36,6 +36,9 @@ export default defineConfig({
         test: {
           name: "ui",
           environment: "jsdom",
+          // Without this jsdom defines requestAnimationFrame but never fires it,
+          // so anything that animates in a frame loop silently never finishes.
+          environmentOptions: { jsdom: { pretendToBeVisual: true } },
           include: ["tests/ui/**/*.test.tsx"],
           setupFiles: ["./tests/ui/setup.ts"],
           env: serverEnv,
