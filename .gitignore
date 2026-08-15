@@ -14,6 +14,10 @@ uploads/
 # DATA_DIR — the SQLite database and every uploaded video land here.
 data/
 
+# Full-resolution originals for the hero frames. The 640x360 crops that ship
+# live in public/stills; these are 15 MB of phone photos and stay local.
+Background_images/
+
 # Working notes for the rebuild, and the design export they came from.
 REBUILD_PROMPT.md
 DESIGN_*.md

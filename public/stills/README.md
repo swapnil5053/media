@@ -5,35 +5,38 @@ The ones on the left are desaturated, torn by dropped-frame bars and labelled
 "can't open"; the ones on the right have their colour back, a play glyph and a
 progress bar. It is the product's argument told without a word of copy.
 
-**These are placeholders.** They are generated gradients, and they look it.
-Replace them with real frames from real videos — ideally the kind of footage the
-project exists for: a clip off a phone, handheld, badly lit, nothing staged.
+These are real photographs, not renders — which is the point. The whole product
+exists because a video shot on a phone would not open on another phone, so the
+artwork is footage of the kind people actually send each other.
 
-## What to drop in
+`f06.jpg` does double duty: it is also the frame shown playing on all three
+devices in the "Locked down by default" section, because it is meant to read as
+the same video on three screens.
 
-- Exactly **11 files**, named `f01.jpg` through `f11.jpg`.
-- **16:9**, around **960×540**. Anything larger is wasted — the widest card on
-  screen is 168px.
-- Keep each one under ~40 KB. They all load at once, so the whole set should
-  come in under half a megabyte.
+## Replacing them
 
-Nothing else needs changing. The hero reads the count from the directory
-listing in `src/components/landing/hero-river.tsx`, and the grading, blur and
-tearing are applied per card at render time.
+- Exactly **11 files**, `f01.jpg` through `f11.jpg`.
+- **16:9**, **640×360**. The widest card on screen is 168px and the two furthest
+  bands sit behind a 6px and a 2px blur, so anything sharper is thrown away by
+  the compositor before it reaches a pixel.
+- Keep each one under ~60 KB. They all load at once.
 
-## Pulling frames out of a video you already have
+Nothing else needs changing. `src/components/landing/hero-river.tsx` builds the
+list from the count, and the grading, blur and tearing are applied per card at
+render time.
 
-`ffprobe` and `ffmpeg` are already a dependency of this project:
+## Pulling frames out of a video
+
+`ffprobe` and `ffmpeg` are already dependencies of this project:
 
 ```bash
-ffmpeg -i clip.mov -vf "fps=1/4,scale=960:-2" -frames:v 11 -q:v 6 f%02d.jpg
+ffmpeg -i clip.mov -vf "fps=1/4,crop=ih*16/9:ih,scale=640:360" -frames:v 11 -q:v 6 f%02d.jpg
 ```
 
-That takes one frame every four seconds, at most eleven of them. Drop the
-results in this folder and reload.
+One frame every four seconds, at most eleven, centre-cropped to 16:9.
 
-## Why they are so small
+## Before you commit one
 
-The cards are 62px, 104px and 168px wide, and the two furthest bands are behind
-a 6px and a 2px blur. Anything sharper than 960px is thrown away by the
-compositor before it reaches a pixel.
+These ship in a public repository and load on every visit. Check each frame for
+a face you did not ask, a readable number plate, a house number, or anything
+else you would not put on a CV.
